@@ -1,0 +1,32 @@
+{
+  "name": "omarchy-screensaver-studio",
+  "id": "daemon0.screensaver-studio",
+  "version": "1.0.0",
+  "description": "Multi-mode screensaver engine with GTK4/Wayland window architecture",
+  "author": "Daemon0",
+  "license": "MIT",
+  "repository": "https://github.com/YOUR-USERNAME/omarchy-screensaver-studio",
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "compatibility": {
+    "omarchy": "dev (13f18b2c) / 4.0.2",
+    "quickshell": "0.3.1",
+    "hyprland": "0.56.2"
+  },
+  "dependencies": {
+    "required": [
+      "omarchy",
+      "quickshell",
+      "python3",
+      "gtk4",
+      "python-gobject",
+      "cairo"
+    ],
+    "optional": [
+      "pipewire",
+      "pipewire-pulse",
+      "gcc"
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-launch-screensaver: Omarchy idle daemon and menu integration launcher
+# ==============================================================================
+
+# Exit early if screensaver is already running
+pgrep -f '[o]rg.omarchy.screensaver' >/dev/null 2>&1 && exit 0
+
+is_force=false
+clean_args=()
+for arg in "$@"; do
+  if [[ "$arg" == "force" ]]; then
+    is_force=true
+  else
+    clean_args+=("$arg")
+  fi
+done
+
+# Check stay-awake state file (unless forced)
+if [[ -f "$HOME/.local/state/omarchy/indicators/stay-awake" ]] && [[ "$is_force" != "true" ]]; then
+  exit 0
+fi
+
+# Respect screensaver-off toggle (unless forced)
+if command -v omarchy-toggle-enabled >/dev/null 2>&1 && omarchy-toggle-enabled screensaver-off && [[ "$is_force" != "true" ]]; then
+  exit 0
+fi
+
+# Do not launch if screen is already locked
+if command -v omarchy-shell >/dev/null 2>&1 && [[ "$(omarchy-shell lock isLocked 2>/dev/null)" == "true" ]]; then
+  exit 0
+fi
+
+# Launch screensaver with cleaned arguments
+exec omarchy-screensaver "${clean_args[@]}"

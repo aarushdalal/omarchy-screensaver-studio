@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-screensaver: Main entrypoint for Omarchy screensaver engine
+# ==============================================================================
+
+set -euo pipefail
+
+# Determine script directory or installed directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SHARE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/omarchy-screensaver"
+
+if [[ -f "$SHARE_DIR/omarchy_screensaver/main.py" ]]; then
+  TARGET_SCRIPT="$SHARE_DIR/omarchy_screensaver/main.py"
+elif [[ -f "$SCRIPT_DIR/../omarchy_screensaver/main.py" ]]; then
+  TARGET_SCRIPT="$SCRIPT_DIR/../omarchy_screensaver/main.py"
+elif [[ -f "$SCRIPT_DIR/omarchy_screensaver/main.py" ]]; then
+  TARGET_SCRIPT="$SCRIPT_DIR/omarchy_screensaver/main.py"
+else
+  echo "[omarchy-screensaver] Error: Could not locate omarchy_screensaver package." >&2
+  exit 1
+fi
+
+exec /usr/bin/python3 "$TARGET_SCRIPT" --class=org.omarchy.screensaver "$@"

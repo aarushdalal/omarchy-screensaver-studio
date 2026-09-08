@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+"""omarchy-screensaver-select: Query and manage Omarchy Screensaver configuration and state.
+
+Usage:
+  omarchy-screensaver-select mode [NAME]           # Get or set active visual mode
+  omarchy-screensaver-select is-mode NAME          # Exit 0 if active mode == NAME, 1 otherwise
+  omarchy-screensaver-select theme [NAME]         # Get or set color theme
+  omarchy-screensaver-select is-theme NAME        # Exit 0 if active theme == NAME, 1 otherwise
+  omarchy-screensaver-select rotation [STATE]     # Get or toggle/set auto-rotation
+  omarchy-screensaver-select is-rotation          # Exit 0 if rotation is true, 1 otherwise
+  omarchy-screensaver-select preview [MODE] [SEC] # Preview active or chosen mode
+  omarchy-screensaver-select status               # Display detailed status summary
+  omarchy-screensaver-select list-modes           # List all available modes
+  omarchy-screensaver-select list-themes          # List all available themes
+"""
+
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+VALID_MODES = ["clock", "particles", "terminal", "system", "visualizer", "aurora"]
+VALID_THEMES = ["auto", "aurora", "cyberpunk", "matrix", "minimal", "osaka"]
+
+CONFIG_PATH = Path.home() / ".config" / "omarchy-screensaver" / "config.toml"
+DEFAULT_CONFIG = Path(__file__).resolve().parent.parent / "config" / "config.toml"
+
+
+def get_config_file() -> Path:
+    if not CONFIG_PATH.exists():
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        if DEFAULT_CONFIG.exists():
+            shutil.copy2(DEFAULT_CONFIG, CONFIG_PATH)
+        else:
+            CONFIG_PATH.write_text(
+                '[general]\nenabled = true\nmode = "clock"\nrotation = false\ntheme = "auto"\n'
+            )
+    return CONFIG_PATH
+
+
+def read_config() -> dict:
+    cfg_file = get_config_file()
+    try:
+        with open(cfg_file, "rb") as f:
+            return tomllib.load(f)
+    except Exception as e:
+        print(f"Error reading {cfg_file}: {e}", file=sys.stderr)
+        return {}
+
+
+def update_toml_value(pattern: str, replacement: str) -> bool:
+    cfg_file = get_config_file()
+    try:
+        content = cfg_file.read_text(encoding="utf-8")
+        new_content, count = re.subn(pattern, replacement, content, flags=re.MULTILINE)
+        if count > 0:
+            cfg_file.write_text(new_content, encoding="utf-8")
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Error modifying {cfg_file}: {e}", file=sys.stderr)
+        return False
+
+
+def notify(glyph: str, title: str, message: str):
+    if shutil.which("omarchy-notification-send"):
+        try:
+            subprocess.run(
+                ["omarchy-notification-send", "-g", glyph, title, message],
+                capture_output=True,
+                check=False,
+            )
+        except Exception:
+            pass
+    elif shutil.which("notify-send"):
+        try:
+            subprocess.run(["notify-send", title, message], capture_output=True, check=False)
+        except Exception:
+            pass
+
+
+def refresh_omarchy_menu():
+    if shutil.which("omarchy-menu"):
+        try:
+            subprocess.run(["omarchy-menu", "refresh"], capture_output=True, check=False)
+        except Exception:
+            pass
+    elif shutil.which("omarchy"):
+        try:
+            subprocess.run(["omarchy", "menu", "refresh"], capture_output=True, check=False)
+        except Exception:
+            pass
+
+
+def get_current_mode() -> str:
+    cfg = read_config()
+    return cfg.get("general", {}).get("mode", "clock")
+
+
+def get_current_theme() -> str:
+    cfg = read_config()
+    return cfg.get("general", {}).get("theme", "auto")
+
+
+def get_current_rotation() -> bool:
+    cfg = read_config()
+    return bool(cfg.get("general", {}).get("rotation", False))
+
+
+def cmd_mode(args):
+    if not args:
+        print(get_current_mode())
+        return 0
+
+    mode = args[0].lower().strip()
+    if mode not in VALID_MODES:
+        print(f"Error: Invalid mode '{mode}'. Choose from: {', '.join(VALID_MODES)}", file=sys.stderr)
+        return 1
+
+    pattern = r'^(mode\s*=\s*)"[^"]*"'
+    replacement = f'\\1"{mode}"'
+    if update_toml_value(pattern, replacement):
+        print(f"Screensaver mode set to: {mode}")
+        notify("󱄄", "Screensaver Mode", f"Active visual mode set to: {mode.title()}")
+        refresh_omarchy_menu()
+        return 0
+    else:
+        print("Error: Could not update mode in config.toml", file=sys.stderr)
+        return 1
+
+
+def cmd_is_mode(args):
+    if not args:
+        return 1
+    target = args[0].lower().strip()
+    return 0 if get_current_mode() == target else 1
+
+
+def cmd_theme(args):
+    if not args:
+        print(get_current_theme())
+        return 0
+
+    theme = args[0].lower().strip()
+    if theme not in VALID_THEMES:
+        themes_dir = Path.home() / ".config" / "omarchy-screensaver" / "themes"
+        available = list(VALID_THEMES)
+        if themes_dir.exists():
+            for p in themes_dir.glob("*.toml"):
+                if p.stem not in available:
+                    available.append(p.stem)
+        if theme not in available:
+            print(f"Error: Invalid theme '{theme}'. Available: {', '.join(available)}", file=sys.stderr)
+            return 1
+
+    pattern = r'^(theme\s*=\s*)"[^"]*"'
+    replacement = f'\\1"{theme}"'
+    if update_toml_value(pattern, replacement):
+        print(f"Screensaver theme set to: {theme}")
+        notify("󰏘", "Screensaver Theme", f"Active color palette set to: {theme.title()}")
+        refresh_omarchy_menu()
+        return 0
+    else:
+        print("Error: Could not update theme in config.toml", file=sys.stderr)
+        return 1
+
+
+def cmd_is_theme(args):
+    if not args:
+        return 1
+    target = args[0].lower().strip()
+    return 0 if get_current_theme() == target else 1
+
+
+def cmd_rotation(args):
+    current = get_current_rotation()
+    if not args or args[0].lower() in ("toggle", "t"):
+        new_val = not current
+    elif args[0].lower() in ("true", "1", "on", "yes", "enable"):
+        new_val = True
+    elif args[0].lower() in ("false", "0", "off", "no", "disable"):
+        new_val = False
+    elif args[0].lower() == "get":
+        print("enabled" if current else "disabled")
+        return 0
+    else:
+        print("Usage: omarchy-screensaver-select rotation [toggle|on|off|get]", file=sys.stderr)
+        return 1
+
+    pattern = r'^(rotation\s*=\s*)(true|false)'
+    replacement = f'\\1{"true" if new_val else "false"}'
+    if update_toml_value(pattern, replacement):
+        status_str = "Enabled" if new_val else "Disabled"
+        print(f"Screensaver auto-rotation: {status_str}")
+        notify("󰑖", "Screensaver Rotation", f"Auto-rotation is now {status_str}")
+        refresh_omarchy_menu()
+        return 0
+    else:
+        print("Error: Could not update rotation in config.toml", file=sys.stderr)
+        return 1
+
+
+def cmd_is_rotation(args):
+    return 0 if get_current_rotation() else 1
+
+
+def cmd_preview(args):
+    mode = args[0] if len(args) > 0 else get_current_mode()
+    duration = args[1] if len(args) > 1 else "5"
+    preview_bin = shutil.which("omarchy-screensaver-preview")
+    if preview_bin:
+        os.execv(preview_bin, [preview_bin, mode, duration])
+    else:
+        engine = shutil.which("omarchy-screensaver") or str(
+            Path(__file__).resolve().parent / "omarchy-screensaver"
+        )
+        os.execv(engine, [engine, "--preview", "--mode", mode, "--duration", str(duration)])
+
+
+def cmd_status(args):
+    mode = get_current_mode()
+    theme = get_current_theme()
+    rotation = "Enabled" if get_current_rotation() else "Disabled"
+    cfg = read_config()
+    fps = cfg.get("display", {}).get("fps", 60)
+    battery_fps = cfg.get("battery", {}).get("battery_fps", 30)
+
+    print("Omarchy Screensaver Status")
+    print(f"  • Active Mode:    {mode.title()}")
+    print(f"  • Color Palette:  {theme.title()} {'(System Theme Sync)' if theme == 'auto' else ''}")
+    print(f"  • Auto-Rotation:  {rotation}")
+    print(f"  • Target FPS:     {fps} FPS (AC) / {battery_fps} FPS (Battery)")
+    print(f"  • Config File:    {get_config_file()}")
+    return 0
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__.strip())
+        return 0
+
+    subcommand = sys.argv[1].lower()
+    args = sys.argv[2:]
+
+    if subcommand in ("mode", "set-mode", "get-mode"):
+        sys.exit(cmd_mode(args))
+    elif subcommand == "is-mode":
+        sys.exit(cmd_is_mode(args))
+    elif subcommand in ("theme", "set-theme", "get-theme"):
+        sys.exit(cmd_theme(args))
+    elif subcommand == "is-theme":
+        sys.exit(cmd_is_theme(args))
+    elif subcommand in ("rotation", "toggle-rotation", "rot"):
+        sys.exit(cmd_rotation(args))
+    elif subcommand == "is-rotation":
+        sys.exit(cmd_is_rotation(args))
+    elif subcommand == "preview":
+        sys.exit(cmd_preview(args))
+    elif subcommand in ("status", "info"):
+        sys.exit(cmd_status(args))
+    elif subcommand in ("list-modes", "modes"):
+        for m in VALID_MODES:
+            print(m)
+        return 0
+    elif subcommand in ("list-themes", "themes"):
+        for t in VALID_THEMES:
+            print(t)
+        return 0
+    elif subcommand in ("-h", "--help", "help"):
+        print(__doc__.strip())
+        return 0
+    else:
+        print(f"Unknown command: '{subcommand}'. Run 'omarchy-screensaver-select --help' for usage.", file=sys.stderr)
+        sys.exit(2)
+
+
+if __name__ == "__main__":
+    main()

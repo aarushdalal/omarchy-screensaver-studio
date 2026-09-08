@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-screensaver-toggle: Toggle screensaver / ambient study desk display
+# ==============================================================================
+# - Press once: Launches screensaver in ambient mode, inhibits idle sleep and screen lock
+# - Press again: Dismisses screensaver, restores normal idle policies
+# - Respects lid switch: Lid close still suspends / sleeps as normal
+# - Immune to accidental mouse / keyboard touches while active (toggle shortcut only)
+# ==============================================================================
+# omarchy:summary=Toggle screensaver / ambient study desk display
+# omarchy:group=system
+# omarchy:name=screensaver-toggle
+
+set -euo pipefail
+
+LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-screensaver-toggle.lock"
+COOLDOWN_FILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-screensaver-toggle.last"
+STATE_DIR="$HOME/.local/state/omarchy/indicators"
+STAY_AWAKE_FILE="$STATE_DIR/stay-awake"
+MARKER_FILE="$STATE_DIR/stay-awake-screensaver"
+PID_FILE="$HOME/.config/omarchy-screensaver/screensaver.pid"
+
+# Acquire file lock with timeout to serialize invocations without deadlocks
+exec 9>"$LOCKFILE"
+if ! flock -w 1 9; then
+  exit 0
+fi
+
+# Cleanup file descriptor 9 on script exit
+release_lock() {
+  flock -u 9 2>/dev/null || true
+  exec 9>&- 2>/dev/null || true
+}
+trap release_lock EXIT
+
+# Debounce check: ignore duplicate key-bounce triggers within 250ms
+now_ms=$(python3 -c 'import time; print(int(time.time()*1000))' 2>/dev/null || date +%s)
+if [[ -f "$COOLDOWN_FILE" ]]; then
+  last_ms=$(cat "$COOLDOWN_FILE" 2>/dev/null || echo 0)
+  diff=$((now_ms - last_ms))
+  if (( diff >= 0 && diff < 250 )); then
+    exit 0
+  fi
+fi
+echo "$now_ms" > "$COOLDOWN_FILE"
+
+is_running() {
+  if [[ -f "$PID_FILE" ]]; then
+    local pid
+    pid=$(cat "$PID_FILE" 2>/dev/null || true)
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      return 0
+    fi
+  fi
+  pgrep -f '[o]rg.omarchy.screensaver' >/dev/null 2>&1
+}
+
+stop_screensaver() {
+  if [[ -f "$PID_FILE" ]]; then
+    local pid
+    pid=$(cat "$PID_FILE" 2>/dev/null || true)
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      kill -TERM "$pid" 2>/dev/null || true
+      for _ in {1..10}; do
+        kill -0 "$pid" 2>/dev/null || break
+        sleep 0.05
+      done
+    fi
+    rm -f "$PID_FILE"
+  fi
+  pkill -TERM -f '[o]rg.omarchy.screensaver' 2>/dev/null || true
+
+  # Clean up stay-awake indicator if set by ambient screensaver mode
+  if [[ -f "$MARKER_FILE" ]]; then
+    rm -f "$MARKER_FILE"
+    rm -f "$STAY_AWAKE_FILE"
+  fi
+
+  if command -v omarchy-notification-send >/dev/null 2>&1; then
+    omarchy-notification-send -g "󱄄" -t 2000 "Study Display" "Ambient screensaver dismissed" >/dev/null 2>&1 || true
+  fi
+}
+
+start_screensaver() {
+  mkdir -p "$STATE_DIR"
+  # Set stay-awake indicator if not already set, marking that screensaver set it
+  if [[ ! -f "$STAY_AWAKE_FILE" ]]; then
+    touch "$STAY_AWAKE_FILE"
+    touch "$MARKER_FILE"
+  fi
+
+  # Close FD 9 (9>&-) so child background processes do NOT inherit or hold the lock!
+  if command -v systemd-inhibit >/dev/null 2>&1; then
+    nohup systemd-inhibit --what=idle --who="Omarchy Screensaver" --why="Ambient Study Display" \
+      omarchy-screensaver --ambient --class org.omarchy.screensaver "$@" >/dev/null 2>&1 9>&- &
+  else
+    nohup omarchy-screensaver --ambient --class org.omarchy.screensaver "$@" >/dev/null 2>&1 9>&- &
+  fi
+
+  if command -v omarchy-notification-send >/dev/null 2>&1; then
+    omarchy-notification-send -g "󱄄" -t 2500 "Study Display" "Ambient screensaver active (idle sleep & lock inhibited)" >/dev/null 2>&1 || true
+  fi
+}
+
+if is_running; then
+  stop_screensaver
+else
+  start_screensaver "$@"
+fi

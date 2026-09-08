@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "daemon0.screensaver-studio",
+  "name": "Screensaver Studio",
+  "version": "1.0.0",
+  "author": "Daemon0",
+  "description": "Multi-mode screensaver engine (clock, particles, terminal, system, visualizer, aurora) with Quickshell and menu integration",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Screensaver Studio",
+    "description": "Screensaver controls, mode selector, and preview launcher",
+    "category": "Desktop",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

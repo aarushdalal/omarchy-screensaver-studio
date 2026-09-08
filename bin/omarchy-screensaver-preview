@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-screensaver-preview: Launch the Omarchy screensaver in preview mode
+# Usage: omarchy-screensaver-preview [MODE] [DURATION_SECONDS]
+# ==============================================================================
+set -euo pipefail
+
+mode=""
+duration=""
+
+for arg in "$@"; do
+  if [[ "$arg" =~ ^[0-9]+$ ]]; then
+    duration="$arg"
+  elif [[ "$arg" =~ ^(clock|particles|terminal|system|visualizer|aurora)$ ]]; then
+    mode="$arg"
+  fi
+done
+
+cmd=(omarchy-screensaver --preview)
+[[ -n "$mode" ]] && cmd+=(--mode "$mode")
+
+if [[ -n "$duration" ]]; then
+  exec timeout "${duration}s" "${cmd[@]}"
+else
+  exec "${cmd[@]}"
+fi

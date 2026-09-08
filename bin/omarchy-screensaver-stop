@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# omarchy-screensaver-stop: Stop any running Omarchy screensaver instances
+
+# Clean up stay-awake indicator if set by ambient screensaver mode
+if [[ -f "$HOME/.local/state/omarchy/indicators/stay-awake-screensaver" ]]; then
+  rm -f "$HOME/.local/state/omarchy/indicators/stay-awake-screensaver"
+  rm -f "$HOME/.local/state/omarchy/indicators/stay-awake"
+fi
+
+exec omarchy-screensaver --stop

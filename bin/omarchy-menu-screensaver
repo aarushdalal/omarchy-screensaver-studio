@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-menu-screensaver: Dedicated Floating HUD for Screensaver Engine
+# ==============================================================================
+set -euo pipefail
+
+# If HUD modal is already open, toggle it off
+if pgrep -f "omarchy-menu-select.*Screensaver" >/dev/null 2>&1; then
+    pkill -f "omarchy-menu-select.*Screensaver" 2>/dev/null || true
+    omarchy-shell shell hide omarchy.menu 2>/dev/null || true
+    exit 0
+fi
+
+# Ensure commands are found
+export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
+
+sub="${1-}"
+
+case "$sub" in
+  --themes|themes)
+    output_themes() {
+      cat << 'THEMES'
+󰸌	Theme: Auto (Omarchy Sync)	Dynamically synchronizes with active system theme	omarchy-screensaver-select theme auto
+󰑮	Theme: Cyberpunk Neon	Electric cyan & hot magenta synthwave aesthetic	omarchy-screensaver-select theme cyberpunk
+󰅟	Theme: Matrix Phosphor	Phosphor green cybernetic matrix monochrome	omarchy-screensaver-select theme matrix
+󰒲	Theme: Nordic Aurora	Glacial emerald, cyan & arctic violet hues	omarchy-screensaver-select theme aurora
+󰄛	Theme: Osaka Night	Deep purple and neon amber Japanese nightscape	omarchy-screensaver-select theme osaka
+󰔎	Theme: Monochrome Minimal	Clean high-contrast grayscale minimalism	omarchy-screensaver-select theme minimal
+󰁍	Back to Main Screensaver Menu	Return to visual mode selector	omarchy-menu-screensaver
+THEMES
+    }
+    records=$(output_themes)
+    selection=$(cut -f1,2,3 <<<"$records" | omarchy-menu-select "Screensaver Theme Palette" -- --width 800 --height 450)
+    if [[ -n "$selection" ]]; then
+      cmd=$(awk -F '\t' -v sel="$selection" '$1 "\t" $2 == sel || $2 == sel { print $4; exit }' <<<"$records")
+      if [[ -n "$cmd" ]]; then
+        eval "$cmd"
+      fi
+    fi
+    ;;
+
+  --preview-picker|preview-picker)
+    output_previews() {
+      cat << 'PREVIEWS'
+󱑂	Preview: Minimal Digital Clock	5-second live fullscreen preview	omarchy-screensaver-preview clock 5
+󰘔	Preview: Generative Particles	5-second live fullscreen preview	omarchy-screensaver-preview particles 5
+	Preview: Terminal Diagnostics	5-second live fullscreen preview	omarchy-screensaver-preview terminal 5
+󰓅	Preview: System Telemetry	5-second live fullscreen preview	omarchy-screensaver-preview system 5
+󰎈	Preview: Audio Spectrum Visualizer	5-second live fullscreen preview	omarchy-screensaver-preview visualizer 5
+󰒲	Preview: Aurora Ambient Flow	5-second live fullscreen preview	omarchy-screensaver-preview aurora 5
+󰁍	Back to Main Screensaver Menu	Return to visual mode selector	omarchy-menu-screensaver
+PREVIEWS
+    }
+    records=$(output_previews)
+    selection=$(cut -f1,2,3 <<<"$records" | omarchy-menu-select "Preview Visual Modes" -- --width 800 --height 450)
+    if [[ -n "$selection" ]]; then
+      cmd=$(awk -F '\t' -v sel="$selection" '$1 "\t" $2 == sel || $2 == sel { print $4; exit }' <<<"$records")
+      if [[ -n "$cmd" ]]; then
+        eval "$cmd"
+      fi
+    fi
+    ;;
+
+  *)
+    output_main() {
+      cat << 'MAIN'
+󱑂	Mode: Minimal Digital Clock	Clock with breathing colon, date & status pill	omarchy-screensaver-select mode clock
+󰘔	Mode: Generative Particles	Constellation network with proximity filaments	omarchy-screensaver-select mode particles
+	Mode: Terminal Diagnostics	Futuristic kernel audit & diagnostic logs	omarchy-screensaver-select mode terminal
+󰓅	Mode: System Telemetry	Live CPU/RAM/Battery sparklines & gauges	omarchy-screensaver-select mode system
+󰎈	Mode: Audio Spectrum Visualizer	MPRIS media metadata & reactive equalizer	omarchy-screensaver-select mode visualizer
+󰒲	Mode: Aurora Ambient Flow	Flowing wave curtains with celestial stardust	omarchy-screensaver-select mode aurora
+󰑖	Toggle Auto-Rotation Mode	Cycle through all modes automatically (300s)	omarchy-screensaver-select toggle-rotation
+󰏘	Select Color Theme Palette...	Choose between Auto, Cyberpunk, Matrix, etc.	omarchy-menu-screensaver --themes
+󱄄	Preview Current Screensaver (5s)	Instant interactive full-screen preview	omarchy-screensaver-preview 5
+󰘔	Preview Any Mode...	Test different visual modes without changing default	omarchy-menu-screensaver --preview-picker
+󰐥	Launch Screensaver Fullscreen Now	Activate screensaver immediately	omarchy-launch-screensaver force
+⚙	Edit Configuration (config.toml)	Open settings in default editor	omarchy-launch-config-editor "$HOME/.config/omarchy-screensaver/config.toml"
+MAIN
+    }
+    records=$(output_main)
+    selection=$(cut -f1,2,3 <<<"$records" | omarchy-menu-select "Screensaver Engine & Visual Modes" -- --width 820 --height 540)
+    if [[ -n "$selection" ]]; then
+      cmd=$(awk -F '\t' -v sel="$selection" '$1 "\t" $2 == sel || $2 == sel { print $4; exit }' <<<"$records")
+      if [[ -n "$cmd" ]]; then
+        eval "$cmd"
+      fi
+    fi
+    ;;
+esac

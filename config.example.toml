@@ -1,0 +1,90 @@
+# ==============================================================================
+# Omarchy Screensaver Configuration
+# ==============================================================================
+# Location: ~/.config/omarchy-screensaver/config.toml
+# Reload: Restart screensaver to apply major changes. Themes update dynamically!
+
+[general]
+enabled = true
+# Modes: "clock", "particles", "terminal", "system", "visualizer", "aurora", "auto"
+mode = "aurora"
+# When rotation is true, screensaver smoothly cycles through rotation_modes
+rotation = false
+rotation_interval = 300
+rotation_modes = [
+    "clock",
+    "particles",
+    "system",
+    "terminal",
+    "aurora",
+    "visualizer"
+]
+# Theme: "auto" (matches active Omarchy theme) or a theme filename in themes/
+theme = "auto"
+
+[display]
+# Target framerate on AC power
+fps = 60
+# Multi-monitor mode: "independent", "mirror", "single"
+multi_monitor = "independent"
+# Input handling: dismiss screensaver on interaction
+exit_on_mouse_move = true
+mouse_move_threshold = 12
+exit_on_key_press = true
+# Burn-in prevention: imperceptible subtle drift of static elements
+burn_in_protection = true
+
+[ambient]
+# Ambient study desk display settings (SUPER + CTRL + S / SUPER + I)
+# When active as study desk display: ONLY the shortcut will toggle/close it
+exit_on_mouse_move = false
+mouse_move_threshold = 100
+exit_on_key_press = false
+exit_on_mouse_click = false
+
+[performance]
+# Profile: "low" (20-30 FPS, minimal effects), "balanced" (30-60 FPS), "high" (60 FPS, richer)
+profile = "balanced"
+
+[battery]
+# Automatically reduce framerate and particle density when running on battery
+auto_detect = true
+reduce_fps = true
+battery_fps = 30
+particle_multiplier = 0.5
+
+[clock]
+format_24h = true
+show_seconds = false
+show_date = true
+show_system_info = true
+colon_blink = true
+
+[particles]
+count = 160
+speed = 0.18
+connection_distance = 120
+particle_size = 1.8
+glow = true
+
+[terminal]
+cursor_blink_rate = 0.55
+show_real_metrics = true
+event_interval = 3.5
+max_log_lines = 12
+
+[system]
+graph_history_points = 50
+update_interval = 0.8
+
+[visualizer]
+style = "spectrum"
+bar_count = 36
+auto_switch_on_play = true
+# When audio pauses: "selected" (reverts to general.mode), "idle" (stays on visualizer), or specific mode
+fallback_mode = "selected"
+
+[aurora]
+speed = 0.25
+wave_count = 4
+dust_count = 60

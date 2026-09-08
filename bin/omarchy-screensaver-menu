@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-screensaver-menu: Unified Interactive Manager (TUI & GUI Dispatcher)
+# ==============================================================================
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
+
+if [[ "${1-}" == "-h" || "${1-}" == "--help" || "${1-}" == "help" ]]; then
+  cat << 'HELP'
+Usage: omarchy-screensaver-menu [OPTIONS]
+
+Interactive manager and selector for Omarchy Screensaver Engine.
+
+Options:
+  --tui             Launch the interactive terminal TUI (powered by Gum)
+  --hud             Open the Quickshell floating modal HUD selector
+  --gui             Launch the terminal TUI in an Omarchy presentation window
+  -h, --help        Show this help message
+
+Without arguments:
+  Runs interactive TUI if inside a terminal, or summons floating HUD if in desktop GUI.
+HELP
+  exit 0
+fi
+
+# If invoked with --hud or stdin is not a terminal, summon the Quickshell Floating HUD
+if [[ "${1-}" == "--hud" || ( ! -t 0 && "${1-}" != "--tui" ) ]]; then
+  exec omarchy-menu-screensaver "${@}"
+fi
+
+# If invoked with --gui, launch inside Omarchy's floating presentation terminal
+if [[ "${1-}" == "--gui" ]]; then
+  exec omarchy-launch-floating-terminal-with-presentation "$0" --tui
+fi
+
+# Source gum theme colors if available
+if command -v omarchy-restart-gum >/dev/null 2>&1; then
+  # shellcheck source=/dev/null
+  source omarchy-restart-gum || true
+fi
+
+# Fallback check if gum is installed
+if ! command -v gum >/dev/null 2>&1; then
+  echo "Notice: 'gum' is not installed, falling back to GUI HUD modal..."
+  exec omarchy-menu-screensaver
+fi
+
+while true; do
+  clear
+  current_mode=$(omarchy-screensaver-select mode 2>/dev/null || echo "clock")
+  current_theme=$(omarchy-screensaver-select theme 2>/dev/null || echo "auto")
+  is_rot=$(omarchy-screensaver-select is-rotation && echo "Enabled" || echo "Disabled")
+
+  gum style \
+    --border rounded \
+    --margin "1 0" \
+    --padding "1 2" \
+    --border-foreground 212 \
+    --bold \
+    "󱄄  Omarchy Screensaver Engine" \
+    "" \
+    "Active Mode:    $(gum style --foreground 42 --bold "$current_mode")" \
+    "Color Palette:  $(gum style --foreground 214 --bold "$current_theme")" \
+    "Auto-Rotation:  $(gum style --foreground 75 --bold "$is_rot")"
+
+  choice=$(gum choose --cursor="󰅂 " --header="Select an action or visual mode:" \
+    "󱑂  Mode: Minimal Digital Clock" \
+    "󰘔  Mode: Generative Particles Constellation" \
+    "  Mode: Terminal Diagnostics & Kernel Logs" \
+    "󰓅  Mode: System Telemetry & Area Charts" \
+    "󰎈  Mode: Audio Spectrum MPRIS Visualizer" \
+    "󰒲  Mode: Nordic Aurora Ambient Flow" \
+    "󰑖  Toggle Auto-Rotation (Cycle All Modes)" \
+    "󰏘  Select Color Palette..." \
+    "󱄄  Preview Current Mode (5s)" \
+    "󰘔  Preview Any Mode..." \
+    "󰐥  Launch Screensaver Fullscreen Now" \
+    "⚙  Edit Configuration File" \
+    "󰅖  Exit") || break
+
+  case "$choice" in
+    *"Minimal Digital Clock"*)
+      omarchy-screensaver-select mode clock
+      if gum confirm --default=no "Preview Clock mode now?"; then
+        omarchy-screensaver-preview clock 5
+      fi
+      ;;
+
+    *"Generative Particles Constellation"*)
+      omarchy-screensaver-select mode particles
+      if gum confirm --default=no "Preview Particles mode now?"; then
+        omarchy-screensaver-preview particles 5
+      fi
+      ;;
+
+    *"Terminal Diagnostics & Kernel Logs"*)
+      omarchy-screensaver-select mode terminal
+      if gum confirm --default=no "Preview Terminal mode now?"; then
+        omarchy-screensaver-preview terminal 5
+      fi
+      ;;
+
+    *"System Telemetry & Area Charts"*)
+      omarchy-screensaver-select mode system
+      if gum confirm --default=no "Preview System mode now?"; then
+        omarchy-screensaver-preview system 5
+      fi
+      ;;
+
+    *"Audio Spectrum MPRIS Visualizer"*)
+      omarchy-screensaver-select mode visualizer
+      if gum confirm --default=no "Preview Visualizer mode now?"; then
+        omarchy-screensaver-preview visualizer 5
+      fi
+      ;;
+
+    *"Nordic Aurora Ambient Flow"*)
+      omarchy-screensaver-select mode aurora
+      if gum confirm --default=no "Preview Aurora mode now?"; then
+        omarchy-screensaver-preview aurora 5
+      fi
+      ;;
+
+    *"Toggle Auto-Rotation"*)
+      omarchy-screensaver-select toggle-rotation
+      sleep 0.8
+      ;;
+
+    *"Select Color Palette"*)
+      theme_choice=$(gum choose --cursor="󰅂 " --header="Select color palette:" \
+        "󰸌  Auto (Sync with Omarchy Theme)" \
+        "󰑮  Cyberpunk Neon" \
+        "󰅟  Matrix Phosphor" \
+        "󰒲  Nordic Aurora" \
+        "󰄛  Osaka Night" \
+        "󰔎  Monochrome Minimal" \
+        "󰁍  Back") || continue
+
+      case "$theme_choice" in
+        *"Auto"*) omarchy-screensaver-select theme auto ;;
+        *"Cyberpunk"*) omarchy-screensaver-select theme cyberpunk ;;
+        *"Matrix"*) omarchy-screensaver-select theme matrix ;;
+        *"Nordic Aurora"*) omarchy-screensaver-select theme aurora ;;
+        *"Osaka"*) omarchy-screensaver-select theme osaka ;;
+        *"Minimal"*) omarchy-screensaver-select theme minimal ;;
+      esac
+      sleep 0.6
+      ;;
+
+    *"Preview Current Mode"*)
+      omarchy-screensaver-preview 5
+      ;;
+
+    *"Preview Any Mode"*)
+      preview_mode=$(gum choose --cursor="󰅂 " --header="Select mode to preview:" \
+        "clock" "particles" "terminal" "system" "visualizer" "aurora" "󰁍 Cancel") || continue
+      if [[ "$preview_mode" != *"Cancel"* ]]; then
+        omarchy-screensaver-preview "$preview_mode" 5
+      fi
+      ;;
+
+    *"Launch Screensaver Fullscreen Now"*)
+      omarchy-launch-screensaver force
+      ;;
+
+    *"Edit Configuration File"*)
+      editor_cmd="${EDITOR:-nano}"
+      if command -v omarchy-launch-config-editor >/dev/null 2>&1; then
+        omarchy-launch-config-editor "$HOME/.config/omarchy-screensaver/config.toml"
+      else
+        "$editor_cmd" "$HOME/.config/omarchy-screensaver/config.toml"
+      fi
+      ;;
+
+    *"Exit"*)
+      break
+      ;;
+  esac
+done
+
+clear
+echo "Omarchy Screensaver Manager exited."

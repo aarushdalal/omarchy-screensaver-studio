@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# omarchy-screensaver-start: Start the Omarchy screensaver
+
+exec omarchy-screensaver "$@"
