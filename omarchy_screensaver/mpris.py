@@ -119,7 +119,9 @@ class MprisClient:
             # Prioritize actively playing media
             playing = [c for c in candidates if c.is_playing and c.title]
             if playing:
-                self._cached_info = playing[0]
+                # Prioritize dedicated music players over browsers
+                dedicated = [c for c in playing if any(p in c.player.lower() for p in ["mpv", "amberol", "spotify", "vlc", "audacious"])]
+                self._cached_info = dedicated[0] if dedicated else playing[0]
             elif candidates:
                 # First one with title
                 with_title = [c for c in candidates if c.title]
