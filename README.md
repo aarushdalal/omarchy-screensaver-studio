@@ -106,6 +106,23 @@ This project contains native Python GTK4 rendering code and optional C extension
 - **Idle Lifecycle Integration**: App ID `org.omarchy.screensaver` — integrates with Quickshell idle services, dismisses instantly on input
 - **Real-Time Audio Spectrum**: Optional C/PipeWire backend with 36 Goertzel filters, sub-10ms latency
 
+## Showcase Gallery
+
+Each visual mode has a playable WebM recording generated from the showcase suite:
+
+| Mode | Showcase |
+|---|---|
+| `aurora` | [Play WebM](assets/showcase/showcase_screensaver_aurora.webm) |
+| `clock` | [Play WebM](assets/showcase/showcase_screensaver_clock.webm) |
+| `geometry` | [Play WebM](assets/showcase/showcase_screensaver_geometry.webm) |
+| `matrix` | [Play WebM](assets/showcase/showcase_screensaver_matrix.webm) |
+| `particles` | [Play WebM](assets/showcase/showcase_screensaver_particles.webm) |
+| `singularity` | [Play WebM](assets/showcase/showcase_screensaver_singularity.webm) |
+| `system` | [Play WebM](assets/showcase/showcase_screensaver_system.webm) |
+| `terminal` | [Play WebM](assets/showcase/showcase_screensaver_terminal.webm) |
+| `visualizer` | [Play WebM](assets/showcase/showcase_screensaver_visualizer.webm) |
+| `warp` | [Play WebM](assets/showcase/showcase_screensaver_warp.webm) |
+
 ---
 
 ## Requirements
