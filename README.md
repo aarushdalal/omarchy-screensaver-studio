@@ -28,7 +28,7 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
 - **OLED Burn-in Protection**: Implemented true `#000000` black subpixel shutoff mode with continuous imperceptible orbital coordinate drift to safeguard OLED/AMOLED displays.
 - **Ambient Study Display Mode**: Created dedicated ambient study display toggle with sleep/lock inhibition and touch immunity (shortcut: `SUPER + I`).
 - **Dynamic Palette Synchronizer**: Designed `theme.py` to inherit color schemes dynamically from the active Omarchy `colors.toml` or built-in presets (`aurora`, `cyberpunk`, `matrix`, `minimal`, `osaka`).
-- **Real-Time PipeWire Audio Spectrum Engine**: Replaced synthetic sine approximations with native C PipeWire audio capture (`audio_spectrum.c` compiled into `libomarchy_audio.so`). Implemented 36 log-spaced Goertzel filters with sub-10ms latency.
+- **Real-Time PipeWire Audio Spectrum Engine**: Replaced synthetic sine approximations with native C PipeWire audio capture (`audio_spectrum.c` compiled into `libomarchy_audio.so`). Implemented 36 log-spaced Goertzel filters with sub-10ms latency, high-sensitivity adaptive gain control (AGC), and lowered noise floor for instant reaction to audio volume spikes.
 - **Idle Lifecycle Integration**: Wired `Service.qml` (Quickshell) to trigger the screensaver via `omarchy-launch-screensaver` wrapper and `shell.json` configuration. Wake dismissal (key press, mouse motion, click) cancels idle cycles.
 - **Interactive Menu Suite & Extensions**: Designed the floating modal HUD selector (`omarchy-menu-screensaver`), keyboard-driven terminal manager (`omarchy-screensaver-menu` via Gum), CLI state manager (`omarchy-screensaver-select`), and `omarchy-menu-extension.jsonc` for Omarchy application launcher integration.
 - **Bar Widget**: Implemented `BarWidget.qml` showing screensaver mode and controls in the Omarchy top bar.
@@ -165,6 +165,12 @@ cd omarchy-screensaver-studio
    ```bash
    sudo pacman -S gum
    ```
+
+---
+
+## Configuration Guide
+
+See [**docs/CONFIGURATION.md**](docs/CONFIGURATION.md) for detailed per-mode TOML parameter specifications, theme overrides, and OLED settings.
 
 ---
 

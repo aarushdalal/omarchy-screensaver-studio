@@ -156,7 +156,7 @@ static void *audio_worker(void *arg) {
         }
 
         // Noise gate: silence when lower than background floor
-        if (max_amp < 12) {
+        if (max_amp < 6) {
             pthread_mutex_lock(&g_mutex);
             g_has_signal = 0;
             for (int b = 0; b < g_num_bands; b++) {
@@ -189,18 +189,18 @@ static void *audio_worker(void *arg) {
             if (mag > frame_max) frame_max = mag;
         }
 
-        // Automatic Gain Control with fast rise and smooth fall
+        // Automatic Gain Control with fast rise and smooth fall (tuned for high sensitivity)
         if (frame_max > g_rolling_max) {
-            g_rolling_max = g_rolling_max * 0.45 + frame_max * 0.55;
+            g_rolling_max = g_rolling_max * 0.40 + frame_max * 0.60;
         } else {
-            g_rolling_max = fmax(15.0, g_rolling_max * 0.985);
+            g_rolling_max = fmax(6.0, g_rolling_max * 0.985);
         }
 
         pthread_mutex_lock(&g_mutex);
         g_has_signal = 1;
         for (int b = 0; b < g_num_bands; b++) {
-            double ratio = fmin(1.0, fmax(0.0, mags[b] / fmax(10.0, g_rolling_max)));
-            float val = (float)pow(ratio, 0.72);
+            double ratio = fmin(1.0, fmax(0.0, (mags[b] * 1.45) / fmax(6.0, g_rolling_max)));
+            float val = (float)pow(ratio, 0.55);
 
             // Instant attack on beat spikes, natural exponential release
             if (val > g_smooth[b]) {
