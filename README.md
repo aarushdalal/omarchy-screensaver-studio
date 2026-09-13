@@ -112,16 +112,16 @@ Each visual mode has a playable WebM recording generated from the showcase suite
 
 | Mode | Showcase |
 |---|---|
-| `aurora` | [Play WebM](assets/showcase/showcase_screensaver_aurora.webm) |
-| `clock` | [Play WebM](assets/showcase/showcase_screensaver_clock.webm) |
-| `geometry` | [Play WebM](assets/showcase/showcase_screensaver_geometry.webm) |
-| `matrix` | [Play WebM](assets/showcase/showcase_screensaver_matrix.webm) |
-| `particles` | [Play WebM](assets/showcase/showcase_screensaver_particles.webm) |
-| `singularity` | [Play WebM](assets/showcase/showcase_screensaver_singularity.webm) |
-| `system` | [Play WebM](assets/showcase/showcase_screensaver_system.webm) |
-| `terminal` | [Play WebM](assets/showcase/showcase_screensaver_terminal.webm) |
-| `visualizer` | [Play WebM](assets/showcase/showcase_screensaver_visualizer.webm) |
-| `warp` | [Play WebM](assets/showcase/showcase_screensaver_warp.webm) |
+| `aurora` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_aurora.webm" type="video/webm">Aurora showcase</video> |
+| `clock` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_clock.webm" type="video/webm">Clock showcase</video> |
+| `geometry` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_geometry.webm" type="video/webm">Geometry showcase</video> |
+| `matrix` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_matrix.webm" type="video/webm">Matrix showcase</video> |
+| `particles` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_particles.webm" type="video/webm">Particles showcase</video> |
+| `singularity` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_singularity.webm" type="video/webm">Singularity showcase</video> |
+| `system` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_system.webm" type="video/webm">System showcase</video> |
+| `terminal` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_terminal.webm" type="video/webm">Terminal showcase</video> |
+| `visualizer` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_visualizer.webm" type="video/webm">Visualizer showcase</video> |
+| `warp` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_warp.webm" type="video/webm">Warp showcase</video> |
 
 ---
 
