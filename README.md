@@ -110,21 +110,6 @@ This project contains native Python GTK4 rendering code and optional C extension
 
 Each visual mode has a playable WebM recording generated from the showcase suite:
 
-GitHub does not render repository-hosted WebM files as inline README players. These animated previews render directly on GitHub; click any preview to open its full WebM recording.
-
-| Mode | Preview |
-|---|---|
-| `aurora` | [![aurora](assets/showcase/previews/showcase_screensaver_aurora.gif)](assets/showcase/showcase_screensaver_aurora.webm) |
-| `clock` | [![clock](assets/showcase/previews/showcase_screensaver_clock.gif)](assets/showcase/showcase_screensaver_clock.webm) |
-| `geometry` | [![geometry](assets/showcase/previews/showcase_screensaver_geometry.gif)](assets/showcase/showcase_screensaver_geometry.webm) |
-| `matrix` | [![matrix](assets/showcase/previews/showcase_screensaver_matrix.gif)](assets/showcase/showcase_screensaver_matrix.webm) |
-| `particles` | [![particles](assets/showcase/previews/showcase_screensaver_particles.gif)](assets/showcase/showcase_screensaver_particles.webm) |
-| `singularity` | [![singularity](assets/showcase/previews/showcase_screensaver_singularity.gif)](assets/showcase/showcase_screensaver_singularity.webm) |
-| `system` | [![system](assets/showcase/previews/showcase_screensaver_system.gif)](assets/showcase/showcase_screensaver_system.webm) |
-| `terminal` | [![terminal](assets/showcase/previews/showcase_screensaver_terminal.gif)](assets/showcase/showcase_screensaver_terminal.webm) |
-| `visualizer` | [![visualizer](assets/showcase/previews/showcase_screensaver_visualizer.gif)](assets/showcase/showcase_screensaver_visualizer.webm) |
-| `warp` | [![warp](assets/showcase/previews/showcase_screensaver_warp.gif)](assets/showcase/showcase_screensaver_warp.webm) |
-
 | Mode | Showcase |
 |---|---|
 | `aurora` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_aurora.webm" type="video/webm">Aurora showcase</video> |
