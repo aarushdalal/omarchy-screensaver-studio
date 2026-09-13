@@ -91,50 +91,48 @@ class VisualizerMode(BaseMode):
 
         self.clear_background(cr, width, height)
 
-        fade = self.fade_in
-        cx = width * 0.5 + self.burn_x
-        cy = height * 0.45 + self.burn_y
+        fade = self.fade_in * self.luminance_factor
+        cx = width * 0.5 + self.burn_x + self.jitter_x
+        cy = height * 0.45 + self.burn_y + self.jitter_y
 
         title = self.media_info.title if has_media else "Awaiting Audio Stream"
         artist = self.media_info.artist if has_media else "Omarchy Soundscape"
         album = self.media_info.album if has_media else ""
         player = self.media_info.player if self.media_info else "AUDIO"
 
-        # Ambient central glow
-        glow_pat = cairo.RadialGradient(cx, cy, 20, cx, cy, width * 0.45)
+        # Ambient central glow (only if playing)
         if is_playing:
-            glow_pat.add_color_stop_rgba(0.0, *with_alpha(self.theme.primary, 0.16 * fade))
-        else:
-            glow_pat.add_color_stop_rgba(0.0, *with_alpha(self.theme.muted, 0.08 * fade))
-        glow_pat.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 0.0)
-        cr.set_source(glow_pat)
-        cr.paint()
+            glow_pat = cairo.RadialGradient(cx, cy, 20, cx, cy, width * 0.40)
+            glow_pat.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(self.theme.primary, 0.14 * fade)))
+            glow_pat.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 0.0)
+            cr.set_source(glow_pat)
+            cr.paint()
 
-        # 1. Player Status Badge
+        # 1. Player Status Indicator
         if is_playing:
-            badge_str = f"󰎈  {player.upper()}  •  PLAYING"
-            badge_color = with_alpha(self.theme.accent, fade * 0.95)
+            badge_str = f"󰎈  {player.upper()}  ·  PLAYING"
+            badge_color = self.oled_color(with_alpha(self.theme.accent, fade * 0.95))
         elif has_media:
-            badge_str = f"󰏤  {player.upper()}  •  PAUSED"
-            badge_color = with_alpha(self.theme.warning, fade * 0.85)
+            badge_str = f"󰏤  {player.upper()}  ·  PAUSED"
+            badge_color = self.oled_color(with_alpha(self.theme.warning, fade * 0.85))
         else:
-            badge_str = "󰎈  OMARCHY VISUALIZER  •  IDLE"
-            badge_color = with_alpha(self.theme.muted, fade * 0.75)
+            badge_str = "󰎈  OMARCHY VISUALIZER  ·  IDLE"
+            badge_color = self.oled_color(with_alpha(self.theme.muted, fade * 0.70))
 
         self.draw_text(
-            cr, badge_str, cx, cy - 140.0,
+            cr, badge_str, cx, cy - 130.0,
             self.FONT_MONO, 12.0, badge_color,
             align="center", weight=Pango.Weight.BOLD
         )
 
-        # 2. Song Title (Large, glowing when playing)
+        # 2. Song Title (Clean floating typography)
         title_color = (
-            with_alpha(self.theme.bright_foreground, fade)
+            self.oled_color(with_alpha(self.theme.bright_foreground, fade))
             if is_playing
-            else with_alpha(self.theme.foreground, fade * 0.85)
+            else self.oled_color(with_alpha(self.theme.foreground, fade * 0.80))
         )
         self.draw_text(
-            cr, title, cx, cy - 85.0,
+            cr, title, cx, cy - 78.0,
             self.FONT_SANS, 34.0, title_color,
             align="center", weight=Pango.Weight.BOLD, glow=is_playing
         )
@@ -142,19 +140,19 @@ class VisualizerMode(BaseMode):
         # 3. Artist & Album
         artist_album = f"{artist}   —   {album}" if album else artist
         self.draw_text(
-            cr, artist_album, cx, cy - 40.0,
-            self.FONT_SANS, 16.0, with_alpha(self.theme.foreground, fade * (0.85 if is_playing else 0.65)),
+            cr, artist_album, cx, cy - 34.0,
+            self.FONT_SANS, 16.0, self.oled_color(with_alpha(self.theme.foreground, fade * (0.85 if is_playing else 0.60))),
             align="center", weight=Pango.Weight.NORMAL
         )
 
-        # 4. Audio Spectrum Equalizer
+        # 4. Floating Audio Spectrum Equalizer (Rounded pill bars with floating peak nodes)
         bands = self.mpris.bands
         peaks = self.mpris.peaks
         n_bars = len(bands)
 
-        vis_w = min(850.0, width * 0.80)
-        vis_h = 160.0
-        bar_gap = 4.0
+        vis_w = min(880.0, width * 0.80)
+        vis_h = 150.0
+        bar_gap = 5.0
         bar_w = (vis_w - (n_bars - 1) * bar_gap) / max(1, n_bars)
         start_x = cx - vis_w * 0.5
         base_y = cy + 130.0
@@ -166,31 +164,23 @@ class VisualizerMode(BaseMode):
             by = base_y - bar_height
 
             # Draw bar with vertical gradient
-            self.draw_rounded_rect(cr, bx, by, bar_w, bar_height, bar_w * 0.35)
+            self.draw_rounded_rect(cr, bx, by, bar_w, bar_height, bar_w * 0.45)
             grad = cairo.LinearGradient(bx, by, bx, base_y)
             if is_playing:
-                grad.add_color_stop_rgba(0.0, *with_alpha(self.theme.secondary, 0.95 * fade))
-                grad.add_color_stop_rgba(0.55, *with_alpha(self.theme.primary, 0.85 * fade))
-                grad.add_color_stop_rgba(1.0, *with_alpha(self.theme.accent, 0.40 * fade))
+                grad.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(self.theme.secondary, 0.95 * fade)))
+                grad.add_color_stop_rgba(0.55, *self.oled_color(with_alpha(self.theme.primary, 0.85 * fade)))
+                grad.add_color_stop_rgba(1.0, *self.oled_color(with_alpha(self.theme.accent, 0.35 * fade)))
             else:
-                grad.add_color_stop_rgba(0.0, *with_alpha(self.theme.primary, 0.40 * fade))
-                grad.add_color_stop_rgba(1.0, *with_alpha(self.theme.muted, 0.15 * fade))
+                grad.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(self.theme.primary, 0.30 * fade)))
+                grad.add_color_stop_rgba(1.0, *self.oled_color(with_alpha(self.theme.muted, 0.10 * fade)))
             cr.set_source(grad)
             cr.fill()
 
-            # Floating peak dot (only during active playback)
+            # Floating peak node (only during active playback)
             peak_val = peaks[i]
             if is_playing and peak_val > 0.05:
-                peak_y = base_y - peak_val * vis_h - 5.0
+                peak_y = base_y - peak_val * vis_h - 6.0
                 if peak_y < base_y:
-                    cr.set_source_rgba(*with_alpha(self.theme.bright_foreground, 0.92 * fade))
+                    cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.bright_foreground, 0.92 * fade)))
                     cr.arc(bx + bar_w * 0.5, peak_y, bar_w * 0.42, 0, math.pi * 2)
                     cr.fill()
-
-        # Baseline reflection rule
-        rule_y = base_y + 8.0
-        cr.set_source_rgba(*with_alpha(self.theme.primary, 0.3 * fade))
-        cr.set_line_width(1.0)
-        cr.move_to(start_x, rule_y)
-        cr.line_to(start_x + vis_w, rule_y)
-        cr.stroke()

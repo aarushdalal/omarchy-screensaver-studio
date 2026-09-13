@@ -75,45 +75,40 @@ class AuroraMode(BaseMode):
         if width != self.width or height != self.height:
             self.on_resize(width, height)
 
-        # Deepest dark background
-        bg_dark = self.theme.background
-        cr.set_source_rgba(*bg_dark)
-        cr.paint()
+        # True OLED black clear
+        self.clear_background(cr, width, height)
 
-        fade = self.fade_in
+        fade = self.fade_in * self.luminance_factor
         t = self.time * self.config.aurora_speed
         w, h = float(width), float(height)
 
-        # 1. Render Undulating Aurora Ribbons
-        # Each ribbon is defined by a cubic spline curve
+        # 1. Render Undulating Aurora Ribbons with Chromatic Dispersion
         wave_configs = [
-            (self.theme.primary, 0.18, 0.7, 0.0, 0.40),
-            (self.theme.secondary, 0.14, 0.9, 1.4, 0.50),
-            (self.theme.accent, 0.12, 0.6, 2.8, 0.35),
-            (self.theme.primary, 0.10, 0.8, 4.2, 0.60),
+            (self.theme.primary, 0.22, 0.7, 0.0, 0.38),
+            (self.theme.secondary, 0.17, 0.9, 1.4, 0.48),
+            (self.theme.accent, 0.15, 0.6, 2.8, 0.32),
+            (self.theme.primary, 0.12, 0.8, 4.2, 0.58),
         ][: self.config.aurora_wave_count]
 
         for color, alpha, freq, phase, y_ratio in wave_configs:
             cr.new_path()
             base_y = h * y_ratio
 
-            # Sample points along the width
-            num_steps = 14
+            num_steps = 18
             step_w = w / (num_steps - 1)
 
             pts = []
             for i in range(num_steps):
                 x = i * step_w
                 norm_x = x / w
-                # Harmonic wave displacement
                 disp = (
-                    math.sin(t * 1.2 + norm_x * freq * 4.0 + phase) * (h * 0.12)
-                    + math.cos(t * 0.7 - norm_x * 2.5) * (h * 0.06)
+                    math.sin(t * 1.3 + norm_x * freq * 4.2 + phase) * (h * 0.14)
+                    + math.cos(t * 0.75 - norm_x * 2.8) * (h * 0.07)
+                    + math.sin(t * 2.1 + norm_x * 7.0) * (h * 0.02)
                 )
                 y = base_y + disp
                 pts.append((x, y))
 
-            # Build smooth curve through points
             cr.move_to(0, h)
             cr.line_to(pts[0][0], pts[0][1])
 
@@ -127,29 +122,31 @@ class AuroraMode(BaseMode):
             cr.line_to(w, h)
             cr.close_path()
 
-            # Vertical soft gradient
-            grad = cairo.LinearGradient(0, base_y - h * 0.2, 0, base_y + h * 0.25)
+            # Vertical soft glowing gradient
+            grad = cairo.LinearGradient(0, base_y - h * 0.22, 0, base_y + h * 0.28)
             grad.add_color_stop_rgba(0.0, *with_alpha(color, 0.0))
-            grad.add_color_stop_rgba(0.4, *with_alpha(color, alpha * fade))
-            grad.add_color_stop_rgba(0.7, *with_alpha(color, alpha * 0.6 * fade))
+            grad.add_color_stop_rgba(0.35, *self.oled_color(with_alpha(color, alpha * fade)))
+            grad.add_color_stop_rgba(0.70, *self.oled_color(with_alpha(color, alpha * 0.55 * fade)))
             grad.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 0.0)
             cr.set_source(grad)
             cr.fill()
 
-        # 2. Render Ambient Dust Particles
+        # 2. Render Ambient Dust Particles with Luminous Halo
         for d in self.dust:
             pulse = 0.7 + 0.3 * math.sin(self.time * 2.0 + d.phase)
             cur_alpha = d.base_alpha * pulse * fade
-            cr.set_source_rgba(*with_alpha(self.theme.bright_foreground, cur_alpha))
+            cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.bright_foreground, cur_alpha)))
             cr.arc(d.x, d.y, d.r, 0, math.pi * 2)
             cr.fill()
 
-        # 3. Minimal Ambient Time Watermark in Bottom-Right Corner
+        # 3. Ambient Floating Time Watermark (Wandering anchor to prevent OLED burn-in)
         import time as pytime
         now = pytime.localtime()
         time_str = pytime.strftime("%H:%M", now)
+        watermark_x = width - 56.0 + self.burn_x + self.jitter_x
+        watermark_y = height - 42.0 + self.burn_y + self.jitter_y
         self.draw_text(
-            cr, time_str, width - 48.0, height - 36.0,
-            self.FONT_MONO, 14.0, with_alpha(self.theme.muted, 0.5 * fade),
+            cr, time_str, watermark_x, watermark_y,
+            self.FONT_MONO, 14.0, self.oled_color(with_alpha(self.theme.muted, 0.45 * fade)),
             align="right"
         )

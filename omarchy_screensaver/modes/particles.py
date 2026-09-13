@@ -1,8 +1,8 @@
-"""Mode 2: Generative Particles.
+"""Mode 2: Deep Volumetric Generative Particles.
 
-Simulates a living digital atmosphere with floating ambient particles, proximity
-connection lines via spatial grid partitioning, and gentle harmonic opacity breathing.
-Optimized for low CPU utilization on integrated graphics.
+Simulates a living cosmic atmosphere with 3D parallax layers, proximity
+filaments via spatial grid partitioning, wandering gravitational singularity vortex,
+and pure OLED true black background.
 """
 
 import math
@@ -18,21 +18,22 @@ from .base import BaseMode
 
 
 class Particle:
-    """Represents a single particle in digital space."""
+    """Represents a particle in 3D-projected space."""
 
-    def __init__(self, x: float, y: float, vx: float, vy: float, radius: float, alpha: float, color_idx: int):
+    def __init__(self, x: float, y: float, vx: float, vy: float, depth: float, color_idx: int):
         self.x = x
         self.y = y
         self.vx = vx
         self.vy = vy
-        self.radius = radius
-        self.base_alpha = alpha
+        self.depth = depth  # 0.2 (deep distant) to 1.0 (foreground)
+        self.base_radius = (0.8 + 1.6 * depth)
+        self.base_alpha = (0.25 + 0.65 * depth)
         self.phase = random.uniform(0.0, math.pi * 2)
         self.color_idx = color_idx  # 0: primary, 1: accent, 2: secondary
 
 
 class ParticlesMode(BaseMode):
-    """Living digital atmosphere screensaver mode."""
+    """Deep volumetric cosmic atmosphere screensaver mode."""
 
     def __init__(self, theme: ThemePalette, config, monitor_index: int = 0):
         super().__init__(theme, config, monitor_index)
@@ -41,30 +42,29 @@ class ParticlesMode(BaseMode):
         self.height = 1080
         self.fade_in = 0.0
         self.is_battery = False
-        self.target_fps = 45  # Locked, smooth 45 FPS for negligible CPU overhead
+        self.target_fps = 50
         self._init_particles()
 
     def _init_particles(self):
         random.seed(42 + self.monitor_index * 1337)
-        # Moderate particle count for clean cyber aesthetic and optimal performance
-        base_count = min(110, self.config.particles_count)
+        base_count = min(140, self.config.particles_count)
         if self.is_battery and self.config.battery_reduce_fps:
             base_count = int(base_count * self.config.particle_multiplier)
 
-        speed_scale = self.config.particles_speed * 50.0
+        speed_scale = self.config.particles_speed * 45.0
 
         self.particles = []
         for _ in range(base_count):
+            depth = random.uniform(0.2, 1.0)
             angle = random.uniform(0.0, math.pi * 2)
-            speed = random.uniform(0.3, 0.9) * speed_scale
+            speed = random.uniform(0.2, 0.8) * speed_scale * (0.4 + 0.6 * depth)
             p = Particle(
                 x=random.uniform(0.0, self.width),
                 y=random.uniform(0.0, self.height),
                 vx=math.cos(angle) * speed,
                 vy=math.sin(angle) * speed,
-                radius=random.uniform(1.2, 2.2) * (self.config.particles_size / 1.8),
-                alpha=random.uniform(0.4, 0.85),
-                color_idx=random.choices([0, 1, 2], weights=[0.60, 0.25, 0.15])[0],
+                depth=depth,
+                color_idx=random.choices([0, 1, 2], weights=[0.55, 0.30, 0.15])[0],
             )
             self.particles.append(p)
 
@@ -77,12 +77,11 @@ class ParticlesMode(BaseMode):
     def update(self, dt: float, metrics: SystemMetrics, media_info: Optional[MediaInfo]):
         super().update(dt, metrics, media_info)
 
-        # Check battery state change
         if metrics and self.config.battery_auto_detect:
             on_bat = not metrics.ac_online
             if on_bat != self.is_battery:
                 self.is_battery = on_bat
-                self.target_fps = self.config.battery_fps if on_bat else 45
+                self.target_fps = self.config.battery_fps if on_bat else 50
                 self._init_particles()
 
         if self.fade_in < 1.0:
@@ -90,18 +89,38 @@ class ParticlesMode(BaseMode):
 
         w, h = float(self.width), float(self.height)
 
+        # Wandering gravitational attractor singularity
+        attractor_x = w * 0.5 + math.sin(self.time * 0.18) * (w * 0.32)
+        attractor_y = h * 0.5 + math.cos(self.time * 0.14) * (h * 0.28)
+        gravity_strength = 2800.0
+
         for p in self.particles:
-            wander_angle = math.sin(self.time * 0.4 + p.phase) * 0.08
-            ca = math.cos(wander_angle)
-            sa = math.sin(wander_angle)
-            vx = p.vx * ca - p.vy * sa
-            vy = p.vx * sa + p.vy * ca
+            # Gravitational pull + gentle tangential swirl
+            dx = attractor_x - p.x
+            dy = attractor_y - p.y
+            dist_sq = dx * dx + dy * dy + 8000.0
+            force = (gravity_strength / dist_sq) * p.depth
 
-            p.x += vx * dt
-            p.y += vy * dt
+            # Orthogonal swirl vector
+            swirl_x = -dy / math.sqrt(dist_sq) * force * 1.5
+            swirl_y = dx / math.sqrt(dist_sq) * force * 1.5
 
-            # Wrap around boundaries
-            margin = 15.0
+            p.vx += ((dx / math.sqrt(dist_sq)) * force + swirl_x) * dt
+            p.vy += ((dy / math.sqrt(dist_sq)) * force + swirl_y) * dt
+
+            # Drag/damping to maintain balanced speeds
+            speed_sq = p.vx * p.vx + p.vy * p.vy
+            max_speed = 90.0 * p.depth
+            if speed_sq > max_speed * max_speed:
+                damping = max_speed / math.sqrt(speed_sq)
+                p.vx *= damping
+                p.vy *= damping
+
+            p.x += p.vx * dt
+            p.y += p.vy * dt
+
+            # Soft boundary wrap
+            margin = 25.0
             if p.x < -margin:
                 p.x = w + margin
             elif p.x > w + margin:
@@ -118,14 +137,16 @@ class ParticlesMode(BaseMode):
 
         self.clear_background(cr, width, height)
 
-        conn_dist = min(90.0, float(self.config.particles_connection_distance))
+        conn_dist = min(95.0, float(self.config.particles_connection_distance))
         conn_dist_sq = conn_dist * conn_dist
-        fade = self.fade_in
+        fade = self.fade_in * self.luminance_factor
 
-        # Spatial Grid Partitioning
+        # 1. Proximity Filaments via Spatial Grid (Only foreground/midground connect)
         cell_size = conn_dist
         grid: Dict[Tuple[int, int], List[Particle]] = {}
         for p in self.particles:
+            if p.depth < 0.4:
+                continue
             cx = int(p.x // cell_size)
             cy = int(p.y // cell_size)
             key = (cx, cy)
@@ -133,81 +154,74 @@ class ParticlesMode(BaseMode):
                 grid[key] = []
             grid[key].append(p)
 
-        # 1. Collect Proximity Lines (Cap at 2 connections per particle for performance)
-        cr.set_line_width(0.8)
-        line_color_base = self.theme.primary
-
-        conns_per_particle = {id(p): 0 for p in self.particles}
+        cr.set_line_width(0.7)
+        line_base = self.theme.primary
+        conns = {id(p): 0 for p in self.particles}
 
         for (cx, cy), cell_particles in grid.items():
             for i, p1 in enumerate(cell_particles):
-                if conns_per_particle[id(p1)] >= 2:
+                if conns[id(p1)] >= 2:
                     continue
-
-                # Same cell
+                # Intra-cell
                 for j in range(i + 1, len(cell_particles)):
                     p2 = cell_particles[j]
-                    if conns_per_particle[id(p2)] >= 2:
+                    if conns[id(p2)] >= 2:
                         continue
-                    dx = p2.x - p1.x
-                    dy = p2.y - p1.y
+                    dx, dy = p2.x - p1.x, p2.y - p1.y
                     d_sq = dx * dx + dy * dy
                     if d_sq < conn_dist_sq:
                         d = math.sqrt(d_sq)
-                        alpha = (1.0 - d / conn_dist) ** 1.5 * 0.40 * fade
-                        cr.set_source_rgba(*with_alpha(line_color_base, alpha))
+                        alpha = (1.0 - d / conn_dist) ** 1.8 * 0.35 * min(p1.depth, p2.depth) * fade
+                        cr.set_source_rgba(*self.oled_color(with_alpha(line_base, alpha)))
                         cr.move_to(p1.x, p1.y)
                         cr.line_to(p2.x, p2.y)
                         cr.stroke()
-                        conns_per_particle[id(p1)] += 1
-                        conns_per_particle[id(p2)] += 1
-                        if conns_per_particle[id(p1)] >= 2:
+                        conns[id(p1)] += 1
+                        conns[id(p2)] += 1
+                        if conns[id(p1)] >= 2:
                             break
 
                 # Neighboring cells
-                if conns_per_particle[id(p1)] >= 2:
+                if conns[id(p1)] >= 2:
                     continue
                 for ox, oy in [(1, 0), (-1, 1), (0, 1), (1, 1)]:
-                    neighbor_key = (cx + ox, cy + oy)
-                    if neighbor_key in grid:
-                        for p2 in grid[neighbor_key]:
-                            if conns_per_particle[id(p2)] >= 2:
+                    neighbor = (cx + ox, cy + oy)
+                    if neighbor in grid:
+                        for p2 in grid[neighbor]:
+                            if conns[id(p2)] >= 2:
                                 continue
-                            dx = p2.x - p1.x
-                            dy = p2.y - p1.y
+                            dx, dy = p2.x - p1.x, p2.y - p1.y
                             d_sq = dx * dx + dy * dy
                             if d_sq < conn_dist_sq:
                                 d = math.sqrt(d_sq)
-                                alpha = (1.0 - d / conn_dist) ** 1.5 * 0.40 * fade
-                                cr.set_source_rgba(*with_alpha(line_color_base, alpha))
+                                alpha = (1.0 - d / conn_dist) ** 1.8 * 0.35 * min(p1.depth, p2.depth) * fade
+                                cr.set_source_rgba(*self.oled_color(with_alpha(line_base, alpha)))
                                 cr.move_to(p1.x, p1.y)
                                 cr.line_to(p2.x, p2.y)
                                 cr.stroke()
-                                conns_per_particle[id(p1)] += 1
-                                conns_per_particle[id(p2)] += 1
-                                if conns_per_particle[id(p1)] >= 2:
+                                conns[id(p1)] += 1
+                                conns[id(p2)] += 1
+                                if conns[id(p1)] >= 2:
                                     break
-                    if conns_per_particle[id(p1)] >= 2:
+                    if conns[id(p1)] >= 2:
                         break
 
-        # 2. Render Particles (Batched by color index for speed)
-        color_groups: Dict[int, List[Particle]] = {0: [], 1: [], 2: []}
-        for p in self.particles:
-            color_groups[p.color_idx].append(p)
-
+        # 2. Render Particles by Depth Layers (Distant -> Midground -> Foreground)
         color_palettes = [self.theme.primary, self.theme.accent, self.theme.secondary]
 
-        for color_idx, group in color_groups.items():
-            if not group:
-                continue
-            base_col = color_palettes[color_idx]
+        # Sort slightly or bucket by depth for proper volumetric rendering
+        for p in self.particles:
+            pulse = 0.85 + 0.15 * math.sin(self.time * 2.0 + p.phase)
+            r = p.base_radius * pulse
+            base_col = color_palettes[p.color_idx]
+            alpha = p.base_alpha * fade
 
-            # Batch circles
-            cr.set_source_rgba(*with_alpha(base_col, 0.75 * fade))
-            cr.new_path()
-            for p in group:
-                pulse = 0.8 + 0.2 * math.sin(self.time * 1.5 + p.phase)
-                r = p.radius * pulse
-                cr.move_to(p.x + r, p.y)
-                cr.arc(p.x, p.y, r, 0, math.pi * 2)
+            # Foreground subtle glow halo
+            if p.depth > 0.75:
+                cr.set_source_rgba(*self.oled_color(with_alpha(base_col, alpha * 0.20)))
+                cr.arc(p.x, p.y, r * 2.2, 0, math.pi * 2)
+                cr.fill()
+
+            cr.set_source_rgba(*self.oled_color(with_alpha(base_col, alpha)))
+            cr.arc(p.x, p.y, r, 0, math.pi * 2)
             cr.fill()

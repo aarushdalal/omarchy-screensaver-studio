@@ -22,7 +22,18 @@ import sys
 import tomllib
 from pathlib import Path
 
-VALID_MODES = ["clock", "particles", "terminal", "system", "visualizer", "aurora"]
+VALID_MODES = [
+    "clock",
+    "matrix",
+    "particles",
+    "warp",
+    "geometry",
+    "singularity",
+    "system",
+    "terminal",
+    "visualizer",
+    "aurora",
+]
 VALID_THEMES = ["auto", "aurora", "cyberpunk", "matrix", "minimal", "osaka"]
 
 CONFIG_PATH = Path.home() / ".config" / "omarchy-screensaver" / "config.toml"

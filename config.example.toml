@@ -7,7 +7,7 @@
 [general]
 enabled = true
 # Modes: "clock", "particles", "terminal", "system", "visualizer", "aurora", "auto"
-mode = "aurora"
+mode = "clock"
 # When rotation is true, screensaver smoothly cycles through rotation_modes
 rotation = false
 rotation_interval = 300
@@ -31,11 +31,12 @@ multi_monitor = "independent"
 exit_on_mouse_move = true
 mouse_move_threshold = 12
 exit_on_key_press = true
-# Burn-in prevention: imperceptible subtle drift of static elements
+# OLED burn-in prevention: pure #000000 true black subpixel shutoff & continuous orbital drift
+oled_mode = true
 burn_in_protection = true
 
 [ambient]
-# Ambient study desk display settings (SUPER + CTRL + S / SUPER + I)
+# Ambient study desk display settings (SUPER + I)
 # When active as study desk display: ONLY the shortcut will toggle/close it
 exit_on_mouse_move = false
 mouse_move_threshold = 100
@@ -88,3 +89,26 @@ fallback_mode = "selected"
 speed = 0.25
 wave_count = 4
 dust_count = 60
+
+[matrix]
+speed = 1.0
+rain_length = 24
+density = 0.85
+font_size = 14
+
+[warp]
+star_count = 450
+warp_speed = 1.2
+streak_length = 1.0
+
+[geometry]
+shape = "tesseract"
+rotation_speed = 0.6
+line_width = 1.6
+glow = true
+
+[singularity]
+particle_count = 350
+swirl_speed = 1.0
+disk_tilt = 0.45
+beaming = true

@@ -1,8 +1,8 @@
 {
   "name": "omarchy-screensaver-studio",
   "id": "daemon0.screensaver-studio",
-  "version": "1.0.0",
-  "description": "Multi-mode screensaver engine with GTK4/Wayland window architecture",
+  "version": "1.1.0",
+  "description": "10-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora) with Quickshell, audio spectrum, and menu integration",
   "author": "Daemon0",
   "license": "MIT",
   "repository": "https://github.com/YOUR-USERNAME/omarchy-screensaver-studio",

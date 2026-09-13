@@ -1,0 +1,168 @@
+{
+  // Style Screensaver (Omarchy Screensaver Engine)
+  "style.screensaver": {
+    "icon": "󱄄",
+    "label": "Screensaver",
+    "aliases": ["screensaver", "screensavers", "saver"]
+  },
+  "style.screensaver.menu": {
+    "icon": "󰘔",
+    "label": "Screensaver Menu (Floating HUD)",
+    "detail": "Open interactive screensaver mode selector HUD",
+    "action": "omarchy-menu-screensaver"
+  },
+  "style.screensaver.tui": {
+    "icon": "",
+    "label": "Screensaver Manager (Terminal TUI)",
+    "detail": "Interactive terminal manager powered by Gum",
+    "action": "omarchy-launch-floating-terminal-with-presentation omarchy-screensaver-menu"
+  },
+  "style.screensaver.preview": {
+    "icon": "󱄄",
+    "label": "Preview Active Screensaver",
+    "detail": "Run full-screen preview for 5 seconds (or dismiss on keypress)",
+    "action": "omarchy-screensaver-preview 5"
+  },
+  "style.screensaver.launch": {
+    "icon": "󰐥",
+    "label": "Launch Screensaver Now",
+    "detail": "Start screensaver immediately",
+    "action": "omarchy-launch-screensaver force"
+  },
+  "style.screensaver.modes": {
+    "icon": "󰄛",
+    "label": "Visual Modes",
+    "aliases": ["screensaver-modes"]
+  },
+  "style.screensaver.modes.clock": {
+    "icon": "󱑂",
+    "label": "Clock (Minimal Typographic)",
+    "detail": "Floating typography with celestial orbital aura & live telemetry",
+    "checked": "omarchy-screensaver-select is-mode clock",
+    "action": "omarchy-screensaver-select mode clock"
+  },
+  "style.screensaver.modes.matrix": {
+    "icon": "󰅟",
+    "label": "Matrix Cyber Rain",
+    "detail": "3D parallax Katakana & hex cascading rain with phosphor decay",
+    "checked": "omarchy-screensaver-select is-mode matrix",
+    "action": "omarchy-screensaver-select mode matrix"
+  },
+  "style.screensaver.modes.particles": {
+    "icon": "󰘔",
+    "label": "Generative Particles",
+    "detail": "3D volumetric constellation with wandering gravitational vortex",
+    "checked": "omarchy-screensaver-select is-mode particles",
+    "action": "omarchy-screensaver-select mode particles"
+  },
+  "style.screensaver.modes.warp": {
+    "icon": "󰐎",
+    "label": "Starfield Warp",
+    "detail": "Relativistic 3D perspective hyperspace with speed streaks",
+    "checked": "omarchy-screensaver-select is-mode warp",
+    "action": "omarchy-screensaver-select mode warp"
+  },
+  "style.screensaver.modes.geometry": {
+    "icon": "󰦪",
+    "label": "4D Tesseract (Geometry)",
+    "detail": "Hypnotic 4D rotating hypercube with depth cueing & glow",
+    "checked": "omarchy-screensaver-select is-mode geometry",
+    "action": "omarchy-screensaver-select mode geometry"
+  },
+  "style.screensaver.modes.singularity": {
+    "icon": "󰇯",
+    "label": "Gravitational Singularity",
+    "detail": "Kerr black hole with relativistic Doppler-beamed accretion disk",
+    "checked": "omarchy-screensaver-select is-mode singularity",
+    "action": "omarchy-screensaver-select mode singularity"
+  },
+  "style.screensaver.modes.system": {
+    "icon": "󰓅",
+    "label": "System Telemetry HUD",
+    "detail": "Radial arc tachometers, flowing Bezier sparklines & live telemetry",
+    "checked": "omarchy-screensaver-select is-mode system",
+    "action": "omarchy-screensaver-select mode system"
+  },
+  "style.screensaver.modes.terminal": {
+    "icon": "",
+    "label": "Diagnostic Stream",
+    "detail": "Borderless holographic Linux kernel & procfs diagnostic waterfall",
+    "checked": "omarchy-screensaver-select is-mode terminal",
+    "action": "omarchy-screensaver-select mode terminal"
+  },
+  "style.screensaver.modes.visualizer": {
+    "icon": "󰎈",
+    "label": "Audio Visualizer",
+    "detail": "MPRIS player metadata & floating spectrum equalizer",
+    "checked": "omarchy-screensaver-select is-mode visualizer",
+    "action": "omarchy-screensaver-select mode visualizer"
+  },
+  "style.screensaver.modes.aurora": {
+    "icon": "󰒲",
+    "label": "Aurora Solar Plasma",
+    "detail": "Multi-octave harmonic spline ribbons with stardust motes",
+    "checked": "omarchy-screensaver-select is-mode aurora",
+    "action": "omarchy-screensaver-select mode aurora"
+  },
+  "style.screensaver.rotation": {
+    "icon": "󰑖",
+    "label": "Auto-Rotation Mode",
+    "detail": "Cycle smoothly through all visual modes every 5 minutes",
+    "checked": "omarchy-screensaver-select is-rotation",
+    "action": "omarchy-screensaver-select toggle-rotation"
+  },
+  "style.screensaver.themes": {
+    "icon": "󰏘",
+    "label": "Color Themes",
+    "aliases": ["screensaver-themes"]
+  },
+  "style.screensaver.themes.auto": {
+    "icon": "󰸌",
+    "label": "Auto (Omarchy Theme)",
+    "detail": "Dynamic real-time sync with active Omarchy palette",
+    "checked": "omarchy-screensaver-select is-theme auto",
+    "action": "omarchy-screensaver-select theme auto"
+  },
+  "style.screensaver.themes.cyberpunk": {
+    "icon": "󰑮",
+    "label": "Cyberpunk Neon",
+    "detail": "Electric cyan & hot magenta synthwave palette",
+    "checked": "omarchy-screensaver-select is-theme cyberpunk",
+    "action": "omarchy-screensaver-select theme cyberpunk"
+  },
+  "style.screensaver.themes.matrix": {
+    "icon": "󰅟",
+    "label": "Matrix Phosphor",
+    "detail": "Phosphor green cybernetic matrix monochrome",
+    "checked": "omarchy-screensaver-select is-theme matrix",
+    "action": "omarchy-screensaver-select theme matrix"
+  },
+  "style.screensaver.themes.aurora": {
+    "icon": "󰒲",
+    "label": "Nordic Aurora",
+    "detail": "Glacial emerald, cyan & arctic violet hues",
+    "checked": "omarchy-screensaver-select is-theme aurora",
+    "action": "omarchy-screensaver-select theme aurora"
+  },
+  "style.screensaver.themes.osaka": {
+    "icon": "󰄛",
+    "label": "Osaka Night",
+    "detail": "Deep purple and neon amber Japanese nightscape",
+    "checked": "omarchy-screensaver-select is-theme osaka",
+    "action": "omarchy-screensaver-select theme osaka"
+  },
+  "style.screensaver.themes.minimal": {
+    "icon": "󰔎",
+    "label": "Monochrome Minimal",
+    "detail": "Clean high-contrast grayscale minimalism",
+    "checked": "omarchy-screensaver-select is-theme minimal",
+    "action": "omarchy-screensaver-select theme minimal"
+  },
+  "style.screensaver.config": {
+    "icon": "",
+    "label": "Edit Configuration",
+    "detail": "Open ~/.config/omarchy-screensaver/config.toml",
+    "action": "omarchy-launch-config-editor \"$HOME/.config/omarchy-screensaver/config.toml\""
+  }
+}
+

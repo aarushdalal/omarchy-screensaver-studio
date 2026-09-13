@@ -31,21 +31,54 @@ class BaseMode:
         self.time: float = 0.0
         self.burn_x: float = 0.0
         self.burn_y: float = 0.0
+        self.luminance_factor: float = 1.0
+        self.jitter_x: float = 0.0
+        self.jitter_y: float = 0.0
+        self._last_jitter_time: float = 0.0
 
     def update_theme(self, theme: ThemePalette):
         """Update active theme palette without recreating simulation."""
         self.theme = theme
 
     def update(self, dt: float, metrics: SystemMetrics, media_info: Optional[MediaInfo]):
-        """Advance physics and state simulation."""
+        """Advance physics, state simulation, and OLED protection."""
         self.time += dt
-        if self.config.burn_in_protection:
-            # Very slow sinusoidal drift (max 15px over ~15 minutes)
-            self.burn_x = math.sin(self.time * 0.007 + self.monitor_index) * 12.0
-            self.burn_y = math.cos(self.time * 0.005 + self.monitor_index) * 8.0
+
+        burn_in_active = getattr(self.config, "burn_in_protection", True)
+        oled_active = getattr(self.config, "oled_mode", True)
+
+        if burn_in_active or oled_active:
+            # Multi-frequency Lissajous orbital trajectory (non-repeating, ~24-36 min cycle)
+            # Produces a gentle, organic drift over 65x45 px radius
+            freq_x = 0.0032
+            freq_y = 0.0025
+            phase = float(self.monitor_index) * 1.5708
+            self.burn_x = (
+                math.sin(self.time * freq_x + phase) * 65.0
+                + math.sin(self.time * 0.008 + phase * 0.5) * 12.0
+            )
+            self.burn_y = (
+                math.cos(self.time * freq_y + phase) * 45.0
+                + math.cos(self.time * 0.006 + phase * 0.5) * 8.0
+            )
+
+            # Subpixel micro-jitter: discrete 0.75-1.5px shift every 60 seconds
+            # Ensures static high-contrast font edges relax across neighboring subpixels
+            if self.time - self._last_jitter_time > 60.0:
+                self._last_jitter_time = self.time
+                step = int(self.time / 60.0)
+                self.jitter_x = ((step * 7) % 5 - 2) * 0.75
+                self.jitter_y = ((step * 11) % 5 - 2) * 0.75
+
+            # Dynamic luminance breathing: gentle 0.82 to 0.98 alpha oscillation
+            # Relieves continuous thermal strain on OLED blue/white phosphors
+            self.luminance_factor = 0.90 + 0.08 * math.sin(self.time * 0.04)
         else:
             self.burn_x = 0.0
             self.burn_y = 0.0
+            self.jitter_x = 0.0
+            self.jitter_y = 0.0
+            self.luminance_factor = 1.0
 
     def render(self, cr: cairo.Context, width: int, height: int, scale: float):
         """Render frame to Cairo graphics context."""
@@ -57,10 +90,22 @@ class BaseMode:
 
     # Helper rendering utilities
     def clear_background(self, cr: cairo.Context, width: int, height: int, custom_bg=None):
-        """Fill background with dark theme color (fast hardware/solid fill)."""
-        bg = custom_bg or self.theme.background
-        cr.set_source_rgba(*bg)
+        """Fill background with pure OLED black or dark theme color.
+
+        When OLED mode is active, guarantees pure rgba(0, 0, 0, 1.0) so OLED subpixels
+        are completely turned off (0 nits, 0 watts, zero burn-in).
+        """
+        if getattr(self.config, "oled_mode", True) and custom_bg is None:
+            cr.set_source_rgba(0.0, 0.0, 0.0, 1.0)
+        else:
+            bg = custom_bg or self.theme.background
+            cr.set_source_rgba(*bg)
         cr.paint()
+
+    def oled_color(self, rgba: Tuple[float, float, float, float], alpha_mult: float = 1.0) -> Tuple[float, float, float, float]:
+        """Apply luminance breathing factor to RGBA color for OLED phosphor relief."""
+        r, g, b, a = rgba
+        return (r, g, b, max(0.0, min(1.0, a * alpha_mult * self.luminance_factor)))
 
     def create_pango_layout(
         self,

@@ -18,14 +18,18 @@ DEFAULT_CONFIG_TOML = """# =====================================================
 
 [general]
 enabled = true
-# Modes: "clock", "particles", "terminal", "system", "visualizer", "aurora", "auto"
+# Modes: "clock", "matrix", "particles", "warp", "geometry", "singularity", "terminal", "system", "visualizer", "aurora", "auto"
 mode = "clock"
 # When rotation is true, screensaver smoothly cycles through rotation_modes
 rotation = false
 rotation_interval = 300
 rotation_modes = [
     "clock",
+    "matrix",
     "particles",
+    "warp",
+    "geometry",
+    "singularity",
     "system",
     "terminal",
     "aurora",
@@ -43,7 +47,8 @@ multi_monitor = "independent"
 exit_on_mouse_move = true
 mouse_move_threshold = 12
 exit_on_key_press = true
-# Burn-in prevention: imperceptible subtle drift of static elements
+# OLED burn-in prevention: pure #000000 true black subpixel shutoff & continuous orbital drift
+oled_mode = true
 burn_in_protection = true
 
 [ambient]
@@ -99,6 +104,29 @@ fallback_mode = "clock"
 speed = 0.25
 wave_count = 4
 dust_count = 60
+
+[matrix]
+speed = 1.0
+rain_length = 24
+density = 0.85
+font_size = 14
+
+[warp]
+star_count = 450
+warp_speed = 1.2
+streak_length = 1.0
+
+[geometry]
+shape = "tesseract"
+rotation_speed = 0.6
+line_width = 1.6
+glow = true
+
+[singularity]
+particle_count = 350
+swirl_speed = 1.0
+disk_tilt = 0.45
+beaming = true
 """
 
 
@@ -122,7 +150,10 @@ class Config:
         self.rotation: bool = gen.get("rotation", False)
         self.rotation_interval: int = int(gen.get("rotation_interval", 300))
         self.rotation_modes: List[str] = gen.get(
-            "rotation_modes", ["clock", "particles", "system", "terminal", "aurora", "visualizer"]
+            "rotation_modes", [
+                "clock", "matrix", "particles", "warp", "geometry",
+                "singularity", "system", "terminal", "aurora", "visualizer"
+            ]
         )
         self.theme: str = gen.get("theme", "auto")
 
@@ -133,6 +164,7 @@ class Config:
         self.exit_on_mouse_move: bool = disp.get("exit_on_mouse_move", True)
         self.mouse_move_threshold: int = int(disp.get("mouse_move_threshold", 12))
         self.exit_on_key_press: bool = disp.get("exit_on_key_press", True)
+        self.oled_mode: bool = disp.get("oled_mode", True)
         self.burn_in_protection: bool = disp.get("burn_in_protection", True)
 
         # [ambient]
@@ -194,16 +226,47 @@ class Config:
         self.aurora_wave_count: int = int(aur.get("wave_count", 4))
         self.aurora_dust_count: int = int(aur.get("dust_count", 60))
 
+        # [matrix]
+        mat = self.raw.get("matrix", {})
+        self.matrix_speed: float = float(mat.get("speed", 1.0))
+        self.matrix_rain_length: int = int(mat.get("rain_length", 24))
+        self.matrix_density: float = float(mat.get("density", 0.85))
+        self.matrix_font_size: int = int(mat.get("font_size", 14))
+
+        # [warp]
+        wrp = self.raw.get("warp", {})
+        self.warp_star_count: int = int(wrp.get("star_count", 450))
+        self.warp_speed: float = float(wrp.get("warp_speed", 1.2))
+        self.warp_streak_length: float = float(wrp.get("streak_length", 1.0))
+
+        # [geometry]
+        geo = self.raw.get("geometry", {})
+        self.geometry_shape: str = geo.get("shape", "tesseract")
+        self.geometry_rotation_speed: float = float(geo.get("rotation_speed", 0.6))
+        self.geometry_line_width: float = float(geo.get("line_width", 1.6))
+        self.geometry_glow: bool = geo.get("glow", True)
+
+        # [singularity]
+        sing = self.raw.get("singularity", {})
+        self.singularity_particle_count: int = int(sing.get("particle_count", 350))
+        self.singularity_swirl_speed: float = float(sing.get("swirl_speed", 1.0))
+        self.singularity_disk_tilt: float = float(sing.get("disk_tilt", 0.45))
+        self.singularity_beaming: bool = sing.get("beaming", True)
+
         # Apply profile tuning
         if self.profile == "low":
             self.fps = min(self.fps, 30)
             self.particles_count = int(self.particles_count * 0.5)
             self.aurora_wave_count = 2
             self.aurora_dust_count = 30
+            self.warp_star_count = int(self.warp_star_count * 0.5)
+            self.singularity_particle_count = int(self.singularity_particle_count * 0.5)
         elif self.profile == "high":
             self.fps = max(self.fps, 60)
             self.particles_count = int(self.particles_count * 1.3)
             self.aurora_wave_count = 5
+            self.warp_star_count = int(self.warp_star_count * 1.3)
+            self.singularity_particle_count = int(self.singularity_particle_count * 1.3)
 
     @classmethod
     def load(cls, path: Optional[str] = None) -> "Config":

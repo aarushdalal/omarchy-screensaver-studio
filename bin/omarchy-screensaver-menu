@@ -65,12 +65,16 @@ while true; do
     "Auto-Rotation:  $(gum style --foreground 75 --bold "$is_rot")"
 
   choice=$(gum choose --cursor="󰅂 " --header="Select an action or visual mode:" \
-    "󱑂  Mode: Minimal Digital Clock" \
-    "󰘔  Mode: Generative Particles Constellation" \
-    "  Mode: Terminal Diagnostics & Kernel Logs" \
-    "󰓅  Mode: System Telemetry & Area Charts" \
-    "󰎈  Mode: Audio Spectrum MPRIS Visualizer" \
-    "󰒲  Mode: Nordic Aurora Ambient Flow" \
+    "󱑂  Mode: Minimal Floating Clock" \
+    "󰅟  Mode: Cybernetic Matrix Rain" \
+    "󰘔  Mode: Volumetric Particles Constellation" \
+    "󰐎  Mode: Relativistic Starfield Warp" \
+    "󰦪  Mode: 4D Rotating Tesseract" \
+    "󰇯  Mode: Gravitational Singularity" \
+    "  Mode: Borderless Diagnostic Stream" \
+    "󰓅  Mode: Holographic Telemetry HUD" \
+    "󰎈  Mode: Floating Spectrum Visualizer" \
+    "󰒲  Mode: Aurora Solar Plasma Flow" \
     "󰑖  Toggle Auto-Rotation (Cycle All Modes)" \
     "󰏘  Select Color Palette..." \
     "󱄄  Preview Current Mode (5s)" \
@@ -80,42 +84,70 @@ while true; do
     "󰅖  Exit") || break
 
   case "$choice" in
-    *"Minimal Digital Clock"*)
+    *"Minimal Floating Clock"*)
       omarchy-screensaver-select mode clock
       if gum confirm --default=no "Preview Clock mode now?"; then
         omarchy-screensaver-preview clock 5
       fi
       ;;
 
-    *"Generative Particles Constellation"*)
+    *"Cybernetic Matrix Rain"*)
+      omarchy-screensaver-select mode matrix
+      if gum confirm --default=no "Preview Matrix mode now?"; then
+        omarchy-screensaver-preview matrix 5
+      fi
+      ;;
+
+    *"Volumetric Particles"*)
       omarchy-screensaver-select mode particles
       if gum confirm --default=no "Preview Particles mode now?"; then
         omarchy-screensaver-preview particles 5
       fi
       ;;
 
-    *"Terminal Diagnostics & Kernel Logs"*)
+    *"Relativistic Starfield Warp"*)
+      omarchy-screensaver-select mode warp
+      if gum confirm --default=no "Preview Warp mode now?"; then
+        omarchy-screensaver-preview warp 5
+      fi
+      ;;
+
+    *"4D Rotating Tesseract"*)
+      omarchy-screensaver-select mode geometry
+      if gum confirm --default=no "Preview Geometry mode now?"; then
+        omarchy-screensaver-preview geometry 5
+      fi
+      ;;
+
+    *"Gravitational Singularity"*)
+      omarchy-screensaver-select mode singularity
+      if gum confirm --default=no "Preview Singularity mode now?"; then
+        omarchy-screensaver-preview singularity 5
+      fi
+      ;;
+
+    *"Borderless Diagnostic Stream"*)
       omarchy-screensaver-select mode terminal
       if gum confirm --default=no "Preview Terminal mode now?"; then
         omarchy-screensaver-preview terminal 5
       fi
       ;;
 
-    *"System Telemetry & Area Charts"*)
+    *"Holographic Telemetry HUD"*)
       omarchy-screensaver-select mode system
       if gum confirm --default=no "Preview System mode now?"; then
         omarchy-screensaver-preview system 5
       fi
       ;;
 
-    *"Audio Spectrum MPRIS Visualizer"*)
+    *"Floating Spectrum Visualizer"*)
       omarchy-screensaver-select mode visualizer
       if gum confirm --default=no "Preview Visualizer mode now?"; then
         omarchy-screensaver-preview visualizer 5
       fi
       ;;
 
-    *"Nordic Aurora Ambient Flow"*)
+    *"Aurora Solar Plasma Flow"*)
       omarchy-screensaver-select mode aurora
       if gum confirm --default=no "Preview Aurora mode now?"; then
         omarchy-screensaver-preview aurora 5
@@ -154,7 +186,7 @@ while true; do
 
     *"Preview Any Mode"*)
       preview_mode=$(gum choose --cursor="󰅂 " --header="Select mode to preview:" \
-        "clock" "particles" "terminal" "system" "visualizer" "aurora" "󰁍 Cancel") || continue
+        "clock" "matrix" "particles" "warp" "geometry" "singularity" "terminal" "system" "visualizer" "aurora" "󰁍 Cancel") || continue
       if [[ "$preview_mode" != *"Cancel"* ]]; then
         omarchy-screensaver-preview "$preview_mode" 5
       fi

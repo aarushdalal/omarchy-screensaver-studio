@@ -3,16 +3,24 @@
 from .aurora import AuroraMode
 from .base import BaseMode
 from .clock import ClockMode
+from .geometry import GeometryMode
+from .matrix import MatrixMode
 from .particles import ParticlesMode
+from .singularity import SingularityMode
 from .system import SystemDashboardMode
 from .terminal import TerminalMode
 from .visualizer import VisualizerMode
+from .warp import WarpMode
 
 MODE_REGISTRY = {
     "clock": ClockMode,
+    "matrix": MatrixMode,
     "particles": ParticlesMode,
-    "terminal": TerminalMode,
+    "warp": WarpMode,
+    "geometry": GeometryMode,
+    "singularity": SingularityMode,
     "system": SystemDashboardMode,
+    "terminal": TerminalMode,
     "visualizer": VisualizerMode,
     "aurora": AuroraMode,
 }
