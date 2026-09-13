@@ -1,14 +1,15 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Screensaver Studio Showcase</title><style>body{font:16px system-ui;background:#10141b;color:#eef2f7;max-width:1100px;margin:auto;padding:32px}h1{color:#a7f3d0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}article{background:#19212d;padding:16px;border-radius:14px}video{width:100%;border-radius:9px}</style></head>
-<body><h1>Omarchy Screensaver Studio</h1><p>Full playable recordings of every visual mode.</p><main class="grid">
-<article><h2>Aurora</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_aurora.webm" type="video/webm"></video></article>
-<article><h2>Clock</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_clock.webm" type="video/webm"></video></article>
-<article><h2>Geometry</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_geometry.webm" type="video/webm"></video></article>
-<article><h2>Matrix</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_matrix.webm" type="video/webm"></video></article>
-<article><h2>Particles</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_particles.webm" type="video/webm"></video></article>
-<article><h2>Singularity</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_singularity.webm" type="video/webm"></video></article>
-<article><h2>System</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_system.webm" type="video/webm"></video></article>
-<article><h2>Terminal</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_terminal.webm" type="video/webm"></video></article>
-<article><h2>Visualizer</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_visualizer.webm" type="video/webm"></video></article>
-<article><h2>Warp</h2><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_warp.webm" type="video/webm"></video></article>
-</main></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Omarchy Screensaver Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#080d12;--panel:#11201e;--line:#245148;--text:#f0fff9;--muted:#9dbbb3;--accent:#70e0bd}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#174b40 0,transparent 38%),var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,sans-serif}header,main,footer{max-width:1180px;margin:auto;padding:28px 24px}header{padding-top:72px}nav{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px}nav a,footer a{color:var(--accent);text-decoration:none}.eyebrow{color:var(--accent);letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700}h1{font-size:clamp(38px,7vw,78px);line-height:1.02;margin:18px 0 12px;max-width:800px}h2{margin:0;font-size:22px}p{color:var(--muted);max-width:700px}.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.stat{border:1px solid var(--line);background:#ffffff08;border-radius:999px;padding:7px 14px;color:var(--muted)}.stat b{color:var(--text)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:26px}.card{background:linear-gradient(145deg,#172d2a,#0d1818);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 14px 40px #0005}.card h2{padding:8px 4px 10px}.card small{color:var(--muted);display:block;padding:0 4px 8px}.card video{width:100%;display:block;border-radius:11px;background:#05080c}footer{padding-bottom:60px;color:var(--muted)}
+</style>
+</head>
+<body><header><nav><strong>OMARCHY / SHOWCASE</strong><a href="https://github.com/aarushdalal/omarchy-screensaver-studio">View source on GitHub →</a></nav><div class="eyebrow">Native Wayland visual engine</div><h1>A screensaver for the in-between moments.</h1><p>Ten generative visual modes, recorded in full. Play each experience directly in your browser with seek, volume, and fullscreen controls.</p><div class="stats"><span class="stat"><b>10</b> visual modes</span><span class="stat"><b>60 FPS</b> recordings</span><span class="stat"><b>WebM / VP9</b> media</span></div></header>
+<main><div class="grid" id="gallery"></div></main><footer>Built for Omarchy · <a href="README.md">Documentation</a></footer>
+<script>
+const modes={aurora:"Harmonic ribbons and stardust",clock:"Orbital typographic clock",geometry:"Rotating 4D tesseract",matrix:"Parallax digital rain",particles:"Cosmic constellation",singularity:"Relativistic accretion disk",system:"Holographic telemetry HUD",terminal:"Live diagnostic waterfall",visualizer:"Reactive audio spectrum",warp:"Relativistic starfield"};
+gallery.innerHTML=Object.entries(modes).map(([name,desc])=>`<article class="card"><h2>${name[0].toUpperCase()+name.slice(1)}</h2><small>${desc}</small><video controls preload="metadata" playsinline><source src="assets/showcase/showcase_screensaver_${name}.webm" type="video/webm">Your browser cannot play WebM.</video></article>`).join("");
+</script></body></html>
