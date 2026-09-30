@@ -63,6 +63,10 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
 
     def _setup_window(self):
         self.set_title(f"Omarchy Screensaver (Monitor {self.monitor_index})")
+        self.set_decorated(False)
+        self.set_resizable(False)
+        geometry = self.monitor.get_geometry()
+        self.set_default_size(geometry.width, geometry.height)
         self.fullscreen_on_monitor(self.monitor)
 
         # Hide cursor completely
@@ -74,9 +78,22 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
 
     def _setup_drawing_area(self):
         self.drawing_area = Gtk.DrawingArea()
+        self.drawing_area.set_hexpand(True)
+        self.drawing_area.set_vexpand(True)
+        self.drawing_area.set_css_classes(["omarchy-screensaver-surface"])
         self.drawing_area.set_draw_func(self._on_draw)
         self.drawing_area.add_tick_callback(self._on_tick)
         self.set_child(self.drawing_area)
+
+        css = Gtk.CssProvider()
+        css.load_from_data(
+            b".omarchy-screensaver-surface { background-color: #000000; margin: 0; padding: 0; }"
+        )
+        display = self.get_display()
+        if display:
+            Gtk.StyleContext.add_provider_for_display(
+                display, css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            )
 
     def _setup_input_controllers(self):
         # Keyboard Controller
@@ -185,10 +202,12 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
 
         dt = now - self._last_tick_time
 
-        # Target frame rate regulation (mode-adaptive + battery throttling)
+        # Target frame rate regulation (mode-adaptive + battery throttling + ambient efficiency)
         app = self.get_application()
         mode_fps = getattr(self.active_mode, "target_fps", self.config.fps)
         target_fps = min(float(self.config.fps), float(mode_fps))
+        if self.is_ambient:
+            target_fps = min(target_fps, 40.0)
         if app and app.metrics and not app.metrics.ac_online and self.config.battery_reduce_fps:
             target_fps = min(target_fps, float(self.config.battery_fps))
 

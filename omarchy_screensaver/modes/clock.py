@@ -25,6 +25,7 @@ class ClockMode(BaseMode):
         self.fade_in: float = 0.0
         self.metrics: Optional[SystemMetrics] = None
         self.orbit_angle: float = 0.0
+        self.target_fps: int = 30
 
     def update(self, dt: float, metrics: SystemMetrics, media_info: Optional[MediaInfo]):
         super().update(dt, metrics, media_info)
@@ -117,8 +118,8 @@ class ClockMode(BaseMode):
         clock_y = cy - h_h * 0.5 - 20.0
 
         # Draw Hours with subtle soft ambient glow
-        primary_c = self.oled_color(with_alpha(self.theme.bright_foreground, alpha))
-        glow_c = with_alpha(self.theme.primary, alpha * 0.20)
+        primary_c = self.oled_color(with_alpha(self.theme.foreground, alpha * 0.95))
+        glow_c = with_alpha(self.theme.accent, alpha * 0.25)
 
         cr.set_source_rgba(*glow_c)
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:

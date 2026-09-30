@@ -152,7 +152,8 @@ class Config:
         self.rotation_modes: List[str] = gen.get(
             "rotation_modes", [
                 "clock", "matrix", "particles", "warp", "geometry",
-                "singularity", "system", "terminal", "aurora", "visualizer"
+                "singularity", "system", "terminal", "aurora", "visualizer",
+                "cyber_nexus", "synthwave", "quantum_helix", "topography", "celestial_orbit"
             ]
         )
         self.theme: str = gen.get("theme", "auto")
@@ -216,9 +217,16 @@ class Config:
         # [visualizer]
         vis = self.raw.get("visualizer", {})
         self.visualizer_style: str = vis.get("style", "spectrum")
-        self.visualizer_bar_count: int = int(vis.get("bar_count", 36))
+        self.visualizer_bar_count: int = int(vis.get("bar_count", 40))
         self.visualizer_auto_switch_on_play: bool = vis.get("auto_switch_on_play", True)
         self.visualizer_fallback_mode: str = vis.get("fallback_mode", "selected")
+        self.visualizer_particles: bool = vis.get("particles", True)
+        self.visualizer_shockwaves: bool = vis.get("shockwaves", True)
+        self.visualizer_wave_ribbon: bool = vis.get("wave_ribbon", True)
+        self.visualizer_light_beams: bool = vis.get("light_beams", True)
+        self.visualizer_mirrored: bool = vis.get("mirrored", True)
+        self.visualizer_bass_bounce: bool = vis.get("bass_bounce", True)
+        self.visualizer_radial_core: bool = vis.get("radial_core", True)
 
         # [aurora]
         aur = self.raw.get("aurora", {})

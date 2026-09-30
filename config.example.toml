@@ -6,7 +6,7 @@
 
 [general]
 enabled = true
-# Modes: "clock", "particles", "terminal", "system", "visualizer", "aurora", "auto"
+# Modes: "clock", "particles", "terminal", "system", "visualizer", "aurora", "matrix", "warp", "geometry", "singularity", "cyber_nexus", "synthwave", "quantum_helix", "topography", "celestial_orbit", "auto"
 mode = "clock"
 # When rotation is true, screensaver smoothly cycles through rotation_modes
 rotation = false
@@ -17,7 +17,12 @@ rotation_modes = [
     "system",
     "terminal",
     "aurora",
-    "visualizer"
+    "visualizer",
+    "cyber_nexus",
+    "synthwave",
+    "quantum_helix",
+    "topography",
+    "celestial_orbit"
 ]
 # Theme: "auto" (matches active Omarchy theme) or a theme filename in themes/
 theme = "auto"
@@ -112,3 +117,28 @@ particle_count = 350
 swirl_speed = 1.0
 disk_tilt = 0.45
 beaming = true
+
+[cyber_nexus]
+node_count = 35
+speed = 0.6
+pulse_speed = 1.0
+
+[synthwave]
+grid_speed = 0.8
+horizon_ratio = 0.58
+sun_glow = true
+
+[quantum_helix]
+strand_count = 2
+particle_count = 45
+speed = 0.8
+
+[topography]
+contour_count = 14
+amplitude = 30.0
+speed = 0.4
+
+[celestial_orbit]
+body_count = 6
+orbit_speed = 0.5
+show_trails = true

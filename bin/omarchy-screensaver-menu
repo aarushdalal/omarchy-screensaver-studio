@@ -75,6 +75,11 @@ while true; do
     "󰓅  Mode: Holographic Telemetry HUD" \
     "󰎈  Mode: Floating Spectrum Visualizer" \
     "󰒲  Mode: Aurora Solar Plasma Flow" \
+    "󰑮  Mode: Cyber Nexus (Hex Flow)" \
+    "󰾏  Mode: Synthwave (Dark Horizon)" \
+    "󰘔  Mode: Quantum Helix (DNA)" \
+    "󰮈  Mode: Topography (Depth Contours)" \
+    "󰇯  Mode: Celestial Orbit (Kepler Resonance)" \
     "󰑖  Toggle Auto-Rotation (Cycle All Modes)" \
     "󰏘  Select Color Palette..." \
     "󱄄  Preview Current Mode (5s)" \
@@ -154,6 +159,41 @@ while true; do
       fi
       ;;
 
+    *"Cyber Nexus"*)
+      omarchy-screensaver-select mode cyber_nexus
+      if gum confirm --default=no "Preview Cyber Nexus mode now?"; then
+        omarchy-screensaver-preview cyber_nexus 5
+      fi
+      ;;
+
+    *"Synthwave"*)
+      omarchy-screensaver-select mode synthwave
+      if gum confirm --default=no "Preview Synthwave mode now?"; then
+        omarchy-screensaver-preview synthwave 5
+      fi
+      ;;
+
+    *"Quantum Helix"*)
+      omarchy-screensaver-select mode quantum_helix
+      if gum confirm --default=no "Preview Quantum Helix mode now?"; then
+        omarchy-screensaver-preview quantum_helix 5
+      fi
+      ;;
+
+    *"Topography"*)
+      omarchy-screensaver-select mode topography
+      if gum confirm --default=no "Preview Topography mode now?"; then
+        omarchy-screensaver-preview topography 5
+      fi
+      ;;
+
+    *"Celestial Orbit"*)
+      omarchy-screensaver-select mode celestial_orbit
+      if gum confirm --default=no "Preview Celestial Orbit mode now?"; then
+        omarchy-screensaver-preview celestial_orbit 5
+      fi
+      ;;
+
     *"Toggle Auto-Rotation"*)
       omarchy-screensaver-select toggle-rotation
       sleep 0.8
@@ -186,7 +226,8 @@ while true; do
 
     *"Preview Any Mode"*)
       preview_mode=$(gum choose --cursor="󰅂 " --header="Select mode to preview:" \
-        "clock" "matrix" "particles" "warp" "geometry" "singularity" "terminal" "system" "visualizer" "aurora" "󰁍 Cancel") || continue
+        "clock" "matrix" "particles" "warp" "geometry" "singularity" "terminal" "system" "visualizer" "aurora" \
+        "cyber_nexus" "synthwave" "quantum_helix" "topography" "celestial_orbit" "󰁍 Cancel") || continue
       if [[ "$preview_mode" != *"Cancel"* ]]; then
         omarchy-screensaver-preview "$preview_mode" 5
       fi

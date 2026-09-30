@@ -34,7 +34,7 @@ release_lock() {
 trap release_lock EXIT
 
 # Debounce check: ignore duplicate key-bounce triggers within 250ms
-now_ms=$(python3 -c 'import time; print(int(time.time()*1000))' 2>/dev/null || date +%s)
+now_ms=$(date +%s%3N 2>/dev/null || date +%s)
 if [[ -f "$COOLDOWN_FILE" ]]; then
   last_ms=$(cat "$COOLDOWN_FILE" 2>/dev/null || echo 0)
   diff=$((now_ms - last_ms))

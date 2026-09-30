@@ -49,9 +49,13 @@ THEMES
 󰦪	Preview: 4D Rotating Tesseract	5-second live fullscreen preview	omarchy-screensaver-preview geometry 5
 󰇯	Preview: Gravitational Singularity	5-second live fullscreen preview	omarchy-screensaver-preview singularity 5
 	Preview: Borderless Diagnostic Stream	5-second live fullscreen preview	omarchy-screensaver-preview terminal 5
-󰓅	Preview: Holographic Telemetry HUD	5-second live fullscreen preview	omarchy-screensaver-preview system 5
 󰎈	Preview: Floating Spectrum Visualizer	5-second live fullscreen preview	omarchy-screensaver-preview visualizer 5
 󰒲	Preview: Aurora Solar Plasma Flow	5-second live fullscreen preview	omarchy-screensaver-preview aurora 5
+󰑮	Preview: Cyber Nexus (Hex Flow)	5-second live fullscreen preview	omarchy-screensaver-preview cyber_nexus 5
+󰾏	Preview: Synthwave (Dark Horizon)	5-second live fullscreen preview	omarchy-screensaver-preview synthwave 5
+󰘔	Preview: Quantum Helix (DNA)	5-second live fullscreen preview	omarchy-screensaver-preview quantum_helix 5
+󰮈	Preview: Topography (Depth Contours)	5-second live fullscreen preview	omarchy-screensaver-preview topography 5
+󰇯	Preview: Celestial Orbit (Kepler)	5-second live fullscreen preview	omarchy-screensaver-preview celestial_orbit 5
 󰁍	Back to Main Screensaver Menu	Return to visual mode selector	omarchy-menu-screensaver
 PREVIEWS
     }
@@ -78,6 +82,11 @@ PREVIEWS
 󰓅	Mode: Holographic Telemetry HUD	Radial arc tachometers & flowing Bezier graphs	omarchy-screensaver-select mode system
 󰎈	Mode: Floating Spectrum Visualizer	Real-time PipeWire spectrum & MPRIS media	omarchy-screensaver-select mode visualizer
 󰒲	Mode: Aurora Solar Plasma Flow	Harmonic Perlin splines with stardust motes	omarchy-screensaver-select mode aurora
+󰑮	Mode: Cyber Nexus (Hex Flow)	Hexagonal energy grid & circuit packet pulses	omarchy-screensaver-select mode cyber_nexus
+󰾏	Mode: Synthwave (Dark Horizon)	Muted perspective grid with segmented retro sun	omarchy-screensaver-select mode synthwave
+󰘔	Mode: Quantum Helix (DNA)	3D rotating double helix with subdued bioluminescence	omarchy-screensaver-select mode quantum_helix
+󰮈	Mode: Topography (Depth Contours)	Subdued generative elevation contour wave flow	omarchy-screensaver-select mode topography
+󰇯	Mode: Celestial Orbit (Kepler)	N-body orbital resonance & phosphorescent trails	omarchy-screensaver-select mode celestial_orbit
 󰑖	Toggle Auto-Rotation Mode	Cycle through all modes automatically (300s)	omarchy-screensaver-select toggle-rotation
 󰏘	Select Color Theme Palette...	Choose between Auto, Cyberpunk, Matrix, etc.	omarchy-menu-screensaver --themes
 󱄄	Preview Current Screensaver (5s)	Instant interactive full-screen preview	omarchy-screensaver-preview 5

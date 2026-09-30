@@ -11,7 +11,7 @@ duration=""
 for arg in "$@"; do
   if [[ "$arg" =~ ^[0-9]+$ ]]; then
     duration="$arg"
-  elif [[ "$arg" =~ ^(clock|particles|terminal|system|visualizer|aurora)$ ]]; then
+  elif [[ "$arg" =~ ^(clock|matrix|particles|warp|geometry|singularity|terminal|system|visualizer|aurora|cyber_nexus|synthwave|quantum_helix|topography|celestial_orbit)$ ]]; then
     mode="$arg"
   fi
 done

@@ -84,10 +84,10 @@ class AuroraMode(BaseMode):
 
         # 1. Render Undulating Aurora Ribbons with Chromatic Dispersion
         wave_configs = [
-            (self.theme.primary, 0.22, 0.7, 0.0, 0.38),
-            (self.theme.secondary, 0.17, 0.9, 1.4, 0.48),
-            (self.theme.accent, 0.15, 0.6, 2.8, 0.32),
-            (self.theme.primary, 0.12, 0.8, 4.2, 0.58),
+            (self.theme.accent, 0.24, 0.7, 0.0, 0.38),
+            (self.theme.secondary, 0.18, 0.9, 1.4, 0.48),
+            (self.theme.dark_accent, 0.16, 0.6, 2.8, 0.32),
+            (self.theme.muted, 0.14, 0.8, 4.2, 0.58),
         ][: self.config.aurora_wave_count]
 
         for color, alpha, freq, phase, y_ratio in wave_configs:
@@ -126,7 +126,7 @@ class AuroraMode(BaseMode):
             grad = cairo.LinearGradient(0, base_y - h * 0.22, 0, base_y + h * 0.28)
             grad.add_color_stop_rgba(0.0, *with_alpha(color, 0.0))
             grad.add_color_stop_rgba(0.35, *self.oled_color(with_alpha(color, alpha * fade)))
-            grad.add_color_stop_rgba(0.70, *self.oled_color(with_alpha(color, alpha * 0.55 * fade)))
+            grad.add_color_stop_rgba(0.70, *self.oled_color(with_alpha(self.theme.dark_accent, alpha * 0.55 * fade)))
             grad.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 0.0)
             cr.set_source(grad)
             cr.fill()
@@ -135,7 +135,7 @@ class AuroraMode(BaseMode):
         for d in self.dust:
             pulse = 0.7 + 0.3 * math.sin(self.time * 2.0 + d.phase)
             cur_alpha = d.base_alpha * pulse * fade
-            cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.bright_foreground, cur_alpha)))
+            cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.accent, cur_alpha)))
             cr.arc(d.x, d.y, d.r, 0, math.pi * 2)
             cr.fill()
 

@@ -63,9 +63,9 @@ This repository includes a valid `manifest.json` for the Omarchy plugin system:
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Daemon0",
-  "description": "10-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora) with Quickshell, audio spectrum, and menu integration",
+  "description": "15-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
   "kinds": ["bar-widget"],
   "entryPoints": { "barWidget": "BarWidget.qml" },
   "barWidget": {
@@ -87,18 +87,25 @@ This project contains native Python GTK4 rendering code and optional C extension
 
 ## Features
 
-- **10 Signature Visual Modes**:
+- **Sub-Second Latency & Low Resource Consumption**: Instant startup ($\le 0.45$s) using deferred background subsystem initialization and optimized lightweight rendering loops.
+- **15 Signature Visual Modes**:
   - `clock`: Minimal typographic clock with orbital aura
-  - `matrix`: 3D Katakana & hex cybernetic cascading rain
-  - `particles`: Volumetric constellation network with wandering attractor
-  - `warp`: Relativistic starfield warp with perspective streaks
+  - `matrix`: 3D Katakana & hex cybernetic cascading rain with glyph caching
+  - `particles`: Volumetric constellation network with wandering attractor (clamped to 90 particles for low CPU load)
+  - `warp`: Relativistic starfield warp with perspective streaks (300 stars)
   - `geometry`: 4D rotating hypercube (tesseract) with depth cueing
-  - `singularity`: Kerr black hole with Doppler-beamed accretion disk
+  - `singularity`: Kerr black hole with Doppler-beamed accretion disk (220 particles)
   - `terminal`: Borderless holographic diagnostic stream
   - `system`: Radial arc tachometers and Bezier telemetry HUD
   - `visualizer`: Real-time PipeWire audio spectrum & MPRIS metadata
-  - `aurora`: Harmonic Perlin spline ribbons with stardust motes
+  - `aurora`: Harmonic Perlin spline ribbons with stardust motes (20 FPS smooth flow)
+  - `cyber_nexus`: Subtle glowing neural nodes connected by pulsing data lines in deep OLED black
+  - `synthwave`: 3D perspective retro wireframe horizon with gentle neon gradient sun
+  - `quantum_helix`: Dual rotating DNA/quantum strands with orbital stardust motes
+  - `topography`: Dynamic topographic contour elevation lines undulating smoothly in dark ambient space
+  - `celestial_orbit`: Gravitational multi-orbital planetary system with planetary trails
 - **OLED True-Black Mode**: `#000000` subpixel shutoff with continuous micro-drift protection
+- **Dual-OS Integration**: Unified controls and synchronized launcher menus across both Omarchy and DaemonOS (`SUPER + CTRL + I` and `SUPER + I`)
 - **Dynamic Palette Synchronizer**: Inherits color schemes from the active Omarchy theme (`colors.toml`) or built-in presets
 - **Interactive Floating HUD**: `omarchy-menu-screensaver` modal menu and top-bar integration
 - **Terminal TUI Manager**: `omarchy-screensaver-menu` powered by Gum

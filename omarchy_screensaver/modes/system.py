@@ -25,7 +25,7 @@ class SystemDashboardMode(BaseMode):
         super().__init__(theme, config, monitor_index)
         self.metrics: Optional[SystemMetrics] = None
         self.fade_in: float = 0.0
-        self.target_fps: int = 30
+        self.target_fps: int = 25
 
         # Eased metric values for organic motion
         self.eased_cpu = 0.0

@@ -42,12 +42,12 @@ class ParticlesMode(BaseMode):
         self.height = 1080
         self.fade_in = 0.0
         self.is_battery = False
-        self.target_fps = 50
+        self.target_fps = 40
         self._init_particles()
 
     def _init_particles(self):
         random.seed(42 + self.monitor_index * 1337)
-        base_count = min(140, self.config.particles_count)
+        base_count = min(90, self.config.particles_count)
         if self.is_battery and self.config.battery_reduce_fps:
             base_count = int(base_count * self.config.particle_multiplier)
 
@@ -155,7 +155,7 @@ class ParticlesMode(BaseMode):
             grid[key].append(p)
 
         cr.set_line_width(0.7)
-        line_base = self.theme.primary
+        line_base = self.theme.dark_accent
         conns = {id(p): 0 for p in self.particles}
 
         for (cx, cy), cell_particles in grid.items():
@@ -207,7 +207,7 @@ class ParticlesMode(BaseMode):
                         break
 
         # 2. Render Particles by Depth Layers (Distant -> Midground -> Foreground)
-        color_palettes = [self.theme.primary, self.theme.accent, self.theme.secondary]
+        color_palettes = [self.theme.accent, self.theme.secondary, self.theme.dark_accent]
 
         # Sort slightly or bucket by depth for proper volumetric rendering
         for p in self.particles:

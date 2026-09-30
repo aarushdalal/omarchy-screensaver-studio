@@ -38,8 +38,10 @@ class ScreensaverApp(Gtk.Application):
         is_debug: bool = False,
         is_ambient: bool = False,
     ):
+        GLib.set_prgname("org.omarchy.screensaver")
+        GLib.set_application_name("Omarchy Screensaver")
         super().__init__(
-            application_id="org.omarchy.screensaver",
+            application_id=None,
             flags=Gio.ApplicationFlags.NON_UNIQUE,
         )
         self.config = config
@@ -57,7 +59,7 @@ class ScreensaverApp(Gtk.Application):
         self.windows: List[ScreensaverWindow] = []
         self.theme_manager = ThemeManager(self.config.theme, self.config.THEMES_DIR)
         self.metrics = SystemMetrics()
-        self.mpris = MprisClient()
+        self.mpris: Optional[MprisClient] = None
         self.media_info: Optional[MediaInfo] = None
 
         self._rotation_idx = 0
@@ -100,22 +102,7 @@ class ScreensaverApp(Gtk.Application):
         if active_mode_name == "auto":
             active_mode_name = self._rotation_modes[0]
 
-        # Initial media state check: if media is actively playing, launch visualizer
-        self.media_info = self.mpris.poll(force=True)
-        if (
-            self.media_info
-            and self.media_info.is_playing
-            and self.config.visualizer_auto_switch_on_play
-            and not self.forced_mode
-            and not self.is_preview
-        ):
-            if active_mode_name != "visualizer":
-                self._saved_mode_before_audio = active_mode_name
-                active_mode_name = "visualizer"
-                self.current_mode = "visualizer"
-                self.log(f"Media playing at launch: auto-switched to visualizer (saved: {self._saved_mode_before_audio})")
-
-        # Multi-monitor window creation
+        # Multi-monitor window creation and instant presentation FIRST
         if self.config.multi_monitor == "single" or n_monitors <= 1:
             mon = monitors.get_item(0)
             win = ScreensaverWindow(
@@ -149,15 +136,41 @@ class ScreensaverApp(Gtk.Application):
                 self.windows.append(win)
                 win.present()
 
-        # Register timers (200ms responsive MPRIS poll for instant play/pause reaction)
+        # Deferred background subsystems initialization (zero startup blocking)
+        GLib.idle_add(self._deferred_setup)
+
+    def _deferred_setup(self) -> bool:
+        if self._is_dismissed:
+            return GLib.SOURCE_REMOVE
+
+        try:
+            self.mpris = MprisClient()
+            self.media_info = self.mpris.poll(force=True)
+            if (
+                self.media_info
+                and self.media_info.is_playing
+                and self.config.visualizer_auto_switch_on_play
+                and not self.forced_mode
+                and not self.is_preview
+            ):
+                if self.current_mode != "visualizer":
+                    self._saved_mode_before_audio = self.current_mode
+                    self.switch_mode("visualizer")
+                    self.log(f"Media playing at launch: auto-switched to visualizer (saved: {self._saved_mode_before_audio})")
+        except Exception as e:
+            self.log(f"Deferred MPRIS init notice: {e}")
+
+        # Timers
         GLib.timeout_add(1000, self._on_metrics_timer)
-        GLib.timeout_add(1200, self._on_theme_timer)
-        GLib.timeout_add(200, self._on_mpris_timer)
+        GLib.timeout_add(1500, self._on_theme_timer)
+        GLib.timeout_add(250, self._on_mpris_timer)
 
         # Mode rotation timer if enabled
         if self.config.rotation and not self.forced_mode and not self.is_preview:
             interval_ms = max(10, self.config.rotation_interval) * 1000
             GLib.timeout_add(interval_ms, self._on_rotation_timer)
+
+        return GLib.SOURCE_REMOVE
 
     def _on_metrics_timer(self) -> bool:
         if self._is_dismissed:
@@ -178,7 +191,8 @@ class ScreensaverApp(Gtk.Application):
     def _on_mpris_timer(self) -> bool:
         if self._is_dismissed:
             return GLib.SOURCE_REMOVE
-
+        if not self.mpris:
+            return GLib.SOURCE_CONTINUE
         was_playing = bool(self.media_info and self.media_info.is_playing)
         self.media_info = self.mpris.poll()
         is_playing = bool(self.media_info and self.media_info.is_playing)

@@ -33,6 +33,11 @@ VALID_MODES = [
     "terminal",
     "visualizer",
     "aurora",
+    "cyber_nexus",
+    "synthwave",
+    "quantum_helix",
+    "topography",
+    "celestial_orbit",
 ]
 VALID_THEMES = ["auto", "aurora", "cyberpunk", "matrix", "minimal", "osaka"]
 

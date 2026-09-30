@@ -43,7 +43,7 @@ class MatrixMode(BaseMode):
         super().__init__(theme, config, monitor_index)
         self.width = 1920
         self.height = 1080
-        self.target_fps = 45
+        self.target_fps = 30
         self.fade_in = 0.0
 
         self.font_size = getattr(self.config, "matrix_font_size", 14)
@@ -131,10 +131,9 @@ class MatrixMode(BaseMode):
                 
                 # Subtle glow
                 if d.depth > 0.6:
-                    cr.set_source_rgba(*self.oled_color(with_alpha(accent_color, 0.35 * fade * d.depth)))
-                    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                        cr.move_to(x + dx, y + dy)
-                        PangoCairo.show_layout(cr, layout)
+                    cr.set_source_rgba(*self.oled_color(with_alpha(accent_color, 0.45 * fade * d.depth)))
+                    cr.move_to(x, y)
+                    PangoCairo.show_layout(cr, layout)
 
                 cr.set_source_rgba(*head_color)
                 cr.move_to(x, y)

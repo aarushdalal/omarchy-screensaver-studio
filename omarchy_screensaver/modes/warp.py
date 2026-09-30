@@ -34,7 +34,7 @@ class WarpMode(BaseMode):
         super().__init__(theme, config, monitor_index)
         self.width = 1920
         self.height = 1080
-        self.target_fps = 60
+        self.target_fps = 45
         self.fade_in = 0.0
 
         self.max_z = 1000.0
@@ -45,7 +45,7 @@ class WarpMode(BaseMode):
 
     def _init_stars(self):
         random.seed(2026 + self.monitor_index * 99)
-        count = getattr(self.config, "warp_star_count", 450)
+        count = min(300, getattr(self.config, "warp_star_count", 450))
         spread = 1200.0
 
         self.stars = []
@@ -97,9 +97,9 @@ class WarpMode(BaseMode):
 
         streak_mult = getattr(self.config, "warp_streak_length", 1.0)
         color_palette = [
-            self.theme.bright_foreground,  # Primary star white/cyan
             self.theme.accent,             # Hyperdrive neon accent
-            self.theme.secondary,          # Deep space magenta/violet
+            self.theme.secondary,          # Deep space rich harmonic tone
+            self.theme.dark_accent,        # Distant deep darker star tone
         ]
 
         cr.set_line_cap(cairo.LINE_CAP_ROUND)

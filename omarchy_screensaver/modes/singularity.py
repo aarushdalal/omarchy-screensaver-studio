@@ -35,14 +35,14 @@ class SingularityMode(BaseMode):
     def __init__(self, theme: ThemePalette, config, monitor_index: int = 0):
         super().__init__(theme, config, monitor_index)
         self.fade_in = 0.0
-        self.target_fps = 60
+        self.target_fps = 40
 
         self.particles: List[PlasmaParticle] = []
         self._init_disk()
 
     def _init_disk(self):
         random.seed(4242 + self.monitor_index * 13)
-        count = getattr(self.config, "singularity_particle_count", 350)
+        count = min(220, getattr(self.config, "singularity_particle_count", 350))
         self.particles = []
 
         for _ in range(count):
@@ -80,14 +80,14 @@ class SingularityMode(BaseMode):
 
         color_palette = [
             self.theme.accent,      # Hot plasma neon
-            self.theme.primary,     # Accretion primary hue
-            self.theme.secondary,   # Doppler red-shift hue
+            self.theme.secondary,   # Accretion rich secondary hue
+            self.theme.dark_accent, # Deep doppler-shift hue
         ]
 
         # 1. Background Gravitational Lensing Halo (Light bent around event horizon)
         lensing_pat = cairo.RadialGradient(cx, cy, event_horizon_r * 0.9, cx, cy, event_horizon_r * 2.2)
         lensing_pat.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(self.theme.accent, 0.55 * fade)))
-        lensing_pat.add_color_stop_rgba(0.4, *self.oled_color(with_alpha(self.theme.primary, 0.25 * fade)))
+        lensing_pat.add_color_stop_rgba(0.4, *self.oled_color(with_alpha(self.theme.dark_accent, 0.30 * fade)))
         lensing_pat.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 0.0)
         cr.set_source(lensing_pat)
         cr.arc(cx, cy, event_horizon_r * 2.2, 0, math.pi * 2)

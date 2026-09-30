@@ -22,7 +22,7 @@ class GeometryMode(BaseMode):
     def __init__(self, theme: ThemePalette, config, monitor_index: int = 0):
         super().__init__(theme, config, monitor_index)
         self.fade_in = 0.0
-        self.target_fps = 60
+        self.target_fps = 40
 
         # Angles for 4D and 3D rotations
         self.angle_xw = 0.0

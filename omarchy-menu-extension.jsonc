@@ -104,6 +104,41 @@
     "checked": "omarchy-screensaver-select is-mode aurora",
     "action": "omarchy-screensaver-select mode aurora"
   },
+  "style.screensaver.modes.cyber_nexus": {
+    "icon": "󱊈",
+    "label": "Cyber Nexus",
+    "detail": "Holographic neural mesh with ambient data pulses",
+    "checked": "omarchy-screensaver-select is-mode cyber_nexus",
+    "action": "omarchy-screensaver-select mode cyber_nexus"
+  },
+  "style.screensaver.modes.synthwave": {
+    "icon": "󰋜",
+    "label": "Synthwave Horizon",
+    "detail": "Infinite 3D perspective retro wireframe grid with neon sun",
+    "checked": "omarchy-screensaver-select is-mode synthwave",
+    "action": "omarchy-screensaver-select mode synthwave"
+  },
+  "style.screensaver.modes.quantum_helix": {
+    "icon": "󰡏",
+    "label": "Quantum Helix",
+    "detail": "Double helix strands with orbital energy particles",
+    "checked": "omarchy-screensaver-select is-mode quantum_helix",
+    "action": "omarchy-screensaver-select mode quantum_helix"
+  },
+  "style.screensaver.modes.topography": {
+    "icon": "󰍹",
+    "label": "Topography Map",
+    "detail": "Subdued contour lines oscillating like a terrain elevation map",
+    "checked": "omarchy-screensaver-select is-mode topography",
+    "action": "omarchy-screensaver-select mode topography"
+  },
+  "style.screensaver.modes.celestial_orbit": {
+    "icon": "󱐋",
+    "label": "Celestial Orbit",
+    "detail": "Central gravitational body with multi-orbital planetary system",
+    "checked": "omarchy-screensaver-select is-mode celestial_orbit",
+    "action": "omarchy-screensaver-select mode celestial_orbit"
+  },
   "style.screensaver.rotation": {
     "icon": "󰑖",
     "label": "Auto-Rotation Mode",
