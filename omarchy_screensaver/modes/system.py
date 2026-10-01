@@ -1,7 +1,7 @@
 """Mode 4: System Telemetry HUD Screensaver Mode.
 
-A serene, borderless holographic HUD featuring floating circular tachometers,
-organic Bezier telemetry curves, live GPU utilization, multi-channel power draw,
+A serene, borderless holographic HUD featuring three floating speedometer tachometers
+(CPU, GPU, and Memory), an organic Bezier system load wave, multi-channel power draw,
 and complete OLED burn-in protection with spacious, theme-synchronized styling.
 """
 
@@ -50,7 +50,7 @@ class SystemDashboardMode(BaseMode):
             self.eased_cpu_power += (metrics.cpu_power_w - self.eased_cpu_power) * min(1.0, dt * 4.5)
             self.eased_gpu_power += (metrics.gpu_power_w - self.eased_gpu_power) * min(1.0, dt * 4.5)
 
-    def _draw_radial_gauge(
+    def _draw_speedometer_gauge(
         self,
         cr: cairo.Context,
         cx: float,
@@ -60,52 +60,102 @@ class SystemDashboardMode(BaseMode):
         label: str,
         value_str: str,
         sub_str: str,
+        bottom_badge: Optional[str],
         gauge_color: Tuple[float, float, float, float],
         fade: float,
     ):
-        """Render a floating circular arc tachometer without background cards."""
+        """Render a relaxing, borderless speedometer tachometer strictly in theme colors."""
         start_angle = 0.75 * math.pi
         total_angle = 1.5 * math.pi
         norm = max(0.0, min(100.0, percent)) / 100.0
         active_end = start_angle + total_angle * norm
 
-        # Faint background track arc
-        cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.surface, 0.40 * fade)))
-        cr.set_line_width(5.5)
+        # 1. Faint background track arc
+        cr.new_path()
+        cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.surface, 0.45 * fade)))
+        cr.set_line_width(4.5)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.arc(cx, cy, radius, start_angle, start_angle + total_angle)
         cr.stroke()
 
-        # Active glowing arc
-        if norm > 0.01:
+        # 2. Delicate radial hash tick marks (speedometer ticks in theme tones)
+        num_ticks = 10
+        for i in range(num_ticks + 1):
+            frac = i / num_ticks
+            ang = start_angle + total_angle * frac
+
+            r_out = radius + 2.0
+            r_in = r_out - 6.0
+            x1 = cx + math.cos(ang) * r_in
+            y1 = cy + math.sin(ang) * r_in
+            x2 = cx + math.cos(ang) * r_out
+            y2 = cy + math.sin(ang) * r_out
+
+            cr.new_path()
+            cr.move_to(x1, y1)
+            cr.line_to(x2, y2)
+            tick_col = (
+                with_alpha(gauge_color, 0.75 * fade)
+                if frac <= norm
+                else with_alpha(self.theme.surface, 0.65 * fade)
+            )
+            cr.set_source_rgba(*self.oled_color(tick_col))
+            cr.set_line_width(1.4)
+            cr.stroke()
+
+            # Intermediate minor ticks
+            if i < num_ticks:
+                m_frac = (i + 0.5) / num_ticks
+                m_ang = start_angle + total_angle * m_frac
+                mx1 = cx + math.cos(m_ang) * (radius - 1.5)
+                my1 = cy + math.sin(m_ang) * (radius - 1.5)
+                mx2 = cx + math.cos(m_ang) * (radius + 2.0)
+                my2 = cy + math.sin(m_ang) * (radius + 2.0)
+                cr.new_path()
+                cr.move_to(mx1, my1)
+                cr.line_to(mx2, my2)
+                m_col = (
+                    with_alpha(gauge_color, 0.40 * fade)
+                    if m_frac <= norm
+                    else with_alpha(self.theme.surface, 0.35 * fade)
+                )
+                cr.set_source_rgba(*self.oled_color(m_col))
+                cr.set_line_width(0.9)
+                cr.stroke()
+
+        # 3. Active glowing speed arc
+        if norm > 0.005:
             # Soft aura glow pass
+            cr.new_path()
             cr.set_source_rgba(*self.oled_color(with_alpha(gauge_color, 0.22 * fade)))
-            cr.set_line_width(12.0)
+            cr.set_line_width(11.0)
             cr.arc(cx, cy, radius, start_angle, active_end)
             cr.stroke()
 
-            # Crisp main arc
+            # Crisp main arc ribbon
+            cr.new_path()
             cr.set_source_rgba(*self.oled_color(with_alpha(gauge_color, 0.95 * fade)))
-            cr.set_line_width(4.5)
+            cr.set_line_width(4.0)
+            cr.set_line_cap(cairo.LINE_CAP_ROUND)
             cr.arc(cx, cy, radius, start_angle, active_end)
             cr.stroke()
 
-            # Luminous tip node
+            # Glowing tip node
             tip_x = cx + math.cos(active_end) * radius
             tip_y = cy + math.sin(active_end) * radius
             cr.new_path()
-            cr.arc(tip_x, tip_y, 3.0, 0, 2 * math.pi)
+            cr.arc(tip_x, tip_y, 3.2, 0, 2 * math.pi)
             cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.bright_foreground, 0.95 * fade)))
             cr.fill()
 
-        # Center typography with generous breathing space
+        # 4. Center typography with calm, spacious breathing room
         self.draw_text(
             cr,
             label,
             cx,
-            cy - 26.0,
+            cy - 25.0,
             self.FONT_MONO,
-            11.0,
+            10.5,
             self.oled_color(with_alpha(self.theme.muted, fade * 0.85)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -114,9 +164,9 @@ class SystemDashboardMode(BaseMode):
             cr,
             value_str,
             cx,
-            cy + 2.0,
+            cy + 3.0,
             self.FONT_MONO,
-            23.0,
+            22.0,
             self.oled_color(with_alpha(self.theme.bright_foreground, fade)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -128,8 +178,22 @@ class SystemDashboardMode(BaseMode):
                 cx,
                 cy + 28.0,
                 self.FONT_MONO,
-                10.5,
+                10.0,
                 self.oled_color(with_alpha(gauge_color, fade * 0.90)),
+                align="center",
+                weight=Pango.Weight.NORMAL,
+            )
+
+        # 5. Bottom sub-badge under gauge (calm, spacious, borderless)
+        if bottom_badge:
+            self.draw_text(
+                cr,
+                bottom_badge,
+                cx,
+                cy + radius + 18.0,
+                self.FONT_MONO,
+                8.5,
+                self.oled_color(with_alpha(self.theme.muted, fade * 0.75)),
                 align="center",
                 weight=Pango.Weight.NORMAL,
             )
@@ -164,7 +228,7 @@ class SystemDashboardMode(BaseMode):
             py = base_y - norm * (h - 6.0)
             coords.append((px, py))
 
-        # Build smooth fill path down to baseline
+        # Build smooth path down to baseline
         cr.new_path()
         cr.move_to(x, base_y)
         cr.line_to(coords[0][0], coords[0][1])
@@ -179,7 +243,7 @@ class SystemDashboardMode(BaseMode):
         cr.close_path()
 
         fill_grad = cairo.LinearGradient(x, y, x, base_y)
-        fill_grad.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(color, 0.22 * fade)))
+        fill_grad.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(color, 0.20 * fade)))
         fill_grad.add_color_stop_rgba(1.0, *self.oled_color(with_alpha(color, 0.0)))
         cr.set_source(fill_grad)
         cr.fill()
@@ -193,7 +257,7 @@ class SystemDashboardMode(BaseMode):
             cx_mid = (p0[0] + p1[0]) * 0.5
             cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
 
-        cr.set_source_rgba(*self.oled_color(with_alpha(color, 0.95 * fade)))
+        cr.set_source_rgba(*self.oled_color(with_alpha(color, 0.92 * fade)))
         cr.set_line_width(1.8)
         cr.stroke()
 
@@ -215,7 +279,7 @@ class SystemDashboardMode(BaseMode):
         time_str = time.strftime("%H:%M:%S" if self.config.clock_format_24h else "%I:%M:%S %p", now)
         date_str = time.strftime("%A · %d %B %Y", now).upper()
 
-        top_y = cy - 250.0
+        top_y = cy - 280.0
 
         # Floating holographic header
         self.draw_text(
@@ -247,14 +311,18 @@ class SystemDashboardMode(BaseMode):
 
         m = self.metrics
 
-        # 1. Radial Tachometer Gauges (Left: CPU, Right: RAM)
-        gauge_radius = min(80.0, width * 0.08)
-        gauge_offset_x = min(350.0, width * 0.28)
-        gauge_y = top_y + 185.0
+        # 1. Tri-Gauge Instrument Cluster (CPU, GPU, RAM) with Speedometer Styling
+        gauge_radius = min(78.0, width * 0.078)
+        gauge_offset_x = min(360.0, width * 0.28)
+        gauge_y = top_y + 175.0
 
-        # Left Gauge: CPU
+        cpu_color = self.theme.accent
+        gpu_color = self.theme.primary
+        ram_color = self.theme.secondary if self.theme.secondary != self.theme.accent else self.theme.primary
+
+        # Left: CPU Speedometer Gauge
         cpu_sub = f"{m.cpu_freq_avg_ghz:.2f} GHz · {m.cpu_temp_c:.0f}°C"
-        self._draw_radial_gauge(
+        self._draw_speedometer_gauge(
             cr,
             cx - gauge_offset_x,
             gauge_y,
@@ -263,14 +331,32 @@ class SystemDashboardMode(BaseMode):
             "CPU LOAD",
             f"{self.eased_cpu:04.1f}%",
             cpu_sub,
-            self.theme.accent,
+            m.cpu_model,
+            cpu_color,
             fade,
         )
 
-        # Right Gauge: Memory
+        # Center: GPU Speedometer Gauge
+        gpu_sub = f"{m.gpu_clock_mhz:.0f} MHz · {m.gpu_temp_c:.0f}°C"
+        gpu_badge = f"VRAM {m.gpu_vram_used_mib:.0f}/{m.gpu_vram_total_mib:.0f} MB  ·  GTT {m.gpu_gtt_used_gib:.1f} GB"
+        self._draw_speedometer_gauge(
+            cr,
+            cx,
+            gauge_y,
+            gauge_radius,
+            self.eased_gpu,
+            "GPU LOAD",
+            f"{self.eased_gpu:04.1f}%",
+            gpu_sub,
+            gpu_badge,
+            gpu_color,
+            fade,
+        )
+
+        # Right: RAM Speedometer Gauge
         mem_sub = f"{m.mem_used_gib:.1f} / {m.mem_total_gib:.1f} GB"
-        ram_color = self.theme.secondary if self.theme.secondary != self.theme.accent else self.theme.primary
-        self._draw_radial_gauge(
+        mem_badge = f"FREE {m.mem_avail_gib:.1f}G  ·  SWAP {m.swap_used_gib:.1f}G ({m.swap_percent:.0f}%)"
+        self._draw_speedometer_gauge(
             cr,
             cx + gauge_offset_x,
             gauge_y,
@@ -279,23 +365,24 @@ class SystemDashboardMode(BaseMode):
             "MEMORY",
             f"{self.eased_mem:04.1f}%",
             mem_sub,
+            mem_badge,
             ram_color,
             fade,
         )
 
-        # 2. Central Bezier CPU History Graph
-        chart_w = min(420.0, width * 0.36)
-        chart_h = 100.0
+        # 2. Central Live Bezier Telemetry Sparkline with generous vertical margin
+        chart_w = min(620.0, width * 0.45)
+        chart_h = 75.0
         chart_x = cx - chart_w * 0.5
-        chart_y = gauge_y - chart_h * 0.5 + 4.0
+        chart_y = gauge_y + gauge_radius + 56.0
 
         self.draw_text(
             cr,
-            "CPU LOAD HISTORY",
+            "SYSTEM LOAD SPECTRUM",
             cx,
             chart_y - 14.0,
             self.FONT_MONO,
-            10.0,
+            9.5,
             self.oled_color(with_alpha(self.theme.muted, fade * 0.8)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -312,19 +399,19 @@ class SystemDashboardMode(BaseMode):
             fade,
         )
 
-        # 3. Spacious Telemetry Stream Below Gauges
-        stream_y = gauge_y + gauge_radius + 64.0
-
-        # Row 1: GPU & Multi-Channel Power Telemetry
-        gpu_power_str = (
-            f"GPU: {self.eased_gpu:04.1f}% · {m.gpu_clock_mhz:.0f} MHz · {m.gpu_temp_c:.0f}°C   ·   "
-            f"POWER: CPU {self.eased_cpu_power:.1f}W   GPU {self.eased_gpu_power:.1f}W   TOTAL {self.eased_soc_power:.1f}W"
+        # 3. Multi-Channel Power Draw HUD (Theme Colored, Relaxed & Spacious)
+        power_y = chart_y + chart_h + 32.0
+        power_str = (
+            f"POWER DRAW:   CPU {self.eased_cpu_power:.1f}W   ·   "
+            f"GPU {self.eased_gpu_power:.1f}W   ·   "
+            f"TOTAL SoC {self.eased_soc_power:.1f}W   ·   "
+            f"BATTERY {m.battery_percent}% [{m.battery_status}] {m.bat_power_w:.1f}W"
         )
         self.draw_text(
             cr,
-            gpu_power_str,
+            power_str,
             cx,
-            stream_y,
+            power_y,
             self.FONT_MONO,
             12.0,
             self.oled_color(with_alpha(self.theme.foreground, fade * 0.90)),
@@ -332,7 +419,8 @@ class SystemDashboardMode(BaseMode):
             weight=Pango.Weight.NORMAL,
         )
 
-        # Row 2: Storage, Network, and Battery
+        # 4. Storage, Network, and Thermals
+        stream_y = power_y + 32.0
         rx_fmt = (
             f"{m.net_rx_rate / (1024 * 1024):.1f}M"
             if m.net_rx_rate >= 1024 * 1024
@@ -343,15 +431,16 @@ class SystemDashboardMode(BaseMode):
             if m.net_tx_rate >= 1024 * 1024
             else f"{m.net_tx_rate / 1024:.0f}K"
         )
-        net_str = f"NET ({m.primary_net_iface}) ↓ {rx_fmt}/s ↑ {tx_fmt}/s"
-        disk_str = f"DISK {m.disk_used_gib:.1f}/{m.disk_total_gib:.1f} GB ({m.disk_percent:.0f}%)"
-        bat_str = f"BAT {m.battery_percent}% [{m.battery_status}]"
-        row2_str = f"{disk_str}   ·   {net_str}   ·   {bat_str}"
+        row2_str = (
+            f"STORAGE {m.disk_used_gib:.1f}/{m.disk_total_gib:.1f} GB ({m.disk_percent:.0f}%)   ·   "
+            f"NET ({m.primary_net_iface}) ↓ {rx_fmt}/s ↑ {tx_fmt}/s   ·   "
+            f"NVMe SSD {m.nvme_temp_c:.0f}°C"
+        )
         self.draw_text(
             cr,
             row2_str,
             cx,
-            stream_y + 32.0,
+            stream_y,
             self.FONT_MONO,
             11.0,
             self.oled_color(with_alpha(self.theme.muted, fade * 0.85)),
@@ -359,16 +448,16 @@ class SystemDashboardMode(BaseMode):
             weight=Pango.Weight.NORMAL,
         )
 
-        # Row 3: Kernel, Uptime, Hardware Thermals, and User
+        # 5. OS Diagnostics Stream
         row3_str = (
             f"KERNEL {m.kernel}   ·   UPTIME {m.uptime_str}   ·   "
-            f"NVMe {m.nvme_temp_c:.0f}°C   ·   USER {m.user}@{m.hostname}"
+            f"USER {m.user}@{m.hostname}"
         )
         self.draw_text(
             cr,
             row3_str,
             cx,
-            stream_y + 60.0,
+            stream_y + 26.0,
             self.FONT_MONO,
             10.0,
             self.oled_color(with_alpha(self.theme.muted, fade * 0.65)),
