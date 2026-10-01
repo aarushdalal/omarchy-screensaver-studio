@@ -21,7 +21,7 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
   - `warp`: Relativistic 3D starfield hyperspace jump with speed streaks and depth scaling.
   - `geometry`: Hypnotic 4D rotating hypercube (tesseract) with depth cueing and chromatic glow.
   - `singularity`: Kerr rotating black hole with relativistic Doppler-beamed accretion disk.
-  - `system`: Holographic telemetry HUD with radial arc tachometers and live Bezier sparklines.
+  - `system`: Digital Cockpit Speedometer Telemetry Cluster — Automotive sports car instrument panel with precision sweeping needles, GPU & CPU tachometers, redline zones, multi-channel power draw (CPU, GPU, SoC, Battery), and dual live Bezier sparklines.
   - `terminal`: Borderless diagnostic waterfall streaming live Linux kernel and procfs metrics.
   - `visualizer`: Floating reactive equalizer bars with real-time PipeWire spectrum and MPRIS metadata.
   - `aurora`: Multi-octave harmonic spline ribbons with celestial stardust motes.
@@ -96,7 +96,7 @@ This project contains native Python GTK4 rendering code and optional C extension
   - `geometry`: 4D rotating hypercube (tesseract) with depth cueing
   - `singularity`: Kerr black hole with Doppler-beamed accretion disk (220 particles)
   - `terminal`: Borderless holographic diagnostic stream
-  - `system`: Radial arc tachometers and Bezier telemetry HUD
+  - `system`: Digital Cockpit Speedometer Telemetry Cluster with GPU/CPU tachometers, power draw, and VRAM HUD
   - `visualizer`: Real-time PipeWire audio spectrum & MPRIS metadata
   - `aurora`: Harmonic Perlin spline ribbons with stardust motes (20 FPS smooth flow)
   - `cyber_nexus`: Subtle glowing neural nodes connected by pulsing data lines in deep OLED black

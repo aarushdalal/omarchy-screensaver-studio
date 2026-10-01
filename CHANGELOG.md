@@ -5,6 +5,20 @@ All notable changes to `omarchy-screensaver-studio` will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-01
+
+### Added
+- **Digital Cockpit Speedometer Telemetry Cluster**: Complete visual overhaul of `system` mode into an automotive sports car instrument panel featuring:
+  - **GPU Speedometer Hero Dial**: High-resolution 270° radial speedometer with dynamic neon speed arc, precision sweeping needle, illuminated needle boss, and glowing redline danger zone (80% - 100%).
+  - **Live GPU Telemetry Stream**: Accurate GPU utilization percentage, VRAM allocation (used/total MB), GTT shared memory, GPU clock frequency (MHz), and GPU core temperature (°C) via cached direct sysfs queries.
+  - **CPU Tachometer Dial**: Synchronized RPM/Load instrument tracking CPU load, multi-core average & max clock frequencies (GHz), core temperature (k10temp/Tctl), and CPU power draw.
+  - **Multi-Channel Power Draw Console**: Real-time multi-channel power metrics displaying live CPU power (W), GPU power (W), SoC package total (PPT Watts), and Battery charge/discharge power (W).
+  - **Automotive Motion Physics**: Eased spring-damped needle acceleration, high-RPM mechanical micro-vibrations (>75% load), and 3-second peak-hold indicators.
+  - **Dedicated Hardware Badges**: Clean pill containers beneath each dial displaying CPU model, VRAM/GTT memory, and Swap memory without gauge dial clutter.
+  - **Dual Live Bezier Telemetry Sparklines**: Simultaneous rolling history oscilloscopes for both CPU load and GPU load.
+  - **Expanded Hardware Telemetry**: Added NVMe SSD temperature monitoring, network throughput, Linux kernel release, and system uptime.
+- **Cross-Mode Telemetry Upgrades**: Added live GPU utilization and power draw metrics to both `clock` and `terminal` screensaver modes.
+
 ## [1.2.0] - 2026-09-30
 
 ### Performance & Optimization

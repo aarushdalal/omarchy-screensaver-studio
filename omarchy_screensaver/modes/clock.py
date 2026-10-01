@@ -180,9 +180,10 @@ class ClockMode(BaseMode):
             m = self.metrics
             telem_y = clock_y + h_h + (62.0 if self.config.clock_show_date else 32.0)
 
-            # Minimalist dot-separated floating row
+            # Minimalist dot-separated floating row with GPU & Power
             telem_text = (
                 f"CPU {m.cpu_percent:04.1f}%   ·   "
+                f"GPU {m.gpu_percent:04.1f}% ({m.soc_power_w:.0f}W)   ·   "
                 f"RAM {m.mem_used_gib:.1f}G   ·   "
                 f"BAT {m.battery_percent}%   ·   "
                 f"UP {m.uptime_str}"

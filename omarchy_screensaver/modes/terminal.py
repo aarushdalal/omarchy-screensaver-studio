@@ -130,9 +130,14 @@ class TerminalMode(BaseMode):
             rx_str = f"{m.net_rx_rate / (1024 * 1024):.1f} MB/s" if m.net_rx_rate >= 1024 * 1024 else f"{m.net_rx_rate / 1024:.0f} KB/s"
             tx_str = f"{m.net_tx_rate / (1024 * 1024):.1f} MB/s" if m.net_tx_rate >= 1024 * 1024 else f"{m.net_tx_rate / 1024:.0f} KB/s"
 
+            gpu_filled = max(0, min(bar_len, int((m.gpu_percent / 100.0) * bar_len)))
+            gpu_bar_str = "■" * gpu_filled + "·" * (bar_len - gpu_filled)
+
             stats = [
-                ("CPU LOAD", f"{m.cpu_percent:04.1f}%  [{bar_str}]  {m.cpu_model}"),
-                ("MEMORY", f"{m.mem_used_gib:.1f} / {m.mem_total_gib:.1f} GiB ({m.mem_percent:.1f}%)"),
+                ("CPU LOAD", f"{m.cpu_percent:04.1f}%  [{bar_str}]  {m.cpu_model} ({m.cpu_freq_avg_ghz:.2f} GHz)"),
+                ("GPU LOAD", f"{m.gpu_percent:04.1f}%  [{gpu_bar_str}]  {m.gpu_name} ({m.gpu_clock_mhz:.0f} MHz, {m.gpu_temp_c:.0f}°C)"),
+                ("POWER DRAW", f"CPU {m.cpu_power_w:.1f}W   │   GPU {m.gpu_power_w:.1f}W   │   SoC {m.soc_power_w:.1f}W   │   BAT {m.bat_power_w:.1f}W"),
+                ("MEMORY", f"{m.mem_used_gib:.1f} / {m.mem_total_gib:.1f} GiB ({m.mem_percent:.1f}%)   │   SWAP {m.swap_used_gib:.1f}G"),
                 ("BATTERY", f"{m.battery_percent}% [{m.battery_status}, AC={'ONLINE' if m.ac_online else 'OFFLINE'}]"),
                 ("NETWORK", f"RX {rx_str}   │   TX {tx_str}   ({m.primary_net_iface})"),
                 ("UPTIME", f"{m.uptime_str}"),
