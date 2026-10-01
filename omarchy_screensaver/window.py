@@ -118,7 +118,14 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
             return True
 
         if self.is_ambient:
-            # In ambient study mode: NO key press closes it (only shortcut can toggle it off)
+            # In ambient study mode: 't' / 'T' toggles audio visualizer if media is playing
+            if keyval in (Gdk.KEY_t, Gdk.KEY_T):
+                app = self.get_application()
+                if hasattr(app, "toggle_visualizer"):
+                    app.toggle_visualizer()
+                return True
+
+            # In ambient study mode: NO other key press closes it (only shortcut can toggle it off)
             if getattr(self.config, "ambient_exit_on_key_press", False):
                 self.get_application().dismiss()
                 return True

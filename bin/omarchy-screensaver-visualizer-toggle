@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-screensaver-visualizer-toggle: Toggle audio visualizer in study mode
+# ==============================================================================
+# - Only active when ambient study mode (SUPER + I) is currently running
+# - Toggles between active study mode and audio visualizer if audio is playing
+# - Bound to "SUPER + T" or triggered via keypress 't' while in study mode
+# ==============================================================================
+# omarchy:summary=Toggle audio visualizer in ambient study mode
+# omarchy:group=system
+# omarchy:name=screensaver-visualizer-toggle
+
+set -euo pipefail
+
+PID_FILE="$HOME/.config/omarchy-screensaver/screensaver.pid"
+MARKER_FILE="$HOME/.local/state/omarchy/indicators/stay-awake-screensaver"
+
+if [[ ! -f "$PID_FILE" ]]; then
+  exit 0
+fi
+
+PID=$(cat "$PID_FILE" 2>/dev/null || true)
+if [[ -z "$PID" ]] || ! kill -0 "$PID" 2>/dev/null; then
+  exit 0
+fi
+
+# Only operate if ambient study mode is currently active
+IS_AMBIENT=0
+if [[ -f "$MARKER_FILE" ]]; then
+  IS_AMBIENT=1
+elif grep -qa -- "--ambient" "/proc/$PID/cmdline" 2>/dev/null; then
+  IS_AMBIENT=1
+fi
+
+if [[ "$IS_AMBIENT" -eq 1 ]]; then
+  kill -USR1 "$PID" 2>/dev/null || true
+fi
