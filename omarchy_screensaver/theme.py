@@ -148,6 +148,12 @@ class ThemePalette:
         self.warning = hex_to_rgba(self.hex_yellow)
         self.success = hex_to_rgba(self.hex_green)
         self.info = hex_to_rgba(self.hex_cyan)
+        self.cyan = hex_to_rgba(self.hex_cyan)
+        self.magenta = hex_to_rgba(self.hex_magenta)
+        self.blue = hex_to_rgba(self.hex_blue)
+        self.green = hex_to_rgba(self.hex_green)
+        self.yellow = hex_to_rgba(self.hex_yellow)
+        self.red = hex_to_rgba(self.hex_red)
 
         # Derived transparent variants for glowing and overlays
         self.bg_glow = with_alpha(self.accent, 0.08)
@@ -357,13 +363,23 @@ class ThemeManager:
 
             self._last_theme_name = theme_name
         else:
-            # Custom theme file from ~/.config/omarchy-screensaver/themes/<name>.toml
+            # Support custom theme file, installed Omarchy system theme, or direct path
             theme_file = os.path.join(self.custom_themes_dir, f"{self.theme_setting}.toml")
-            if os.path.exists(theme_file):
-                self._watch_path = theme_file
+            omarchy_theme_file = os.path.expanduser(f"~/.local/share/omarchy/themes/{self.theme_setting}/colors.toml")
+
+            target_file = None
+            if os.path.isfile(self.theme_setting):
+                target_file = self.theme_setting
+            elif os.path.isfile(theme_file):
+                target_file = theme_file
+            elif os.path.isfile(omarchy_theme_file):
+                target_file = omarchy_theme_file
+
+            if target_file:
+                self._watch_path = target_file
                 try:
-                    self._last_mtime = os.path.getmtime(theme_file)
-                    with open(theme_file, "rb") as f:
+                    self._last_mtime = os.path.getmtime(target_file)
+                    with open(target_file, "rb") as f:
                         data = tomllib.load(f)
                         raw_colors = data.get("colors", data)
                         theme_name = data.get("name", self.theme_setting)

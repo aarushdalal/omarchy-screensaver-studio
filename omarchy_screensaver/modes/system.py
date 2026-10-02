@@ -63,7 +63,6 @@ class SystemDashboardMode(BaseMode):
         bottom_badge: Optional[str],
         gauge_color: Tuple[float, float, float, float],
         fade: float,
-        scale: float = 1.0,
     ):
         """Render a relaxing, borderless speedometer tachometer strictly in theme colors."""
         start_angle = 0.75 * math.pi
@@ -71,25 +70,33 @@ class SystemDashboardMode(BaseMode):
         norm = max(0.0, min(100.0, percent)) / 100.0
         active_end = start_angle + total_angle * norm
 
-        # 1. Faint background track arc
+        # 1. Subtle inner dial accent ring (minimalist instrument depth)
+        inner_r = radius * 0.74
+        cr.new_path()
+        cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.45)))
+        cr.set_line_width(1.0)
+        cr.arc(cx, cy, inner_r, start_angle, start_angle + total_angle)
+        cr.stroke()
+
+        # 2. Main background track arc
         cr.new_path()
         cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade)))
-        cr.set_line_width(4.5 * scale)
+        cr.set_line_width(4.5)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.arc(cx, cy, radius, start_angle, start_angle + total_angle)
         cr.stroke()
 
-        # 2. Delicate radial hash tick marks (speedometer ticks in theme tones)
-        num_ticks = 10
+        # 3. Delicate radial hash tick marks (12 automotive tachometer divisions)
+        num_ticks = 12
         inactive_tick_col = self.theme.track_tick_inactive_color(fade)
-        active_tick_col = with_alpha(gauge_color, 0.85 * fade)
+        active_tick_col = with_alpha(gauge_color, 0.88 * fade)
 
         for i in range(num_ticks + 1):
             frac = i / num_ticks
             ang = start_angle + total_angle * frac
 
-            r_out = radius + 2.0 * scale
-            r_in = r_out - 6.0 * scale
+            r_out = radius + 2.5
+            r_in = r_out - 6.5
             x1 = cx + math.cos(ang) * r_in
             y1 = cy + math.sin(ang) * r_in
             x2 = cx + math.cos(ang) * r_out
@@ -100,62 +107,66 @@ class SystemDashboardMode(BaseMode):
             cr.line_to(x2, y2)
             tick_col = active_tick_col if frac <= norm else inactive_tick_col
             cr.set_source_rgba(*self.oled_color(tick_col))
-            cr.set_line_width(1.4 * scale)
+            cr.set_line_width(1.5)
             cr.stroke()
 
-            # Intermediate minor ticks
+            # Minor mid-ticks
             if i < num_ticks:
                 m_frac = (i + 0.5) / num_ticks
                 m_ang = start_angle + total_angle * m_frac
-                mx1 = cx + math.cos(m_ang) * (radius - 1.5 * scale)
-                my1 = cy + math.sin(m_ang) * (radius - 1.5 * scale)
-                mx2 = cx + math.cos(m_ang) * (radius + 2.0 * scale)
-                my2 = cy + math.sin(m_ang) * (radius + 2.0 * scale)
+                mx1 = cx + math.cos(m_ang) * (radius - 2.0)
+                my1 = cy + math.sin(m_ang) * (radius - 2.0)
+                mx2 = cx + math.cos(m_ang) * (radius + 2.5)
+                my2 = cy + math.sin(m_ang) * (radius + 2.5)
                 cr.new_path()
                 cr.move_to(mx1, my1)
                 cr.line_to(mx2, my2)
                 m_col = (
                     with_alpha(gauge_color, 0.45 * fade)
                     if m_frac <= norm
-                    else with_alpha(inactive_tick_col, inactive_tick_col[3] * 0.6)
+                    else with_alpha(inactive_tick_col, inactive_tick_col[3] * 0.55)
                 )
                 cr.set_source_rgba(*self.oled_color(m_col))
-                cr.set_line_width(0.9 * scale)
+                cr.set_line_width(0.9)
                 cr.stroke()
 
-        # 3. Active glowing speed arc
+        # 4. Active glowing speed arc
         if norm > 0.005:
             # Soft aura glow pass
             cr.new_path()
             cr.set_source_rgba(*self.oled_color(with_alpha(gauge_color, 0.22 * fade)))
-            cr.set_line_width(11.0 * scale)
+            cr.set_line_width(11.0)
             cr.arc(cx, cy, radius, start_angle, active_end)
             cr.stroke()
 
             # Crisp main arc ribbon
             cr.new_path()
             cr.set_source_rgba(*self.oled_color(with_alpha(gauge_color, 0.95 * fade)))
-            cr.set_line_width(4.0 * scale)
+            cr.set_line_width(4.0)
             cr.set_line_cap(cairo.LINE_CAP_ROUND)
             cr.arc(cx, cy, radius, start_angle, active_end)
             cr.stroke()
 
-            # Glowing tip node
+            # Glowing tip node with soft halo
             tip_x = cx + math.cos(active_end) * radius
             tip_y = cy + math.sin(active_end) * radius
             cr.new_path()
-            cr.arc(tip_x, tip_y, 3.2 * scale, 0, 2 * math.pi)
+            cr.arc(tip_x, tip_y, 4.5, 0, 2 * math.pi)
+            cr.set_source_rgba(*self.oled_color(with_alpha(gauge_color, 0.40 * fade)))
+            cr.fill()
+            cr.new_path()
+            cr.arc(tip_x, tip_y, 2.6, 0, 2 * math.pi)
             cr.set_source_rgba(*self.oled_color(self.theme.text_primary_color(fade)))
             cr.fill()
 
-        # 4. Center typography with calm, spacious breathing room
+        # 5. Center typography with calm, spacious breathing room
         self.draw_text(
             cr,
             label,
             cx,
-            cy - 25.0 * scale,
+            cy - 27.0,
             self.FONT_MONO,
-            10.5 * scale,
+            10.5,
             self.oled_color(self.theme.text_muted_color(fade * 0.90)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -164,9 +175,9 @@ class SystemDashboardMode(BaseMode):
             cr,
             value_str,
             cx,
-            cy + 3.0 * scale,
+            cy + 4.0,
             self.FONT_MONO,
-            22.0 * scale,
+            24.0,
             self.oled_color(self.theme.text_primary_color(fade)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -176,101 +187,205 @@ class SystemDashboardMode(BaseMode):
                 cr,
                 sub_str,
                 cx,
-                cy + 28.0 * scale,
+                cy + 31.0,
                 self.FONT_MONO,
-                10.0 * scale,
+                10.5,
                 self.oled_color(with_alpha(gauge_color, fade * 0.95)),
                 align="center",
                 weight=Pango.Weight.NORMAL,
             )
 
-        # 5. Bottom sub-badge under gauge (calm, spacious, borderless)
+        # 6. Bottom sub-badge under gauge (calm, spacious, borderless)
         if bottom_badge:
             self.draw_text(
                 cr,
                 bottom_badge,
                 cx,
-                cy + radius + 20.0 * scale,
+                cy + radius + 22.0,
                 self.FONT_MONO,
-                8.5 * scale,
+                9.0,
                 self.oled_color(self.theme.text_muted_color(fade * 0.85)),
                 align="center",
                 weight=Pango.Weight.NORMAL,
             )
 
-    def _draw_flowing_sparkline(
+    def _draw_dual_sparkline(
         self,
         cr: cairo.Context,
         x: float,
         y: float,
         w: float,
         h: float,
-        history: List[float],
+        cpu_history: List[float],
+        gpu_history: List[float],
         max_val: float,
-        color: Tuple[float, float, float, float],
+        cpu_color: Tuple[float, float, float, float],
+        gpu_color: Tuple[float, float, float, float],
         fade: float,
-        scale: float = 1.0,
     ):
-        """Draw an organic Bezier-curved telemetry graph."""
-        history_list = list(history) if history else [0.0]
+        """Draw dual flowing Bezier telemetry graphs for CPU and GPU with subtle time grid."""
         max_history = 60
-        if len(history_list) < max_history:
-            initial_val = history_list[0] if history_list else 0.0
-            points = [initial_val] * (max_history - len(history_list)) + history_list
-        else:
-            points = history_list[-max_history:]
 
-        n = len(points)
-        dx = w / max(1, n - 1)
-        safe_max = max(1.0, max_val)
+        def _prepare_points(hist: List[float]) -> List[float]:
+            hl = list(hist) if hist else [0.0]
+            if len(hl) < max_history:
+                init_val = hl[0] if hl else 0.0
+                return [init_val] * (max_history - len(hl)) + hl
+            return hl[-max_history:]
+
+        cpu_pts = _prepare_points(cpu_history)
+        gpu_pts = _prepare_points(gpu_history)
+
         base_y = y + h
+        safe_max = max(1.0, max_val)
 
-        # Calculate coordinates
-        coords = []
-        for i, val in enumerate(points):
-            norm = max(0.0, min(1.0, val / safe_max))
-            px = x + i * dx
-            py = base_y - norm * (h - 6.0 * scale)
-            coords.append((px, py))
-
-        # Build smooth path down to baseline
+        # 1. Subtle, minimalist reference grid (50% dashed line and solid baseline)
+        # Baseline
         cr.new_path()
+        cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.50)))
+        cr.set_line_width(1.0)
         cr.move_to(x, base_y)
-        cr.line_to(coords[0][0], coords[0][1])
-
-        for i in range(len(coords) - 1):
-            p0 = coords[i]
-            p1 = coords[i + 1]
-            cx_mid = (p0[0] + p1[0]) * 0.5
-            cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
-
         cr.line_to(x + w, base_y)
-        cr.close_path()
-
-        fill_grad = cairo.LinearGradient(x, y, x, base_y)
-        fill_alpha = 0.20 if getattr(self.theme, "is_dark", True) else 0.18
-        fill_grad.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(color, fill_alpha * fade)))
-        fill_grad.add_color_stop_rgba(1.0, *self.oled_color(with_alpha(color, 0.0)))
-        cr.set_source(fill_grad)
-        cr.fill()
-
-        # Stroke glowing curve
-        cr.new_path()
-        cr.move_to(coords[0][0], coords[0][1])
-        for i in range(len(coords) - 1):
-            p0 = coords[i]
-            p1 = coords[i + 1]
-            cx_mid = (p0[0] + p1[0]) * 0.5
-            cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
-
-        cr.set_source_rgba(*self.oled_color(with_alpha(color, 0.92 * fade)))
-        cr.set_line_width(1.8 * scale)
         cr.stroke()
 
-        # Current live point node
-        last_pt = coords[-1]
+        # Midline (50% utilization guide)
+        mid_y = y + h * 0.5
         cr.new_path()
-        cr.arc(last_pt[0], last_pt[1], 3.0 * scale, 0, math.pi * 2)
+        cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.22)))
+        cr.set_line_width(0.8)
+        cr.set_dash([4.0, 6.0])
+        cr.move_to(x, mid_y)
+        cr.line_to(x + w, mid_y)
+        cr.stroke()
+        cr.set_dash([])  # reset dash pattern
+
+        # Subtle vertical division tick marks on baseline
+        for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
+            tx = x + w * frac
+            cr.new_path()
+            cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.35)))
+            cr.set_line_width(1.0)
+            cr.move_to(tx, base_y)
+            cr.line_to(tx, base_y + 4.0)
+            cr.stroke()
+
+        # Subtle timeline labels
+        self.draw_text(
+            cr,
+            "-60s",
+            x,
+            base_y + 11.0,
+            self.FONT_MONO,
+            8.0,
+            self.oled_color(self.theme.text_muted_color(fade * 0.65)),
+            align="left",
+        )
+        self.draw_text(
+            cr,
+            "NOW",
+            x + w,
+            base_y + 11.0,
+            self.FONT_MONO,
+            8.0,
+            self.oled_color(self.theme.text_muted_color(fade * 0.65)),
+            align="right",
+        )
+
+        def _calc_coords(pts: List[float]) -> List[Tuple[float, float]]:
+            n = len(pts)
+            dx = w / max(1, n - 1)
+            coords = []
+            for i, val in enumerate(pts):
+                norm = max(0.0, min(1.0, val / safe_max))
+                px = x + i * dx
+                py = base_y - norm * (h - 6.0)
+                coords.append((px, py))
+            return coords
+
+        gpu_coords = _calc_coords(gpu_pts)
+        cpu_coords = _calc_coords(cpu_pts)
+
+        # 2. Draw GPU Activity Curve (first pass)
+        fill_grad_gpu = cairo.LinearGradient(x, y, x, base_y)
+        gpu_fill_a = 0.14 if getattr(self.theme, "is_dark", True) else 0.12
+        fill_grad_gpu.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(gpu_color, gpu_fill_a * fade)))
+        fill_grad_gpu.add_color_stop_rgba(1.0, *self.oled_color(with_alpha(gpu_color, 0.0)))
+
+        cr.new_path()
+        cr.move_to(x, base_y)
+        cr.line_to(gpu_coords[0][0], gpu_coords[0][1])
+        for i in range(len(gpu_coords) - 1):
+            p0 = gpu_coords[i]
+            p1 = gpu_coords[i + 1]
+            cx_mid = (p0[0] + p1[0]) * 0.5
+            cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
+        cr.line_to(x + w, base_y)
+        cr.close_path()
+        cr.set_source(fill_grad_gpu)
+        cr.fill()
+
+        # Stroke GPU glowing curve
+        cr.new_path()
+        cr.move_to(gpu_coords[0][0], gpu_coords[0][1])
+        for i in range(len(gpu_coords) - 1):
+            p0 = gpu_coords[i]
+            p1 = gpu_coords[i + 1]
+            cx_mid = (p0[0] + p1[0]) * 0.5
+            cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
+        cr.set_source_rgba(*self.oled_color(with_alpha(gpu_color, 0.85 * fade)))
+        cr.set_line_width(1.8)
+        cr.stroke()
+
+        # GPU live node
+        last_gpu = gpu_coords[-1]
+        cr.new_path()
+        cr.arc(last_gpu[0], last_gpu[1], 4.5, 0, math.pi * 2)
+        cr.set_source_rgba(*self.oled_color(with_alpha(gpu_color, 0.35 * fade)))
+        cr.fill()
+        cr.new_path()
+        cr.arc(last_gpu[0], last_gpu[1], 2.4, 0, math.pi * 2)
+        cr.set_source_rgba(*self.oled_color(with_alpha(gpu_color, 0.95 * fade)))
+        cr.fill()
+
+        # 3. Draw CPU Activity Curve (second pass, harmonic overlay)
+        fill_grad_cpu = cairo.LinearGradient(x, y, x, base_y)
+        cpu_fill_a = 0.18 if getattr(self.theme, "is_dark", True) else 0.15
+        fill_grad_cpu.add_color_stop_rgba(0.0, *self.oled_color(with_alpha(cpu_color, cpu_fill_a * fade)))
+        fill_grad_cpu.add_color_stop_rgba(1.0, *self.oled_color(with_alpha(cpu_color, 0.0)))
+
+        cr.new_path()
+        cr.move_to(x, base_y)
+        cr.line_to(cpu_coords[0][0], cpu_coords[0][1])
+        for i in range(len(cpu_coords) - 1):
+            p0 = cpu_coords[i]
+            p1 = cpu_coords[i + 1]
+            cx_mid = (p0[0] + p1[0]) * 0.5
+            cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
+        cr.line_to(x + w, base_y)
+        cr.close_path()
+        cr.set_source(fill_grad_cpu)
+        cr.fill()
+
+        # Stroke CPU glowing curve
+        cr.new_path()
+        cr.move_to(cpu_coords[0][0], cpu_coords[0][1])
+        for i in range(len(cpu_coords) - 1):
+            p0 = cpu_coords[i]
+            p1 = cpu_coords[i + 1]
+            cx_mid = (p0[0] + p1[0]) * 0.5
+            cr.curve_to(cx_mid, p0[1], cx_mid, p1[1], p1[0], p1[1])
+        cr.set_source_rgba(*self.oled_color(with_alpha(cpu_color, 0.95 * fade)))
+        cr.set_line_width(2.0)
+        cr.stroke()
+
+        # CPU live node
+        last_cpu = cpu_coords[-1]
+        cr.new_path()
+        cr.arc(last_cpu[0], last_cpu[1], 5.0, 0, math.pi * 2)
+        cr.set_source_rgba(*self.oled_color(with_alpha(cpu_color, 0.40 * fade)))
+        cr.fill()
+        cr.new_path()
+        cr.arc(last_cpu[0], last_cpu[1], 2.6, 0, math.pi * 2)
         cr.set_source_rgba(*self.oled_color(self.theme.text_primary_color(fade)))
         cr.fill()
 
@@ -279,17 +394,22 @@ class SystemDashboardMode(BaseMode):
 
         fade = self.fade_in * self.luminance_factor
         cx = width * 0.5 + self.burn_x + self.jitter_x
-        cy = height * 0.5 + self.burn_y + self.jitter_y - 12.0
+        cy = height * 0.5 + self.burn_y + self.jitter_y - 10.0
 
-        # UI Scale factor to ensure crisp, balanced proportions across HiDPI and resolutions
-        ui_scale = min(width / 1920.0, height / 1080.0)
-        ui_scale = max(0.70, min(2.20, ui_scale))
+        # Normal, prominent sizing. GTK4 handles display DPI; do not downscale on normal desktop resolutions.
+        # Only gently scale on sub-720p screens or up-scale on 4K.
+        if height < 700.0 or width < 1200.0:
+            ui_scale = max(0.75, min(1.0, min(width / 1280.0, height / 720.0)))
+        elif width >= 2560.0 and height >= 1440.0:
+            ui_scale = min(1.5, min(width / 1920.0, height / 1080.0))
+        else:
+            ui_scale = 1.0
 
         now = time.localtime()
         time_str = time.strftime("%H:%M:%S" if self.config.clock_format_24h else "%I:%M:%S %p", now)
         date_str = time.strftime("%A · %d %B %Y", now).upper()
 
-        top_y = cy - 280.0 * ui_scale
+        top_y = cy - 252.0 * ui_scale
 
         # Floating holographic header
         self.draw_text(
@@ -298,7 +418,7 @@ class SystemDashboardMode(BaseMode):
             cx,
             top_y,
             self.FONT_MONO,
-            44.0 * ui_scale,
+            48.0 * ui_scale,
             self.oled_color(self.theme.text_primary_color(fade)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -310,7 +430,7 @@ class SystemDashboardMode(BaseMode):
             cx,
             top_y + 46.0 * ui_scale,
             self.FONT_SANS,
-            11.5 * ui_scale,
+            11.0 * ui_scale,
             self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
             align="center",
             weight=Pango.Weight.BOLD,
@@ -321,14 +441,14 @@ class SystemDashboardMode(BaseMode):
 
         m = self.metrics
 
-        # 1. Tri-Gauge Instrument Cluster (CPU, GPU, RAM) with Speedometer Styling
-        gauge_radius = min(78.0 * ui_scale, width * 0.12)
-        gauge_offset_x = min(360.0 * ui_scale, width * 0.35)
+        # 1. Tri-Gauge Instrument Cluster (CPU, GPU, RAM) with Speedometer Tachometer Styling
+        gauge_radius = min(88.0 * ui_scale, width * 0.088)
+        gauge_offset_x = min(360.0 * ui_scale, width * 0.28)
         gauge_y = top_y + 175.0 * ui_scale
 
         cpu_color = self.theme.accent
-        gpu_color = self.theme.primary
-        ram_color = self.theme.secondary if self.theme.secondary != self.theme.accent else self.theme.primary
+        gpu_color = self.theme.cyan if self.theme.cyan != self.theme.accent else self.theme.primary
+        ram_color = self.theme.secondary if self.theme.secondary not in (cpu_color, gpu_color) else self.theme.blue
 
         # Left: CPU Speedometer Gauge
         cpu_sub = (
@@ -348,7 +468,6 @@ class SystemDashboardMode(BaseMode):
             m.cpu_model,
             cpu_color,
             fade,
-            scale=ui_scale,
         )
 
         # Center: GPU Speedometer Gauge
@@ -370,7 +489,6 @@ class SystemDashboardMode(BaseMode):
             gpu_badge,
             gpu_color,
             fade,
-            scale=ui_scale,
         )
 
         # Right: RAM Speedometer Gauge
@@ -388,41 +506,67 @@ class SystemDashboardMode(BaseMode):
             mem_badge,
             ram_color,
             fade,
-            scale=ui_scale,
         )
 
-        # 2. Central Live Bezier Telemetry Sparkline with generous vertical breathing room
-        chart_w = min(620.0 * ui_scale, width * 0.45)
-        chart_h = 75.0 * ui_scale
+        # 2. Central Live Dual-Trace Bezier Telemetry Sparkline
+        chart_w = min(680.0 * ui_scale, width * 0.48)
+        chart_h = 76.0 * ui_scale
         chart_x = cx - chart_w * 0.5
         chart_y = gauge_y + gauge_radius + 68.0 * ui_scale
 
+        # Sparkline Header with distinct CPU and GPU legends
         self.draw_text(
             cr,
-            "SYSTEM LOAD SPECTRUM",
-            cx,
-            chart_y - 16.0 * ui_scale,
+            "SYSTEM SPECTRUM (60s)",
+            chart_x,
+            chart_y - 14.0 * ui_scale,
             self.FONT_MONO,
             9.5 * ui_scale,
             self.oled_color(self.theme.text_muted_color(fade * 0.85)),
-            align="center",
+            align="left",
             weight=Pango.Weight.BOLD,
         )
-        self._draw_flowing_sparkline(
+        # GPU legend (right aligned)
+        gpu_leg_w, _ = self.draw_text(
+            cr,
+            f"GPU {self.eased_gpu:4.1f}%",
+            chart_x + chart_w,
+            chart_y - 14.0 * ui_scale,
+            self.FONT_MONO,
+            9.5 * ui_scale,
+            self.oled_color(with_alpha(gpu_color, fade * 0.95)),
+            align="right",
+            weight=Pango.Weight.BOLD,
+        )
+        # CPU legend (to the left of GPU legend)
+        self.draw_text(
+            cr,
+            f"CPU {self.eased_cpu:4.1f}%   ·   ",
+            chart_x + chart_w - gpu_leg_w,
+            chart_y - 14.0 * ui_scale,
+            self.FONT_MONO,
+            9.5 * ui_scale,
+            self.oled_color(with_alpha(cpu_color, fade * 0.95)),
+            align="right",
+            weight=Pango.Weight.BOLD,
+        )
+
+        self._draw_dual_sparkline(
             cr,
             chart_x,
             chart_y,
             chart_w,
             chart_h,
             list(m.cpu_history),
+            list(m.gpu_history),
             100.0,
-            self.theme.accent,
+            cpu_color,
+            gpu_color,
             fade,
-            scale=ui_scale,
         )
 
         # 3. Multi-Channel Power Draw HUD (Theme Colored, Relaxed & Spacious)
-        power_y = chart_y + chart_h + 36.0 * ui_scale
+        power_y = chart_y + chart_h + 38.0 * ui_scale
         bat_str = (
             f"BATTERY {m.battery_percent}% [{m.battery_status}] {m.bat_power_w:4.1f}W"
             if m.has_battery
