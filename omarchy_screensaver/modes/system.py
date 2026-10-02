@@ -446,9 +446,8 @@ class SystemDashboardMode(BaseMode):
         gauge_offset_x = min(360.0 * ui_scale, width * 0.28)
         gauge_y = top_y + 175.0 * ui_scale
 
-        cpu_color = self.theme.accent
-        gpu_color = self.theme.cyan if self.theme.cyan != self.theme.accent else self.theme.primary
-        ram_color = self.theme.secondary if self.theme.secondary not in (cpu_color, gpu_color) else self.theme.blue
+        # Unified theme palette: all instrument dials share the active theme's signature accent
+        gauge_color = self.theme.accent
 
         # Left: CPU Speedometer Gauge
         cpu_sub = (
@@ -466,7 +465,7 @@ class SystemDashboardMode(BaseMode):
             f"{self.eased_cpu:5.1f}%",
             cpu_sub,
             m.cpu_model,
-            cpu_color,
+            gauge_color,
             fade,
         )
 
@@ -487,7 +486,7 @@ class SystemDashboardMode(BaseMode):
             f"{self.eased_gpu:5.1f}%",
             gpu_sub,
             gpu_badge,
-            gpu_color,
+            gauge_color,
             fade,
         )
 
@@ -504,17 +503,25 @@ class SystemDashboardMode(BaseMode):
             f"{self.eased_mem:5.1f}%",
             mem_sub,
             mem_badge,
-            ram_color,
+            gauge_color,
             fade,
         )
 
-        # 2. Central Live Dual-Trace Bezier Telemetry Sparkline
+        # 2. Central Live Dual-Trace Bezier Telemetry Sparkline (Theme-Synchronized)
         chart_w = min(680.0 * ui_scale, width * 0.48)
         chart_h = 76.0 * ui_scale
         chart_x = cx - chart_w * 0.5
         chart_y = gauge_y + gauge_radius + 68.0 * ui_scale
 
-        # Sparkline Header with distinct CPU and GPU legends
+        # Sparkline colors strictly from active theme palette
+        cpu_curve_color = self.theme.accent
+        gpu_curve_color = (
+            self.theme.dark_foreground
+            if getattr(self.theme, "is_dark", True)
+            else self.theme.foreground
+        )
+
+        # Sparkline Header with distinct CPU and GPU legends in theme palette
         self.draw_text(
             cr,
             "SYSTEM SPECTRUM (60s)",
@@ -526,7 +533,7 @@ class SystemDashboardMode(BaseMode):
             align="left",
             weight=Pango.Weight.BOLD,
         )
-        # GPU legend (right aligned)
+        # GPU legend (right aligned, in harmonic theme foreground)
         gpu_leg_w, _ = self.draw_text(
             cr,
             f"GPU {self.eased_gpu:4.1f}%",
@@ -534,11 +541,11 @@ class SystemDashboardMode(BaseMode):
             chart_y - 14.0 * ui_scale,
             self.FONT_MONO,
             9.5 * ui_scale,
-            self.oled_color(with_alpha(gpu_color, fade * 0.95)),
+            self.oled_color(with_alpha(gpu_curve_color, fade * 0.95)),
             align="right",
             weight=Pango.Weight.BOLD,
         )
-        # CPU legend (to the left of GPU legend)
+        # CPU legend (to the left of GPU legend, in theme accent)
         self.draw_text(
             cr,
             f"CPU {self.eased_cpu:4.1f}%   ·   ",
@@ -546,7 +553,7 @@ class SystemDashboardMode(BaseMode):
             chart_y - 14.0 * ui_scale,
             self.FONT_MONO,
             9.5 * ui_scale,
-            self.oled_color(with_alpha(cpu_color, fade * 0.95)),
+            self.oled_color(with_alpha(cpu_curve_color, fade * 0.95)),
             align="right",
             weight=Pango.Weight.BOLD,
         )
@@ -560,8 +567,8 @@ class SystemDashboardMode(BaseMode):
             list(m.cpu_history),
             list(m.gpu_history),
             100.0,
-            cpu_color,
-            gpu_color,
+            cpu_curve_color,
+            gpu_curve_color,
             fade,
         )
 
