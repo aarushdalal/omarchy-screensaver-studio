@@ -86,8 +86,8 @@ class SystemDashboardMode(BaseMode):
         cr.arc(cx, cy, radius, start_angle, start_angle + total_angle)
         cr.stroke()
 
-        # 3. Delicate radial hash tick marks (12 automotive tachometer divisions)
-        num_ticks = 12
+        # 3. Clean, calm radial tick marks (10 automotive tachometer divisions)
+        num_ticks = 10
         inactive_tick_col = self.theme.track_tick_inactive_color(fade)
         active_tick_col = with_alpha(gauge_color, 0.88 * fade)
 
@@ -109,26 +109,6 @@ class SystemDashboardMode(BaseMode):
             cr.set_source_rgba(*self.oled_color(tick_col))
             cr.set_line_width(1.5)
             cr.stroke()
-
-            # Minor mid-ticks
-            if i < num_ticks:
-                m_frac = (i + 0.5) / num_ticks
-                m_ang = start_angle + total_angle * m_frac
-                mx1 = cx + math.cos(m_ang) * (radius - 2.0)
-                my1 = cy + math.sin(m_ang) * (radius - 2.0)
-                mx2 = cx + math.cos(m_ang) * (radius + 2.5)
-                my2 = cy + math.sin(m_ang) * (radius + 2.5)
-                cr.new_path()
-                cr.move_to(mx1, my1)
-                cr.line_to(mx2, my2)
-                m_col = (
-                    with_alpha(gauge_color, 0.45 * fade)
-                    if m_frac <= norm
-                    else with_alpha(inactive_tick_col, inactive_tick_col[3] * 0.55)
-                )
-                cr.set_source_rgba(*self.oled_color(m_col))
-                cr.set_line_width(0.9)
-                cr.stroke()
 
         # 4. Active glowing speed arc
         if norm > 0.005:
@@ -443,8 +423,8 @@ class SystemDashboardMode(BaseMode):
 
         # 1. Tri-Gauge Instrument Cluster (CPU, GPU, RAM) with Speedometer Tachometer Styling
         gauge_radius = min(88.0 * ui_scale, width * 0.088)
-        gauge_offset_x = min(360.0 * ui_scale, width * 0.28)
-        gauge_y = top_y + 175.0 * ui_scale
+        gauge_offset_x = min(380.0 * ui_scale, width * 0.28)
+        gauge_y = top_y + 195.0 * ui_scale
 
         # Unified theme palette: all instrument dials share the active theme's signature accent
         gauge_color = self.theme.accent
@@ -508,10 +488,11 @@ class SystemDashboardMode(BaseMode):
         )
 
         # 2. Central Live Dual-Trace Bezier Telemetry Sparkline (Theme-Synchronized)
-        chart_w = min(680.0 * ui_scale, width * 0.48)
-        chart_h = 76.0 * ui_scale
+        # Width matches exactly the distance from left dial center to right dial center
+        chart_w = gauge_offset_x * 2.0
+        chart_h = 74.0 * ui_scale
         chart_x = cx - chart_w * 0.5
-        chart_y = gauge_y + gauge_radius + 68.0 * ui_scale
+        chart_y = gauge_y + gauge_radius + 85.0 * ui_scale
 
         # Sparkline colors strictly from active theme palette
         cpu_curve_color = self.theme.accent
@@ -524,7 +505,7 @@ class SystemDashboardMode(BaseMode):
         # Sparkline Header with distinct CPU and GPU legends in theme palette
         self.draw_text(
             cr,
-            "SYSTEM SPECTRUM (60s)",
+            "SYSTEM ACTIVITY (60s)",
             chart_x,
             chart_y - 14.0 * ui_scale,
             self.FONT_MONO,
@@ -572,33 +553,14 @@ class SystemDashboardMode(BaseMode):
             fade,
         )
 
-        # 3. Multi-Channel Power Draw HUD (Theme Colored, Relaxed & Spacious)
-        power_y = chart_y + chart_h + 38.0 * ui_scale
-        bat_str = (
-            f"BATTERY {m.battery_percent}% [{m.battery_status}] {m.bat_power_w:4.1f}W"
-            if m.has_battery
-            else "AC POWERED"
-        )
-        power_str = (
-            f"POWER DRAW:   CPU {self.eased_cpu_power:4.1f}W   ·   "
-            f"GPU {self.eased_gpu_power:4.1f}W   ·   "
-            f"TOTAL SoC {self.eased_soc_power:4.1f}W   ·   "
-            f"{bat_str}"
-        )
-        self.draw_text(
-            cr,
-            power_str,
-            cx,
-            power_y,
-            self.FONT_MONO,
-            11.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade)),
-            align="center",
-            weight=Pango.Weight.NORMAL,
-        )
+        # 3. Dedicated 3-Column Telemetry Bay (Spacious, Uncluttered, Relaxing)
+        # Vertically aligned with each instrument dial above for intuitive glanceability
+        telem_y = chart_y + chart_h + 56.0 * ui_scale
+        col_left_x = cx - gauge_offset_x
+        col_mid_x = cx
+        col_right_x = cx + gauge_offset_x
 
-        # 4. Storage, Network, and Thermals
-        stream_y = power_y + 30.0 * ui_scale
+        # Formats for network throughput
         rx_fmt = (
             f"{m.net_rx_rate / (1024 * 1024):4.1f}M"
             if m.net_rx_rate >= 1024 * 1024
@@ -609,42 +571,117 @@ class SystemDashboardMode(BaseMode):
             if m.net_tx_rate >= 1024 * 1024
             else f"{m.net_tx_rate / 1024:4.0f}K"
         )
-        net_str = (
-            f"NET ({m.primary_net_iface}) ↓ {rx_fmt}/s ↑ {tx_fmt}/s"
+
+        # Column 1: Power & Battery (Aligned under CPU Dial)
+        self.draw_text(
+            cr,
+            "●  POWER & BATTERY",
+            col_left_x,
+            telem_y,
+            self.FONT_MONO,
+            10.0 * ui_scale,
+            self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
+            align="center",
+            weight=Pango.Weight.BOLD,
+        )
+        self.draw_text(
+            cr,
+            f"CPU {self.eased_cpu_power:4.1f}W   ·   GPU {self.eased_gpu_power:4.1f}W",
+            col_left_x,
+            telem_y + 25.0 * ui_scale,
+            self.FONT_MONO,
+            11.5 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade)),
+            align="center",
+        )
+        bat_sub = (
+            f"SoC {self.eased_soc_power:4.1f}W   ·   BAT {m.battery_percent}% ({m.bat_power_w:3.1f}W)"
+            if m.has_battery
+            else f"TOTAL SoC {self.eased_soc_power:4.1f}W   ·   AC POWERED"
+        )
+        self.draw_text(
+            cr,
+            bat_sub,
+            col_left_x,
+            telem_y + 49.0 * ui_scale,
+            self.FONT_MONO,
+            11.0 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
+            align="center",
+        )
+
+        # Column 2: Storage & Network (Aligned under GPU Dial)
+        self.draw_text(
+            cr,
+            "●  STORAGE & NETWORK",
+            col_mid_x,
+            telem_y,
+            self.FONT_MONO,
+            10.0 * ui_scale,
+            self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
+            align="center",
+            weight=Pango.Weight.BOLD,
+        )
+        disk_sub = (
+            f"SSD {m.disk_used_gib:4.0f}/{m.disk_total_gib:4.0f} GB ({m.disk_percent:2.0f}%)   ·   {m.nvme_temp_c:2.0f}°C"
+            if m.nvme_temp_c > 0
+            else f"SSD {m.disk_used_gib:4.0f}/{m.disk_total_gib:4.0f} GB ({m.disk_percent:2.0f}%)"
+        )
+        self.draw_text(
+            cr,
+            disk_sub,
+            col_mid_x,
+            telem_y + 25.0 * ui_scale,
+            self.FONT_MONO,
+            11.5 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade)),
+            align="center",
+        )
+        net_sub = (
+            f"NET ({m.primary_net_iface})  ↓ {rx_fmt}/s   ↑ {tx_fmt}/s"
             if m.primary_net_iface
             else "NET OFFLINE"
         )
-        nvme_str = f"   ·   NVMe SSD {m.nvme_temp_c:2.0f}°C" if m.nvme_temp_c > 0 else ""
-        row2_str = (
-            f"STORAGE {m.disk_used_gib:5.1f}/{m.disk_total_gib:5.1f} GB ({m.disk_percent:2.0f}%)   ·   "
-            f"{net_str}{nvme_str}"
-        )
         self.draw_text(
             cr,
-            row2_str,
-            cx,
-            stream_y,
+            net_sub,
+            col_mid_x,
+            telem_y + 49.0 * ui_scale,
             self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade)),
+            11.0 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
             align="center",
-            weight=Pango.Weight.NORMAL,
         )
 
-        # 5. OS Diagnostics & Identity Stream
-        diag_y = stream_y + 26.0 * ui_scale
-        row3_str = (
-            f"KERNEL {m.kernel}   ·   UPTIME {m.uptime_str}   ·   "
-            f"USER {m.user}@{m.hostname}"
+        # Column 3: Platform & Session (Aligned under Memory Dial)
+        self.draw_text(
+            cr,
+            "●  SYSTEM PLATFORM",
+            col_right_x,
+            telem_y,
+            self.FONT_MONO,
+            10.0 * ui_scale,
+            self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
+            align="center",
+            weight=Pango.Weight.BOLD,
         )
         self.draw_text(
             cr,
-            row3_str,
-            cx,
-            diag_y,
+            f"KERNEL {m.kernel}",
+            col_right_x,
+            telem_y + 25.0 * ui_scale,
             self.FONT_MONO,
-            10.0 * ui_scale,
-            self.oled_color(self.theme.text_muted_color(fade * 0.90)),
+            11.5 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade)),
             align="center",
-            weight=Pango.Weight.NORMAL,
+        )
+        self.draw_text(
+            cr,
+            f"UPTIME {m.uptime_str}   ·   {m.user}@{m.hostname}",
+            col_right_x,
+            telem_y + 49.0 * ui_scale,
+            self.FONT_MONO,
+            11.0 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
+            align="center",
         )

@@ -15,8 +15,8 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
-#define CHUNK_SIZE 368
-#define SAMPLE_RATE 22050
+#define CHUNK_SIZE 800
+#define SAMPLE_RATE 48000
 #define MAX_BANDS 64
 
 typedef struct {
@@ -43,25 +43,26 @@ static float g_latest_peaks[MAX_BANDS];
 static void init_filters(int num_bands) {
     g_num_bands = (num_bands > MAX_BANDS) ? MAX_BANDS : (num_bands < 8 ? 8 : num_bands);
     double f_min = 40.0;
-    double f_max = 12500.0;
+    double f_max = 11500.0;
     double factor = pow(f_max / f_min, 1.0 / (g_num_bands - 1));
 
     for (int b = 0; b < g_num_bands; b++) {
         double freq = f_min * pow(factor, b);
-        int k = (int)(0.5 + (CHUNK_SIZE * freq / SAMPLE_RATE));
-        if (k < 1) k = 1;
-        if (k > CHUNK_SIZE / 2) k = CHUNK_SIZE / 2;
-        double omega = (2.0 * M_PI * k) / CHUNK_SIZE;
+        // Continuous angular frequency for exact sub-band placement (no duplicate or clipped bins)
+        double omega = (2.0 * M_PI * freq) / SAMPLE_RATE;
         g_filters[b].coeff = 2.0 * cos(omega);
         g_filters[b].cos_w = cos(omega);
         g_filters[b].sin_w = sin(omega);
         
-        // Equalization weighting across spectrum
-        g_filters[b].eq_boost = 1.0 + (b * 0.045);
-        if (b < 10) {
-            // Punchy bass boost for kick drums and 808s
-            g_filters[b].eq_boost += (10 - b) * 0.075;
-        }
+        // Equalization weighting across spectrum:
+        // Acoustic energy rolls off at ~3-4.5 dB/octave in recorded music.
+        // We boost upper frequencies progressively so hi-hats, cymbals, air, and snare sizzle
+        // register with full dynamic range alongside kick drums and bass lines.
+        double rel = (double)b / (double)(g_num_bands - 1);
+        double bass_boost = (b < 8) ? (8 - b) * 0.08 : 0.0;
+        double treble_boost = pow(rel, 1.15) * 8.5;
+        g_filters[b].eq_boost = 1.25 + bass_boost + treble_boost;
+
         g_smooth[b] = 0.0f;
         g_peaks[b] = 0.0f;
         g_peak_speeds[b] = 0.0f;
