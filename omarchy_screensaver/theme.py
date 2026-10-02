@@ -100,27 +100,33 @@ class ThemePalette:
         self.hex_accent = data.get("accent") or data.get("primary") or "#9434b5"
         self.hex_primary = self.hex_accent
 
-        # Secondary color: pick harmonic companion
+        # Secondary color: strictly derived from the active theme palette (never ANSI magenta/cyan)
         cand_sec = data.get("secondary")
-        cand_mag = data.get("magenta")
-        cand_cyan = data.get("cyan")
-        cand_blue = data.get("blue")
-
         if cand_sec:
             self.hex_secondary = cand_sec
-        elif cand_mag and cand_cyan:
-            self.hex_secondary = cand_mag if cand_mag != self.hex_accent else cand_cyan
-        elif cand_cyan:
-            self.hex_secondary = cand_cyan
-        elif cand_mag:
-            self.hex_secondary = cand_mag
-        elif cand_blue:
-            self.hex_secondary = cand_blue
+        elif self.is_dark:
+            self.hex_secondary = (
+                data.get("dark_foreground")
+                or data.get("light_foreground")
+                or self.hex_accent
+            )
         else:
-            self.hex_secondary = self.hex_accent
+            self.hex_secondary = (
+                data.get("light_foreground")
+                or data.get("dark_foreground")
+                or self.hex_accent
+            )
 
         # Deeper dark accent tone for moody shadows, base gradients, and acoustic ribbons
-        self.hex_dark_accent = data.get("dark_accent") or data.get("on_primary") or data.get("dark_foreground") or "#431652"
+        cand_dark_acc = data.get("dark_accent") or data.get("on_primary")
+        if cand_dark_acc:
+            self.hex_dark_accent = cand_dark_acc
+        else:
+            self.hex_dark_accent = (
+                data.get("selection")
+                or data.get("muted")
+                or self.hex_surface
+            )
 
         # Chromatic accents directly from data
         self.hex_red = data.get("red", "#ff554a")

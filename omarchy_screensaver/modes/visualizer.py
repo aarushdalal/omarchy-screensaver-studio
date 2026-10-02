@@ -249,7 +249,7 @@ class VisualizerMode(BaseMode):
             badge_color = self.oled_color(with_alpha(self.theme.accent, fade * 0.90))
         elif has_media:
             badge_str = f"󰏤  {player.upper()}  ·  PAUSED"
-            badge_color = self.oled_color(with_alpha(self.theme.warning, fade * 0.85))
+            badge_color = self.oled_color(with_alpha(self.theme.muted, fade * 0.85))
         else:
             badge_str = "󰎈  OMARCHY AURORA FLOW  ·  IDLE"
             badge_color = self.oled_color(with_alpha(self.theme.dark_accent, fade * 0.70))

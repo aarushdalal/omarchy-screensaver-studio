@@ -106,7 +106,7 @@ class TerminalMode(BaseMode):
         for label, desc in checks:
             self.draw_text(
                 cr, "✓", start_x, cur_y, self.FONT_MONO, font_size,
-                self.oled_color(with_alpha(self.theme.success, fade * 0.95)), align="left", weight=Pango.Weight.BOLD
+                self.oled_color(with_alpha(self.theme.accent, fade * 0.95)), align="left", weight=Pango.Weight.BOLD
             )
             self.draw_text(
                 cr, f"[{label:<8}]", start_x + 22.0, cur_y, self.FONT_MONO, font_size,
