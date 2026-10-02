@@ -61,17 +61,39 @@ class ThemePalette:
         self.name = name
         self.raw_data = data
 
-        # Base background colors (dark tones - pure void / pitch dark)
-        self.hex_background = data.get("darker_background") or data.get("dark_background") or data.get("background", "#0a080c")
-        self.hex_surface = data.get("dark_background") or data.get("lighter_background") or data.get("surface", "#110e14")
+        # Determine whether the active theme is Dark or Light
+        raw_mode = str(data.get("mode", "")).strip().lower()
+        if raw_mode == "light":
+            self.mode = "light"
+            self.is_dark = False
+        elif raw_mode == "dark":
+            self.mode = "dark"
+            self.is_dark = True
+        else:
+            # Fallback to background luminance
+            bg_cand = data.get("background") or data.get("dark_background") or "#0a080c"
+            self.is_dark = color_luminance(bg_cand) < 0.5
+            self.mode = "dark" if self.is_dark else "light"
 
-        # Foreground & text tones
-        self.hex_foreground = data.get("foreground", "#e7e1e4")
-        self.hex_bright_foreground = data.get("bright_foreground", "#ffffff")
-        self.hex_dark_foreground = data.get("dark_foreground") or data.get("muted", "#978e96")
+        # Base background colors
+        if self.is_dark:
+            self.hex_background = data.get("darker_background") or data.get("dark_background") or data.get("background", "#0a080c")
+            self.hex_surface = data.get("dark_background") or data.get("lighter_background") or data.get("surface", "#110e14")
+            self.hex_foreground = data.get("foreground", "#e7e1e4")
+            self.hex_bright_foreground = data.get("bright_foreground", "#ffffff")
+            self.hex_light_foreground = data.get("light_foreground", "#d6d5bc")
+            self.hex_dark_foreground = data.get("dark_foreground") or data.get("muted", "#81b8a8")
+            self.hex_muted = data.get("muted", "#534856")
+        else:
+            self.hex_background = data.get("background") or data.get("lighter_background") or "#eff1f5"
+            self.hex_surface = data.get("lighter_background") or data.get("dark_background") or data.get("surface", "#e3e4e8")
+            self.hex_foreground = data.get("foreground", "#4c4f69")
+            self.hex_bright_foreground = data.get("bright_foreground") or data.get("foreground", "#100f0f")
+            self.hex_light_foreground = data.get("light_foreground", "#5c5f77")
+            self.hex_dark_foreground = data.get("dark_foreground", "#878580")
+            self.hex_muted = data.get("muted", "#acb0be")
 
-        # Muted / Selection / Darker tones
-        self.hex_muted = data.get("muted", "#534856")
+        # Selection
         self.hex_selection = data.get("selection") or self.hex_surface
 
         # Signature Accent (vibrant rich dark accent for moody screensavers)
@@ -114,6 +136,7 @@ class ThemePalette:
         self.surface = hex_to_rgba(self.hex_surface)
         self.foreground = hex_to_rgba(self.hex_foreground)
         self.bright_foreground = hex_to_rgba(self.hex_bright_foreground)
+        self.light_foreground = hex_to_rgba(self.hex_light_foreground)
         self.dark_foreground = hex_to_rgba(self.hex_dark_foreground)
         self.muted = hex_to_rgba(self.hex_muted)
         self.selection = hex_to_rgba(self.hex_selection)
@@ -132,6 +155,37 @@ class ThemePalette:
         self.card_border = with_alpha(self.accent, 0.25)
         self.accent_glow = with_alpha(self.accent, 0.35)
         self.particle_color = with_alpha(self.accent, 0.85)
+
+    def text_primary_color(self, fade: float = 1.0) -> Tuple[float, float, float, float]:
+        """High-contrast dominant text (clock digits, primary gauge readouts)."""
+        color = self.bright_foreground
+        return with_alpha(color, fade)
+
+    def text_secondary_color(self, fade: float = 1.0) -> Tuple[float, float, float, float]:
+        """Readable secondary text (power HUD, gauge sub-readings)."""
+        color = self.foreground if self.is_dark else self.light_foreground
+        return with_alpha(color, fade * 0.95)
+
+    def text_muted_color(self, fade: float = 1.0) -> Tuple[float, float, float, float]:
+        """Comfortable muted text with guaranteed legible contrast in both dark and light modes."""
+        if self.is_dark:
+            return with_alpha(self.foreground, fade * 0.70)
+        else:
+            return with_alpha(self.foreground, fade * 0.82)
+
+    def track_arc_color(self, fade: float = 1.0) -> Tuple[float, float, float, float]:
+        """Subtle background gauge track arc."""
+        if self.is_dark:
+            return with_alpha(self.bright_foreground, 0.12 * fade)
+        else:
+            return with_alpha(self.foreground, 0.14 * fade)
+
+    def track_tick_inactive_color(self, fade: float = 1.0) -> Tuple[float, float, float, float]:
+        """Inactive speedometer tick mark."""
+        if self.is_dark:
+            return with_alpha(self.bright_foreground, 0.16 * fade)
+        else:
+            return with_alpha(self.foreground, 0.20 * fade)
 
     @property
     def accent_rgb(self) -> Tuple[float, float, float]:
@@ -209,47 +263,74 @@ class ThemeManager:
                 try:
                     with open(self.CAELESTIA_SCHEME_FILE, "r", encoding="utf-8") as f:
                         scheme = json.load(f)
-                    colours = scheme.get("colours", {})
-                    # In M3 dark mode, select vibrant dark key tones from scheme.json (e.g. rich dark purple 9434b5, secondary 6430ba):
-                    accent_dark = (
-                        colours.get("accent")
-                        or colours.get("primary")
-                        or "9434b5"
-                    )
-                    secondary_dark = (
-                        colours.get("secondary")
-                        or colours.get("tertiary")
-                        or "6430ba"
-                    )
-                    dark_accent = (
-                        colours.get("dark_accent")
-                        or colours.get("primaryContainer")
-                        or "431652"
-                    )
-                    magenta_dark = accent_dark
-                    cyan_dark = colours.get("tertiary") or secondary_dark
+                    scheme_mode = str(scheme.get("mode", "dark")).strip().lower()
+                    is_caelestia_dark = scheme_mode != "light"
 
-                    raw_colors = {
-                        "background": f"#{colours.get('surfaceContainerLowest', colours.get('background', '100d10'))}",
-                        "darker_background": f"#{colours.get('surfaceContainerLowest', '0e0c0e')}",
-                        "dark_background": f"#{colours.get('surfaceContainer', '1d1b1d')}",
-                        "foreground": f"#{colours.get('onSurfaceVariant', colours.get('onBackground', 'cec3cc'))}",
-                        "bright_foreground": f"#{colours.get('onSurface', 'e7e1e4')}",
-                        "dark_foreground": f"#{colours.get('outline', '978e96')}",
-                        "muted": f"#{colours.get('secondaryContainer', '534856')}",
-                        "selection": f"#{colours.get('surfaceContainerHigh', '2c292c')}",
-                        "accent": f"#{accent_dark}",
-                        "primary": f"#{accent_dark}",
-                        "secondary": f"#{secondary_dark}",
-                        "dark_accent": f"#{dark_accent}",
-                        "blue": f"#{secondary_dark}",
-                        "cyan": f"#{cyan_dark}",
-                        "magenta": f"#{magenta_dark}",
-                        "red": f"#{colours.get('errorContainer', '93000a')}",
-                        "green": f"#{colours.get('tertiaryContainer', 'be8792')}",
-                        "yellow": f"#{colours.get('primaryContainer', 'a88cb1')}",
-                        "orange": f"#{colours.get('secondaryContainer', '534856')}",
-                    }
+                    if is_caelestia_dark:
+                        accent_dark = (
+                            colours.get("accent")
+                            or colours.get("primary")
+                            or "9434b5"
+                        )
+                        secondary_dark = (
+                            colours.get("secondary")
+                            or colours.get("tertiary")
+                            or "6430ba"
+                        )
+                        dark_accent = (
+                            colours.get("dark_accent")
+                            or colours.get("primaryContainer")
+                            or "431652"
+                        )
+                        raw_colors = {
+                            "mode": "dark",
+                            "background": f"#{colours.get('surfaceContainerLowest', colours.get('background', '100d10'))}",
+                            "darker_background": f"#{colours.get('surfaceContainerLowest', '0e0c0e')}",
+                            "dark_background": f"#{colours.get('surfaceContainer', '1d1b1d')}",
+                            "foreground": f"#{colours.get('onSurfaceVariant', colours.get('onBackground', 'cec3cc'))}",
+                            "bright_foreground": f"#{colours.get('onSurface', 'e7e1e4')}",
+                            "dark_foreground": f"#{colours.get('outline', '978e96')}",
+                            "light_foreground": f"#{colours.get('onSurfaceVariant', 'cec3cc')}",
+                            "muted": f"#{colours.get('secondaryContainer', '534856')}",
+                            "selection": f"#{colours.get('surfaceContainerHigh', '2c292c')}",
+                            "accent": f"#{accent_dark}",
+                            "primary": f"#{accent_dark}",
+                            "secondary": f"#{secondary_dark}",
+                            "dark_accent": f"#{dark_accent}",
+                            "blue": f"#{secondary_dark}",
+                            "cyan": f"#{colours.get('tertiary', secondary_dark)}",
+                            "magenta": f"#{accent_dark}",
+                            "red": f"#{colours.get('errorContainer', '93000a')}",
+                            "green": f"#{colours.get('tertiaryContainer', 'be8792')}",
+                            "yellow": f"#{colours.get('primaryContainer', 'a88cb1')}",
+                            "orange": f"#{colours.get('secondaryContainer', '534856')}",
+                        }
+                    else:
+                        accent_light = colours.get("accent") or colours.get("primary") or "1e66f5"
+                        secondary_light = colours.get("secondary") or colours.get("tertiary") or "6430ba"
+                        raw_colors = {
+                            "mode": "light",
+                            "background": f"#{colours.get('background', colours.get('surfaceContainerLowest', 'eff1f5'))}",
+                            "lighter_background": f"#{colours.get('surface', 'f5f5f9')}",
+                            "dark_background": f"#{colours.get('surfaceContainer', 'e3e4e8')}",
+                            "foreground": f"#{colours.get('onSurface', '4c4f69')}",
+                            "bright_foreground": f"#{colours.get('onSurface', '1d1b20')}",
+                            "dark_foreground": f"#{colours.get('outline', '79747e')}",
+                            "light_foreground": f"#{colours.get('onSurfaceVariant', '49454f')}",
+                            "muted": f"#{colours.get('outlineVariant', 'acb0be')}",
+                            "selection": f"#{colours.get('surfaceContainerHigh', 'ccd0da')}",
+                            "accent": f"#{accent_light}",
+                            "primary": f"#{accent_light}",
+                            "secondary": f"#{secondary_light}",
+                            "dark_accent": f"#{colours.get('primaryContainer', 'dce0e8')}",
+                            "blue": f"#{secondary_light}",
+                            "cyan": f"#{colours.get('tertiary', '179299')}",
+                            "magenta": f"#{colours.get('tertiary', 'ea76cb')}",
+                            "red": f"#{colours.get('error', 'd20f39')}",
+                            "green": f"#{colours.get('tertiary', '40a02b')}",
+                            "yellow": f"#{colours.get('secondary', 'df8e1d')}",
+                            "orange": f"#{colours.get('secondary', 'd84e2b')}",
+                        }
                     theme_name = f"caelestia-{scheme.get('name', 'dynamic')}"
                     self._watch_path = self.CAELESTIA_SCHEME_FILE
                     self._last_mtime = os.path.getmtime(self.CAELESTIA_SCHEME_FILE)

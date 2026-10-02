@@ -90,12 +90,15 @@ class BaseMode:
 
     # Helper rendering utilities
     def clear_background(self, cr: cairo.Context, width: int, height: int, custom_bg=None):
-        """Fill background with pure OLED black or dark theme color.
+        """Fill background with pure OLED black or theme background.
 
-        When OLED mode is active, guarantees pure rgba(0, 0, 0, 1.0) so OLED subpixels
-        are completely turned off (0 nits, 0 watts, zero burn-in).
+        When OLED mode is active AND the theme is dark, guarantees pure rgba(0, 0, 0, 1.0)
+        so OLED subpixels are completely turned off (0 nits, 0 watts, zero burn-in).
+        In light mode, renders the active theme's background palette so light mode
+        displays correctly without pitch-black void or blinding raw white.
         """
-        if getattr(self.config, "oled_mode", True) and custom_bg is None:
+        is_dark = getattr(self.theme, "is_dark", True)
+        if getattr(self.config, "oled_mode", True) and custom_bg is None and is_dark:
             cr.set_source_rgba(0.0, 0.0, 0.0, 1.0)
         else:
             bg = custom_bg or self.theme.background
@@ -103,9 +106,11 @@ class BaseMode:
         cr.paint()
 
     def oled_color(self, rgba: Tuple[float, float, float, float], alpha_mult: float = 1.0) -> Tuple[float, float, float, float]:
-        """Apply luminance breathing factor to RGBA color for OLED phosphor relief."""
+        """Apply luminance breathing factor to RGBA color for OLED phosphor relief in dark mode."""
         r, g, b, a = rgba
-        return (r, g, b, max(0.0, min(1.0, a * alpha_mult * self.luminance_factor)))
+        is_dark = getattr(self.theme, "is_dark", True)
+        factor = self.luminance_factor if is_dark else 1.0
+        return (r, g, b, max(0.0, min(1.0, a * alpha_mult * factor)))
 
     def create_pango_layout(
         self,
@@ -140,7 +145,7 @@ class BaseMode:
         weight: Pango.Weight = Pango.Weight.NORMAL,
         glow: bool = False,
     ) -> Tuple[float, float]:
-        """Render text with Pango with optional subtle glow."""
+        """Render text with Pango with optional subtle glow in dark mode."""
         pango_align = Pango.Alignment.CENTER
         if align == "left":
             pango_align = Pango.Alignment.LEFT
@@ -159,7 +164,7 @@ class BaseMode:
 
         render_y = y - h * 0.5
 
-        if glow:
+        if glow and getattr(self.theme, "is_dark", True):
             glow_rgba = with_alpha(color_rgba, color_rgba[3] * 0.25)
             cr.set_source_rgba(*glow_rgba)
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1)]:
