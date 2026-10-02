@@ -14,28 +14,33 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
 
 - **Plugin Architecture**: Designed and structured this as a conformant Omarchy plugin with `manifest.json` and `BarWidget.qml` following the Omarchy plugin conventions.
 - **Python GTK4/Cairo Screensaver Engine**: Designed and implemented the multi-mode screensaver as a native GTK4 Wayland window under application ID `org.omarchy.screensaver` (integrates with Hyprland window rules and Quickshell's `IdleMonitor`). Core modules: `app.py`, `window.py`, `modes/`, `theme.py`, `config.py`.
-- **10 Signature Visual Modes**: Authored all visual mode rendering logic:
+- **15 Signature Visual Modes**: Authored all visual mode rendering logic:
   - `clock`: Minimalist floating typographic clock with celestial orbital aura, date, and battery status.
   - `matrix`: 3D parallax cybernetic rain with authentic Katakana glyphs, hex numbers, and phosphor decay.
   - `particles`: Volumetric cosmic constellation with wandering gravitational attractor.
   - `warp`: Relativistic 3D starfield hyperspace jump with speed streaks and depth scaling.
   - `geometry`: Hypnotic 4D rotating hypercube (tesseract) with depth cueing and chromatic glow.
   - `singularity`: Kerr rotating black hole with relativistic Doppler-beamed accretion disk.
-  - `system`: Digital Cockpit Speedometer Telemetry Cluster — Automotive sports car instrument panel with precision sweeping needles, GPU & CPU tachometers, redline zones, multi-channel power draw (CPU, GPU, SoC, Battery), and dual live Bezier sparklines.
+  - `system`: Spacious Speedometer Telemetry Cluster — Automotive instrument panel with precision tachometer dials (CPU, GPU, RAM), 10-division automotive ticks, dual-trace Bezier live system sparkline (60s), and a dedicated 3-column telemetry bay (Power & Battery, Storage & Network, Platform & Session) with generous breathing room.
   - `terminal`: Borderless diagnostic waterfall streaming live Linux kernel and procfs metrics.
   - `visualizer`: Floating reactive equalizer bars with real-time PipeWire spectrum and MPRIS metadata.
   - `aurora`: Multi-octave harmonic spline ribbons with celestial stardust motes.
+  - `cyber_nexus`: Subtle glowing neural nodes connected by pulsing data lines in deep OLED black.
+  - `synthwave`: 3D perspective retro wireframe horizon with gentle neon gradient sun.
+  - `quantum_helix`: Dual rotating DNA/quantum strands with orbital stardust motes.
+  - `topography`: Dynamic topographic contour elevation lines undulating smoothly in dark ambient space.
+  - `celestial_orbit`: Gravitational multi-orbital planetary system with planetary trails.
 - **OLED Burn-in Protection**: Implemented true `#000000` black subpixel shutoff mode with continuous imperceptible orbital coordinate drift to safeguard OLED/AMOLED displays.
-- **Ambient Study Display Mode**: Created dedicated ambient study display toggle with sleep/lock inhibition and touch immunity (shortcut: `SUPER + I`).
-- **Dynamic Palette Synchronizer**: Designed `theme.py` to inherit color schemes dynamically from the active Omarchy `colors.toml` or built-in presets (`aurora`, `cyberpunk`, `matrix`, `minimal`, `osaka`).
-- **Real-Time PipeWire Audio Spectrum Engine**: Replaced synthetic sine approximations with native C PipeWire audio capture (`audio_spectrum.c` compiled into `libomarchy_audio.so`). Implemented 36 log-spaced Goertzel filters with sub-10ms latency, high-sensitivity adaptive gain control (AGC), and lowered noise floor for instant reaction to audio volume spikes.
+- **Ambient Study Display Mode**: Created dedicated ambient study display toggle with sleep/lock inhibition and touch immunity (shortcut: `SUPER + I`), plus live audio visualizer toggle (`SUPER + T` / `'t'`).
+- **Dynamic Palette Synchronizer**: Designed `theme.py` to inherit color schemes dynamically from the active Omarchy `colors.toml` or built-in presets (`aurora`, `cyberpunk`, `matrix`, `minimal`, `osaka`) with 100% theme harmony.
+- **Real-Time PipeWire Audio Spectrum Engine**: Native C PipeWire audio monitor (`audio_spectrum.c` compiled into `libomarchy_audio.so`) running at native 48,000 Hz with 36 continuous-frequency Goertzel filters, progressive acoustic tilt equalization for full dynamic response across all 36 bands (40 Hz - 11.5 kHz), sub-10ms latency, and study mode visualizer toggle (`SUPER + T` / keypress `'t'`).
 - **Idle Lifecycle Integration**: Wired `Service.qml` (Quickshell) to trigger the screensaver via `omarchy-launch-screensaver` wrapper and `shell.json` configuration. Wake dismissal (key press, mouse motion, click) cancels idle cycles.
 - **Interactive Menu Suite & Extensions**: Designed the floating modal HUD selector (`omarchy-menu-screensaver`), keyboard-driven terminal manager (`omarchy-screensaver-menu` via Gum), CLI state manager (`omarchy-screensaver-select`), and `omarchy-menu-extension.jsonc` for Omarchy application launcher integration.
 - **Bar Widget**: Implemented `BarWidget.qml` showing screensaver mode and controls in the Omarchy top bar.
 - **Theme Definitions**: Authored `themes/` directory with per-mode color palette overrides.
 - **Performance Tuning**: Optimized rendering for AMD Ryzen 7 PRO 5850U integrated Vega graphics (<1% total CPU, ~55 MB RAM at 60 FPS).
 - **Installer**: Authored `./install.sh` with timestamped backup manifests.
-- **Testing**: Tested all 10 modes on Omarchy 4.0.2 / Quickshell 0.3.1 / GTK4 Wayland / Hyprland 0.56.2.
+- **Testing**: Tested all 15 modes on Omarchy 4.0.2 / Quickshell 0.3.1 / GTK4 Wayland / Hyprland 0.56.2.
 
 ---
 

@@ -5,6 +5,27 @@ All notable changes to `omarchy-screensaver-studio` will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-02
+
+### Added & Refined
+- **Spacious 3-Column System Telemetry HUD**:
+  - Re-architected system telemetry below the sparkline into 3 dedicated, well-spaced functional columns vertically aligned directly beneath the 3 speedometer gauges:
+    - **Left Column** (`● POWER & BATTERY`): CPU & GPU wattage, total SoC package power, battery charge/discharge percentage & live rate.
+    - **Center Column** (`● STORAGE & NETWORK`): NVMe SSD usage, drive temperature, active network interface, download & upload throughput.
+    - **Right Column** (`● SYSTEM PLATFORM`): Linux kernel release, system uptime, and session user/hostname.
+  - Eliminated cluttered horizontal paragraphs of concatenated abbreviations and dots.
+  - Generous spacing between all HUD elements: clock-to-dial padding (195px), dial horizontal separation (380px), dial-to-sparkline margin (85px), and sparkline-to-telemetry margin (56px).
+  - Streamlined speedometer tachometer dials with 10 clean automotive divisions, removing noisy micro-ticks for a tranquil, luxury instrument panel feel.
+- **Audio Visualizer 48kHz Engine & Full 36-Band Dynamic Range**:
+  - Upgraded native audio capture pipeline in `audio_spectrum.c` to native 48,000 Hz sample rate (matching PipeWire 1.6.8).
+  - Switched to generalized continuous angular frequency calculations ($\omega = 2\pi f / f_s$), preventing low-frequency duplicate bins.
+  - Extended musical frequency span to 40 Hz – 11,500 Hz, with progressive acoustic tilt equalization boost (`pow(rel, 1.15) * 8.5`) to overcome high-frequency acoustic roll-off.
+  - Fixed dead/flat response in the top 4 visualizer bars (bands 32-35), providing full dynamic dance across the entire audible spectrum.
+- **Ambient Study Mode Audio Visualizer Toggle**:
+  - Added dedicated toggle mechanism (`omarchy-screensaver-visualizer-toggle`, bound to `SUPER + T` or keypress `'t'` in study mode) to switch between study desk display and live music visualizer without exiting study mode.
+- **Strict Theme Palette Adherence**:
+  - Eliminated ANSI terminal magenta/cyan bleeding into visualizer, aurora, particles, and widget ribbons by deriving `secondary` and `dark_accent` strictly from active desktop theme tokens (`dark_foreground`, `light_foreground`, `dark_accent`, `selection`).
+
 ## [1.3.0] - 2026-10-01
 
 ### Added
