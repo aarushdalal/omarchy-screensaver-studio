@@ -43,6 +43,11 @@ class SystemDashboardMode(BaseMode):
         self.eased_bat_volt: float = 12.0
         self.eased_bat_current: float = 0.0
 
+        # Cached clock strings to eliminate redundant per-frame strftime allocations
+        self._cached_sec: int = -1
+        self._cached_time_str: str = ""
+        self._cached_date_str: str = ""
+
     def update(self, dt: float, metrics: SystemMetrics, media_info: Optional[MediaInfo]):
         super().update(dt, metrics, media_info)
         self.metrics = metrics
@@ -102,11 +107,13 @@ class SystemDashboardMode(BaseMode):
         cr.arc(cx, cy, radius, start_angle, start_angle + total_angle)
         cr.stroke()
 
-        # 3. Clean, calm radial tick marks (10 automotive tachometer divisions)
+        # 3. Clean, calm radial tick marks (10 automotive tachometer divisions, batched)
         num_ticks = 10
         inactive_tick_col = self.theme.track_tick_inactive_color(fade)
         active_tick_col = with_alpha(gauge_color, 0.88 * fade)
 
+        inactive_ticks = []
+        active_ticks = []
         for i in range(num_ticks + 1):
             frac = i / num_ticks
             ang = start_angle + total_angle * frac
@@ -117,13 +124,26 @@ class SystemDashboardMode(BaseMode):
             y1 = cy + math.sin(ang) * r_in
             x2 = cx + math.cos(ang) * r_out
             y2 = cy + math.sin(ang) * r_out
+            if frac <= norm:
+                active_ticks.append((x1, y1, x2, y2))
+            else:
+                inactive_ticks.append((x1, y1, x2, y2))
 
+        cr.set_line_width(1.5)
+        if inactive_ticks:
             cr.new_path()
-            cr.move_to(x1, y1)
-            cr.line_to(x2, y2)
-            tick_col = active_tick_col if frac <= norm else inactive_tick_col
-            cr.set_source_rgba(*self.oled_color(tick_col))
-            cr.set_line_width(1.5)
+            for x1, y1, x2, y2 in inactive_ticks:
+                cr.move_to(x1, y1)
+                cr.line_to(x2, y2)
+            cr.set_source_rgba(*self.oled_color(inactive_tick_col))
+            cr.stroke()
+
+        if active_ticks:
+            cr.new_path()
+            for x1, y1, x2, y2 in active_ticks:
+                cr.move_to(x1, y1)
+                cr.line_to(x2, y2)
+            cr.set_source_rgba(*self.oled_color(active_tick_col))
             cr.stroke()
 
         # 4. Active glowing speed arc
@@ -255,15 +275,15 @@ class SystemDashboardMode(BaseMode):
         cr.stroke()
         cr.set_dash([])  # reset dash pattern
 
-        # Subtle vertical division tick marks on baseline
+        # Subtle vertical division tick marks on baseline (batched)
+        cr.new_path()
         for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
             tx = x + w * frac
-            cr.new_path()
-            cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.35)))
-            cr.set_line_width(1.0)
             cr.move_to(tx, base_y)
             cr.line_to(tx, base_y + 4.0)
-            cr.stroke()
+        cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.35)))
+        cr.set_line_width(1.0)
+        cr.stroke()
 
         # Subtle timeline labels
         self.draw_text(
@@ -401,9 +421,14 @@ class SystemDashboardMode(BaseMode):
         else:
             ui_scale = 1.0
 
-        now = time.localtime()
-        time_str = time.strftime("%H:%M:%S" if self.config.clock_format_24h else "%I:%M:%S %p", now)
-        date_str = time.strftime("%A · %d %B %Y", now).upper()
+        sec_now = int(time.time())
+        if sec_now != self._cached_sec:
+            self._cached_sec = sec_now
+            now = time.localtime(sec_now)
+            self._cached_time_str = time.strftime("%H:%M:%S" if self.config.clock_format_24h else "%I:%M:%S %p", now)
+            self._cached_date_str = time.strftime("%A · %d %B %Y", now).upper()
+        time_str = self._cached_time_str
+        date_str = self._cached_date_str
 
         top_y = cy - 252.0 * ui_scale
 

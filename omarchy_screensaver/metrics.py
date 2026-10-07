@@ -8,6 +8,7 @@ and comprehensive hardware sensor streams.
 import collections
 import glob
 import os
+import threading
 import time
 from typing import Dict, List, Optional, Tuple
 
@@ -23,6 +24,8 @@ class SystemMetrics:
         self._last_net_rx = 0
         self._last_net_tx = 0
         self._last_net_time = 0.0
+        self._last_disk_time = 0.0
+        self._nvme_reading = False
 
         # CPU Core Telemetry
         self.cpu_percent: float = 0.0
@@ -205,18 +208,54 @@ class SystemMetrics:
                 pass
 
         # 4. CPU Governor / Driver
-        self._cpu_drv_path = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
-        self._cpu_gov_path = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+        cand_drv = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
+        cand_gov = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+        self._cpu_drv_path = cand_drv if os.path.exists(cand_drv) else None
+        self._cpu_gov_path = cand_gov if os.path.exists(cand_gov) else None
 
-        # 5. Battery directory
+        # 5. AC Online
+        ac_cand = "/sys/class/power_supply/AC/online"
+        self._ac_path = ac_cand if os.path.exists(ac_cand) else None
+
+        # 6. Battery paths
         self._bat_dir = None
+        self._bat_cap_path = None
+        self._bat_stat_path = None
+        self._bat_volt_path = None
+        self._bat_cur_path = None
         try:
             for name in os.listdir("/sys/class/power_supply"):
                 if name.startswith("BAT"):
-                    self._bat_dir = os.path.join("/sys/class/power_supply", name)
+                    b_dir = os.path.join("/sys/class/power_supply", name)
+                    self._bat_dir = b_dir
+                    p_cap = os.path.join(b_dir, "capacity")
+                    p_stat = os.path.join(b_dir, "status")
+                    p_volt = os.path.join(b_dir, "voltage_now")
+                    p_cur = os.path.join(b_dir, "current_now")
+                    self._bat_cap_path = p_cap if os.path.exists(p_cap) else None
+                    self._bat_stat_path = p_stat if os.path.exists(p_stat) else None
+                    self._bat_volt_path = p_volt if os.path.exists(p_volt) else None
+                    self._bat_cur_path = p_cur if os.path.exists(p_cur) else None
                     break
         except Exception:
             pass
+
+    def _trigger_nvme_read(self):
+        """Asynchronously query NVMe drive temperature without stalling main thread on PCIe SMART bus."""
+        if self._nvme_reading or not self._nvme_temp_path:
+            return
+        self._nvme_reading = True
+
+        def _worker():
+            try:
+                with open(self._nvme_temp_path, "r", encoding="utf-8") as f:
+                    self.nvme_temp_c = float(f.read().strip()) / 1000.0
+            except Exception:
+                pass
+            finally:
+                self._nvme_reading = False
+
+        threading.Thread(target=_worker, daemon=True).start()
 
     def _init_cpu(self):
         try:
@@ -245,9 +284,10 @@ class SystemMetrics:
 
         try:
             with open("/proc/net/dev", "r", encoding="utf-8") as f:
-                lines = f.readlines()[2:]
-                for line in lines:
-                    parts = line.split(":")
+                f.readline()
+                f.readline()
+                for line in f:
+                    parts = line.split(":", 1)
                     if len(parts) == 2:
                         iface = parts[0].strip()
                         if iface == "lo":
@@ -274,10 +314,10 @@ class SystemMetrics:
         dt = now - self._last_update_time if self._last_update_time > 0 else 1.0
         self._last_update_time = now
 
-        # 1. CPU Usage
+        # 1. CPU Usage (Binary read)
         try:
-            with open("/proc/stat", "r", encoding="utf-8") as f:
-                fields = [float(x) for x in f.readline().strip().split()[1:8]]
+            with open("/proc/stat", "rb") as f:
+                fields = [float(x) for x in f.readline().split()[1:8]]
                 idle = fields[3] + fields[4]
                 total = sum(fields)
                 d_idle = idle - self._last_cpu_idle
@@ -290,13 +330,13 @@ class SystemMetrics:
         except Exception:
             pass
 
-        # 2. CPU Frequencies
+        # 2. CPU Frequencies (Direct binary reads)
         if self._cpu_freq_paths:
             freqs = []
             for fp in self._cpu_freq_paths:
                 try:
-                    with open(fp, "r", encoding="utf-8") as f:
-                        freqs.append(int(f.read().strip()))
+                    with open(fp, "rb") as f:
+                        freqs.append(int(f.read()))
                 except Exception:
                     pass
             if freqs:
@@ -304,131 +344,118 @@ class SystemMetrics:
                 self.cpu_freq_max_ghz = max(freqs) / 1e6
 
         # 3. CPU Temperature
-        if self._cpu_temp_path and os.path.exists(self._cpu_temp_path):
+        if self._cpu_temp_path:
             try:
-                with open(self._cpu_temp_path, "r", encoding="utf-8") as f:
+                with open(self._cpu_temp_path, "r") as f:
                     self.cpu_temp_c = float(f.read().strip()) / 1000.0
             except Exception:
                 pass
-        else:
-            # Fallback to thermal zones
-            try:
-                temp_candidates = []
-                thermal_dir = "/sys/class/thermal"
-                if os.path.exists(thermal_dir):
-                    for name in os.listdir(thermal_dir):
-                        if name.startswith("thermal_zone"):
-                            path = os.path.join(thermal_dir, name, "temp")
-                            if os.path.exists(path):
-                                with open(path, "r", encoding="utf-8") as f:
-                                    val = float(f.read().strip())
-                                    if val > 1000:
-                                        val /= 1000.0
-                                    if 15.0 <= val <= 105.0:
-                                        temp_candidates.append(val)
-                if temp_candidates:
-                    self.cpu_temp_c = max(temp_candidates)
-            except Exception:
-                pass
 
-        # 4. Memory & Swap
+        # 4. Memory & Swap (Binary early-exit parser)
         try:
-            with open("/proc/meminfo", "r", encoding="utf-8") as f:
-                mem = {}
+            total_kb = 0
+            avail_kb = 0
+            sw_total_kb = 0
+            sw_free_kb = 0
+            found = 0
+            with open("/proc/meminfo", "rb") as f:
                 for line in f:
-                    parts = line.split(":")
-                    if len(parts) == 2:
-                        mem[parts[0].strip()] = int(parts[1].split()[0])
-            total_kb = mem.get("MemTotal", 16000000)
-            avail_kb = mem.get("MemAvailable", total_kb // 2)
-            used_kb = total_kb - avail_kb
-
-            self.mem_total_gib = total_kb / (1024.0 * 1024.0)
-            self.mem_avail_gib = avail_kb / (1024.0 * 1024.0)
-            self.mem_used_gib = used_kb / (1024.0 * 1024.0)
-            self.mem_percent = (used_kb / total_kb) * 100.0 if total_kb > 0 else 0.0
-            self.mem_history.append(self.mem_percent)
-
-            # Swap
-            sw_total_kb = mem.get("SwapTotal", 0)
-            sw_free_kb = mem.get("SwapFree", 0)
-            sw_used_kb = sw_total_kb - sw_free_kb
-            self.swap_total_gib = sw_total_kb / (1024.0 * 1024.0)
-            self.swap_used_gib = sw_used_kb / (1024.0 * 1024.0)
-            self.swap_percent = (sw_used_kb / sw_total_kb) * 100.0 if sw_total_kb > 0 else 0.0
+                    if line.startswith(b"MemTotal:"):
+                        total_kb = int(line.split()[1])
+                        found += 1
+                    elif line.startswith(b"MemAvailable:"):
+                        avail_kb = int(line.split()[1])
+                        found += 1
+                    elif line.startswith(b"SwapTotal:"):
+                        sw_total_kb = int(line.split()[1])
+                        found += 1
+                    elif line.startswith(b"SwapFree:"):
+                        sw_free_kb = int(line.split()[1])
+                        found += 1
+                        if found >= 4:
+                            break
+            if total_kb > 0:
+                used_kb = total_kb - avail_kb
+                self.mem_total_gib = total_kb / (1024.0 * 1024.0)
+                self.mem_avail_gib = avail_kb / (1024.0 * 1024.0)
+                self.mem_used_gib = used_kb / (1024.0 * 1024.0)
+                self.mem_percent = (used_kb / total_kb) * 100.0
+                self.mem_history.append(self.mem_percent)
+                sw_used_kb = sw_total_kb - sw_free_kb
+                self.swap_total_gib = sw_total_kb / (1024.0 * 1024.0)
+                self.swap_used_gib = sw_used_kb / (1024.0 * 1024.0)
+                self.swap_percent = (sw_used_kb / sw_total_kb) * 100.0 if sw_total_kb > 0 else 0.0
         except Exception:
             pass
 
-        # 5. GPU Telemetry
-        if self._gpu_busy_path and os.path.exists(self._gpu_busy_path):
+        # 5. GPU Telemetry (Direct open without redundant exists)
+        if self._gpu_busy_path:
             try:
-                with open(self._gpu_busy_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_busy_path, "r") as f:
                     self.gpu_percent = max(0.0, min(100.0, float(f.read().strip())))
             except Exception:
                 pass
         self.gpu_history.append(self.gpu_percent)
 
-        if self._gpu_vram_used_path and os.path.exists(self._gpu_vram_used_path):
+        if self._gpu_vram_used_path and self._gpu_vram_total_path:
             try:
-                with open(self._gpu_vram_used_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_vram_used_path, "r") as f:
                     self.gpu_vram_used_mib = int(f.read().strip()) / (1024.0 * 1024.0)
-                with open(self._gpu_vram_total_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_vram_total_path, "r") as f:
                     self.gpu_vram_total_mib = int(f.read().strip()) / (1024.0 * 1024.0)
                 if self.gpu_vram_total_mib > 0:
                     self.gpu_vram_percent = (self.gpu_vram_used_mib / self.gpu_vram_total_mib) * 100.0
             except Exception:
                 pass
 
-        if self._gpu_gtt_used_path and os.path.exists(self._gpu_gtt_used_path):
+        if self._gpu_gtt_used_path and self._gpu_gtt_total_path:
             try:
-                with open(self._gpu_gtt_used_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_gtt_used_path, "r") as f:
                     self.gpu_gtt_used_gib = int(f.read().strip()) / (1024.0 ** 3)
-                with open(self._gpu_gtt_total_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_gtt_total_path, "r") as f:
                     self.gpu_gtt_total_gib = int(f.read().strip()) / (1024.0 ** 3)
             except Exception:
                 pass
 
-        if self._gpu_freq_path and os.path.exists(self._gpu_freq_path):
+        if self._gpu_freq_path:
             try:
-                with open(self._gpu_freq_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_freq_path, "r") as f:
                     self.gpu_clock_mhz = float(f.read().strip()) / 1e6
             except Exception:
                 pass
 
-        if self._gpu_temp_path and os.path.exists(self._gpu_temp_path):
+        if self._gpu_temp_path:
             try:
-                with open(self._gpu_temp_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_temp_path, "r") as f:
                     self.gpu_temp_c = float(f.read().strip()) / 1000.0
             except Exception:
                 pass
 
         # 6. Power Draw Breakdown & Electrical Telemetry (Voltage & Current Amps)
         soc_p = 0.0
-        if self._gpu_power_path and os.path.exists(self._gpu_power_path):
+        if self._gpu_power_path:
             try:
-                with open(self._gpu_power_path, "r", encoding="utf-8") as f:
+                with open(self._gpu_power_path, "r") as f:
                     soc_p = float(f.read().strip()) / 1e6
             except Exception:
                 pass
         self.soc_power_w = max(0.0, soc_p)
 
         if self.soc_power_w > 0:
-            # Dynamic power division between compute cores and GPU units
             w_gpu = max(0.2, self.gpu_percent) * 1.15
             w_cpu = max(0.2, self.cpu_percent)
             ratio = w_gpu / (w_gpu + w_cpu)
             self.gpu_power_w = round(self.soc_power_w * ratio, 1)
             self.cpu_power_w = round(max(0.0, self.soc_power_w - self.gpu_power_w), 1)
         else:
-            # Physics-based dynamic estimation
             self.cpu_power_w = round(4.0 + 15.0 * (self.cpu_percent / 100.0), 1)
             self.gpu_power_w = round(2.5 + 12.0 * (self.gpu_percent / 100.0), 1)
             self.soc_power_w = round(self.cpu_power_w + self.gpu_power_w, 1)
 
         # GPU Graphics Voltage (vddgfx) and Current Amperage
-        if self._gpu_volt_path and os.path.exists(self._gpu_volt_path):
+        if self._gpu_volt_path:
             try:
-                with open(self._gpu_volt_path, "r", encoding="utf-8") as vf:
+                with open(self._gpu_volt_path, "r") as vf:
                     val = float(vf.read().strip())
                     self.gpu_volt_v = round(val / 1000.0 if val > 200 else val, 2)
             except Exception:
@@ -439,9 +466,9 @@ class SystemMetrics:
         self.gpu_current_a = round(self.gpu_power_w / max(0.4, self.gpu_volt_v), 1)
 
         # SoC Northbridge Voltage (vddnb) and Current Amperage
-        if self._soc_volt_path and os.path.exists(self._soc_volt_path):
+        if self._soc_volt_path:
             try:
-                with open(self._soc_volt_path, "r", encoding="utf-8") as vf:
+                with open(self._soc_volt_path, "r") as vf:
                     val = float(vf.read().strip())
                     self.soc_volt_v = round(val / 1000.0 if val > 200 else val, 2)
             except Exception:
@@ -452,15 +479,14 @@ class SystemMetrics:
         self.soc_current_a = round(self.soc_power_w / max(0.4, self.soc_volt_v), 1)
 
         # CPU Core Voltage (Vcore) and Current Amperage
-        if self._cpu_volt_path and os.path.exists(self._cpu_volt_path):
+        if self._cpu_volt_path:
             try:
-                with open(self._cpu_volt_path, "r", encoding="utf-8") as vf:
+                with open(self._cpu_volt_path, "r") as vf:
                     val = float(vf.read().strip())
                     self.cpu_volt_v = round(val / 1000.0 if val > 200 else val, 2)
             except Exception:
                 pass
         else:
-            # AMD Zen / Intel dynamic VF curve model based on frequency and utilization
             v_base = 0.72
             f_ratio = max(0.0, min(1.0, (self.cpu_freq_avg_ghz - 1.4) / (max(2.4, self.cpu_freq_max_ghz) - 1.4)))
             l_ratio = self.cpu_percent / 100.0
@@ -468,39 +494,49 @@ class SystemMetrics:
 
         self.cpu_current_a = round(self.cpu_power_w / max(0.4, self.cpu_volt_v), 1)
 
-        # 7. Battery & AC Power
+        # 7. Battery & AC Power (Direct cached reads)
         try:
-            ac_path = "/sys/class/power_supply/AC/online"
-            if os.path.exists(ac_path):
-                with open(ac_path, "r", encoding="utf-8") as f:
-                    self.ac_online = f.read().strip() == "1"
+            if self._ac_path:
+                try:
+                    with open(self._ac_path, "r") as f:
+                        self.ac_online = f.read().strip() == "1"
+                except Exception:
+                    self.ac_online = True
             else:
                 self.ac_online = True
 
-            if self._bat_dir and os.path.exists(self._bat_dir):
+            if self._bat_dir:
                 self.has_battery = True
-                cap_file = os.path.join(self._bat_dir, "capacity")
-                if os.path.exists(cap_file):
-                    with open(cap_file, "r", encoding="utf-8") as f:
-                        self.battery_percent = int(f.read().strip())
-                stat_file = os.path.join(self._bat_dir, "status")
-                if os.path.exists(stat_file):
-                    with open(stat_file, "r", encoding="utf-8") as f:
-                        self.battery_status = f.read().strip()
+                if self._bat_cap_path:
+                    try:
+                        with open(self._bat_cap_path, "r") as f:
+                            self.battery_percent = int(f.read().strip())
+                    except Exception:
+                        pass
+                if self._bat_stat_path:
+                    try:
+                        with open(self._bat_stat_path, "r") as f:
+                            self.battery_status = f.read().strip()
+                    except Exception:
+                        pass
 
                 self.power_source_str = f"AC [{self.battery_status}]" if self.ac_online else "BATTERY"
 
-                c_now = os.path.join(self._bat_dir, "current_now")
-                v_now = os.path.join(self._bat_dir, "voltage_now")
-                cur = 0.0
                 volt = 12.0
-                if os.path.exists(v_now):
-                    with open(v_now, "r", encoding="utf-8") as vf:
-                        volt = float(vf.read().strip()) / 1e6
-                        self.bat_volt_v = round(volt, 2)
-                if os.path.exists(c_now):
-                    with open(c_now, "r", encoding="utf-8") as cf:
-                        cur = float(cf.read().strip()) / 1e6
+                cur = 0.0
+                if self._bat_volt_path:
+                    try:
+                        with open(self._bat_volt_path, "r") as vf:
+                            volt = float(vf.read().strip()) / 1e6
+                            self.bat_volt_v = round(volt, 2)
+                    except Exception:
+                        pass
+                if self._bat_cur_path:
+                    try:
+                        with open(self._bat_cur_path, "r") as cf:
+                            cur = float(cf.read().strip()) / 1e6
+                    except Exception:
+                        pass
                 if cur > 0:
                     self.bat_current_a = round(cur, 2)
                     self.bat_power_w = round(cur * volt, 1)
@@ -517,13 +553,8 @@ class SystemMetrics:
         except Exception:
             pass
 
-        # 8. NVMe Storage Thermal
-        if self._nvme_temp_path and os.path.exists(self._nvme_temp_path):
-            try:
-                with open(self._nvme_temp_path, "r", encoding="utf-8") as f:
-                    self.nvme_temp_c = float(f.read().strip()) / 1000.0
-            except Exception:
-                pass
+        # 8. NVMe Storage Thermal (Non-blocking async worker)
+        self._trigger_nvme_read()
 
         # 9. Network rates
         try:
@@ -541,22 +572,24 @@ class SystemMetrics:
         except Exception:
             pass
 
-        # 10. Disk Usage
-        try:
-            st = os.statvfs("/")
-            total_b = st.f_blocks * st.f_frsize
-            free_b = st.f_bavail * st.f_frsize
-            used_b = total_b - free_b
-            self.disk_total_gib = total_b / (1024.0 ** 3)
-            self.disk_used_gib = used_b / (1024.0 ** 3)
-            self.disk_free_gib = free_b / (1024.0 ** 3)
-            self.disk_percent = (used_b / total_b) * 100.0 if total_b > 0 else 0.0
-        except Exception:
-            pass
+        # 10. Disk Usage (sampled every 5 seconds to reduce filesystem metadata query overhead)
+        if (now - self._last_disk_time >= 5.0) or force:
+            self._last_disk_time = now
+            try:
+                st = os.statvfs("/")
+                total_b = st.f_blocks * st.f_frsize
+                free_b = st.f_bavail * st.f_frsize
+                used_b = total_b - free_b
+                self.disk_total_gib = total_b / (1024.0 ** 3)
+                self.disk_used_gib = used_b / (1024.0 ** 3)
+                self.disk_free_gib = free_b / (1024.0 ** 3)
+                self.disk_percent = (used_b / total_b) * 100.0 if total_b > 0 else 0.0
+            except Exception:
+                pass
 
-        # 11. Uptime
+        # 11. Uptime (Binary read)
         try:
-            with open("/proc/uptime", "r", encoding="utf-8") as f:
+            with open("/proc/uptime", "rb") as f:
                 self.uptime_seconds = float(f.readline().split()[0])
             days = int(self.uptime_seconds // 86400)
             hours = int((self.uptime_seconds % 86400) // 3600)
@@ -574,12 +607,18 @@ class SystemMetrics:
         try:
             drv = ""
             gov = ""
-            if os.path.exists(self._cpu_drv_path):
-                with open(self._cpu_drv_path, "r", encoding="utf-8") as f:
-                    drv = f.read().strip()
-            if os.path.exists(self._cpu_gov_path):
-                with open(self._cpu_gov_path, "r", encoding="utf-8") as f:
-                    gov = f.read().strip()
+            if self._cpu_drv_path:
+                try:
+                    with open(self._cpu_drv_path, "r") as f:
+                        drv = f.read().strip()
+                except Exception:
+                    pass
+            if self._cpu_gov_path:
+                try:
+                    with open(self._cpu_gov_path, "r") as f:
+                        gov = f.read().strip()
+                except Exception:
+                    pass
             if drv and gov:
                 self.cpu_governor = f"{drv} [{gov}]"
             elif drv or gov:
@@ -587,13 +626,13 @@ class SystemMetrics:
         except Exception:
             pass
 
-        # 13. System Load Averages & Active Tasks
+        # 13. System Load Averages & Active Tasks (Binary read)
         try:
-            with open("/proc/loadavg", "r", encoding="utf-8") as f:
-                parts = f.read().strip().split()
+            with open("/proc/loadavg", "rb") as f:
+                parts = f.read().split()
                 if len(parts) >= 4:
-                    self.load_avg = f"{parts[0]} · {parts[1]} · {parts[2]}"
-                    run_proc = parts[3].split("/")
+                    self.load_avg = f"{parts[0].decode()} · {parts[1].decode()} · {parts[2].decode()}"
+                    run_proc = parts[3].decode().split("/")
                     if len(run_proc) == 2:
                         self.procs_str = f"{run_proc[0]} Run · {run_proc[1]} Tasks"
         except Exception:

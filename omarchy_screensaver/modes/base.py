@@ -35,6 +35,21 @@ class BaseMode:
         self.jitter_x: float = 0.0
         self.jitter_y: float = 0.0
         self._last_jitter_time: float = 0.0
+        self._shared_layout: Optional[Pango.Layout] = None
+
+    _FONT_DESC_CACHE: dict = {}
+
+    @classmethod
+    def _get_font_desc(cls, font_family: str, font_size_pt: float, weight: Pango.Weight) -> Pango.FontDescription:
+        key = (font_family, font_size_pt, weight)
+        desc = cls._FONT_DESC_CACHE.get(key)
+        if desc is None:
+            desc = Pango.FontDescription()
+            desc.set_family(font_family)
+            desc.set_size(int(font_size_pt * Pango.SCALE))
+            desc.set_weight(weight)
+            cls._FONT_DESC_CACHE[key] = desc
+        return desc
 
     def update_theme(self, theme: ThemePalette):
         """Update active theme palette without recreating simulation."""
@@ -121,13 +136,9 @@ class BaseMode:
         weight: Pango.Weight = Pango.Weight.NORMAL,
         alignment: Pango.Alignment = Pango.Alignment.CENTER,
     ) -> Pango.Layout:
-        """Create and configure a Pango layout."""
+        """Create and configure a Pango layout (using cached FontDescription)."""
         layout = PangoCairo.create_layout(cr)
-        desc = Pango.FontDescription()
-        desc.set_family(font_family)
-        desc.set_size(int(font_size_pt * Pango.SCALE))
-        desc.set_weight(weight)
-        layout.set_font_description(desc)
+        layout.set_font_description(self._get_font_desc(font_family, font_size_pt, weight))
         layout.set_text(text, -1)
         layout.set_alignment(alignment)
         return layout
@@ -145,16 +156,17 @@ class BaseMode:
         weight: Pango.Weight = Pango.Weight.NORMAL,
         glow: bool = False,
     ) -> Tuple[float, float]:
-        """Render text with Pango with optional subtle glow in dark mode."""
-        pango_align = Pango.Alignment.CENTER
-        if align == "left":
-            pango_align = Pango.Alignment.LEFT
-        elif align == "right":
-            pango_align = Pango.Alignment.RIGHT
+        """Render text with Pango using high-performance layout reuse and cached font metrics."""
+        if self._shared_layout is None:
+            self._shared_layout = PangoCairo.create_layout(cr)
+        else:
+            PangoCairo.update_layout(cr, self._shared_layout)
+        layout = self._shared_layout
 
-        layout = self.create_pango_layout(cr, text, font_family, font_size_pt, weight, pango_align)
-        ink, logical = layout.get_pixel_extents()
-        w, h = logical.width, logical.height
+        layout.set_font_description(self._get_font_desc(font_family, font_size_pt, weight))
+        layout.set_text(text, -1)
+
+        w, h = layout.get_pixel_size()
 
         render_x = x
         if align == "center":
@@ -165,11 +177,12 @@ class BaseMode:
         render_y = y - h * 0.5
 
         if glow and getattr(self.theme, "is_dark", True):
-            glow_rgba = with_alpha(color_rgba, color_rgba[3] * 0.25)
+            glow_rgba = with_alpha(color_rgba, color_rgba[3] * 0.28)
             cr.set_source_rgba(*glow_rgba)
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1)]:
-                cr.move_to(render_x + dx, render_y + dy)
-                PangoCairo.show_layout(cr, layout)
+            cr.move_to(render_x - 1.0, render_y - 1.0)
+            PangoCairo.show_layout(cr, layout)
+            cr.move_to(render_x + 1.0, render_y + 1.0)
+            PangoCairo.show_layout(cr, layout)
 
         cr.set_source_rgba(*color_rgba)
         cr.move_to(render_x, render_y)
