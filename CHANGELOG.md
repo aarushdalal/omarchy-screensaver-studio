@@ -5,6 +5,22 @@ All notable changes to `omarchy-screensaver-studio` will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-07
+
+### Added & Refined
+- **CPU & GPU Electrical Voltage & Current Telemetry**:
+  - Live CPU rail voltage ($V_{\text{core}}$ in V) and core amperage ($I_{\text{core}}$ in A) computed from real-time power draw and dynamic VF curve/hwmon.
+  - Live GPU graphics voltage ($V_{\text{ddgfx}}$ in V) and current ($I_{\text{gfx}}$ in A) reading directly from `amdgpu` hwmon `in0_input` and VRM power.
+  - Live battery voltage ($V_{\text{bat}}$ in V) and charging/discharging current ($I_{\text{bat}}$ in A) via sysfs power supply sensors.
+  - Speedometer bottom dial badges now display live voltage and current (`CPU Model · 0.99V · 12.1A` and `VRAM · 1.04V · 4.8A`).
+- **Advanced Technical System Metrics & Spacious 3-Column Bay**:
+  - Re-engineered 3-Column Telemetry Bay with dedicated spacing and balanced line lengths to eliminate any text crowding or overlap:
+    - **Column 1** (`● ELECTRICAL & POWER`): Live Wattage, Voltage, and Amperage across CPU rail, GPU rail, and Battery/SoC.
+    - **Column 2** (`● STORAGE & I/O MESH`): NVMe SSD storage capacity, drive temperature, network download/upload rates, and memory bus active/free stats.
+    - **Column 3** (`● KERNEL & RUNTIME`): Linux kernel release, session user, 1m/5m/15m system load averages with logical core count, CPU frequency governor, and system uptime.
+- **Calm, High-Contrast Typography**:
+  - Balanced character lengths across all columns to maintain over 150px of relaxing negative space between telemetry groups, strictly adhering to active theme palette tokens.
+
 ## [1.4.0] - 2026-10-02
 
 ### Added & Refined

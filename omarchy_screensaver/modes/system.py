@@ -34,6 +34,14 @@ class SystemDashboardMode(BaseMode):
         self.eased_soc_power: float = 0.0
         self.eased_cpu_power: float = 0.0
         self.eased_gpu_power: float = 0.0
+        self.eased_cpu_volt: float = 0.88
+        self.eased_cpu_current: float = 5.0
+        self.eased_gpu_volt: float = 0.90
+        self.eased_gpu_current: float = 2.0
+        self.eased_soc_volt: float = 0.83
+        self.eased_soc_current: float = 8.0
+        self.eased_bat_volt: float = 12.0
+        self.eased_bat_current: float = 0.0
 
     def update(self, dt: float, metrics: SystemMetrics, media_info: Optional[MediaInfo]):
         super().update(dt, metrics, media_info)
@@ -49,6 +57,14 @@ class SystemDashboardMode(BaseMode):
             self.eased_soc_power += (metrics.soc_power_w - self.eased_soc_power) * min(1.0, dt * 4.5)
             self.eased_cpu_power += (metrics.cpu_power_w - self.eased_cpu_power) * min(1.0, dt * 4.5)
             self.eased_gpu_power += (metrics.gpu_power_w - self.eased_gpu_power) * min(1.0, dt * 4.5)
+            self.eased_cpu_volt += (metrics.cpu_volt_v - self.eased_cpu_volt) * min(1.0, dt * 4.5)
+            self.eased_cpu_current += (metrics.cpu_current_a - self.eased_cpu_current) * min(1.0, dt * 4.5)
+            self.eased_gpu_volt += (metrics.gpu_volt_v - self.eased_gpu_volt) * min(1.0, dt * 4.5)
+            self.eased_gpu_current += (metrics.gpu_current_a - self.eased_gpu_current) * min(1.0, dt * 4.5)
+            self.eased_soc_volt += (metrics.soc_volt_v - self.eased_soc_volt) * min(1.0, dt * 4.5)
+            self.eased_soc_current += (metrics.soc_current_a - self.eased_soc_current) * min(1.0, dt * 4.5)
+            self.eased_bat_volt += (metrics.bat_volt_v - self.eased_bat_volt) * min(1.0, dt * 4.5)
+            self.eased_bat_current += (metrics.bat_current_a - self.eased_bat_current) * min(1.0, dt * 4.5)
 
     def _draw_speedometer_gauge(
         self,
@@ -435,6 +451,8 @@ class SystemDashboardMode(BaseMode):
             if m.cpu_temp_c > 0
             else f"{m.cpu_freq_avg_ghz:4.2f} GHz"
         )
+        cpu_short = m.cpu_model.replace(" with Radeon Graphics", "").strip()
+        cpu_badge = f"{cpu_short}  ·  {self.eased_cpu_volt:4.2f}V · {self.eased_cpu_current:4.1f}A"
         self._draw_speedometer_gauge(
             cr,
             cx - gauge_offset_x,
@@ -444,7 +462,7 @@ class SystemDashboardMode(BaseMode):
             "CPU LOAD",
             f"{self.eased_cpu:5.1f}%",
             cpu_sub,
-            m.cpu_model,
+            cpu_badge,
             gauge_color,
             fade,
         )
@@ -455,7 +473,7 @@ class SystemDashboardMode(BaseMode):
             if m.gpu_temp_c > 0
             else f"{m.gpu_clock_mhz:4.0f} MHz"
         )
-        gpu_badge = f"VRAM {m.gpu_vram_used_mib:3.0f}/{m.gpu_vram_total_mib:3.0f} MB  ·  GTT {m.gpu_gtt_used_gib:3.1f} GB"
+        gpu_badge = f"VRAM {m.gpu_vram_used_mib:3.0f}/{m.gpu_vram_total_mib:3.0f} MB  ·  {self.eased_gpu_volt:4.2f}V · {self.eased_gpu_current:4.1f}A"
         self._draw_speedometer_gauge(
             cr,
             cx,
@@ -572,10 +590,10 @@ class SystemDashboardMode(BaseMode):
             else f"{m.net_tx_rate / 1024:4.0f}K"
         )
 
-        # Column 1: Power & Battery (Aligned under CPU Dial)
+        # Column 1: Electrical & Power (Aligned under CPU Dial)
         self.draw_text(
             cr,
-            "●  POWER & BATTERY",
+            "●  ELECTRICAL & POWER",
             col_left_x,
             telem_y,
             self.FONT_MONO,
@@ -586,34 +604,43 @@ class SystemDashboardMode(BaseMode):
         )
         self.draw_text(
             cr,
-            f"CPU {self.eased_cpu_power:4.1f}W   ·   GPU {self.eased_gpu_power:4.1f}W",
+            f"CPU RAIL   {self.eased_cpu_power:4.1f}W · {self.eased_cpu_volt:4.2f}V · {self.eased_cpu_current:4.1f}A",
             col_left_x,
-            telem_y + 25.0 * ui_scale,
+            telem_y + 24.0 * ui_scale,
             self.FONT_MONO,
-            11.5 * ui_scale,
+            10.5 * ui_scale,
             self.oled_color(self.theme.text_secondary_color(fade)),
             align="center",
         )
-        bat_sub = (
-            f"SoC {self.eased_soc_power:4.1f}W   ·   BAT {m.battery_percent}% ({m.bat_power_w:3.1f}W)"
-            if m.has_battery
-            else f"TOTAL SoC {self.eased_soc_power:4.1f}W   ·   AC POWERED"
+        self.draw_text(
+            cr,
+            f"GPU RAIL   {self.eased_gpu_power:4.1f}W · {self.eased_gpu_volt:4.2f}V · {self.eased_gpu_current:4.1f}A",
+            col_left_x,
+            telem_y + 47.0 * ui_scale,
+            self.FONT_MONO,
+            10.5 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade * 0.90)),
+            align="center",
         )
+        if m.has_battery:
+            bat_sub = f"BATTERY    {m.battery_percent}% · {self.eased_bat_volt:4.1f}V · {self.eased_bat_current:4.1f}A [{m.battery_status.upper()}]"
+        else:
+            bat_sub = f"TOTAL SoC  {self.eased_soc_power:4.1f}W · {self.eased_soc_volt:4.2f}V · {self.eased_soc_current:4.1f}A"
         self.draw_text(
             cr,
             bat_sub,
             col_left_x,
-            telem_y + 49.0 * ui_scale,
+            telem_y + 70.0 * ui_scale,
             self.FONT_MONO,
-            11.0 * ui_scale,
+            10.5 * ui_scale,
             self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
             align="center",
         )
 
-        # Column 2: Storage & Network (Aligned under GPU Dial)
+        # Column 2: Storage & I/O Mesh (Aligned under GPU Dial)
         self.draw_text(
             cr,
-            "●  STORAGE & NETWORK",
+            "●  STORAGE & I/O MESH",
             col_mid_x,
             telem_y,
             self.FONT_MONO,
@@ -623,40 +650,47 @@ class SystemDashboardMode(BaseMode):
             weight=Pango.Weight.BOLD,
         )
         disk_sub = (
-            f"SSD {m.disk_used_gib:4.0f}/{m.disk_total_gib:4.0f} GB ({m.disk_percent:2.0f}%)   ·   {m.nvme_temp_c:2.0f}°C"
+            f"SSD NVMe   {m.disk_used_gib:3.0f}/{m.disk_total_gib:3.0f} GB · {m.nvme_temp_c:2.0f}°C"
             if m.nvme_temp_c > 0
-            else f"SSD {m.disk_used_gib:4.0f}/{m.disk_total_gib:4.0f} GB ({m.disk_percent:2.0f}%)"
+            else f"SSD NVMe   {m.disk_used_gib:3.0f}/{m.disk_total_gib:3.0f} GB"
         )
         self.draw_text(
             cr,
             disk_sub,
             col_mid_x,
-            telem_y + 25.0 * ui_scale,
+            telem_y + 24.0 * ui_scale,
             self.FONT_MONO,
-            11.5 * ui_scale,
+            10.5 * ui_scale,
             self.oled_color(self.theme.text_secondary_color(fade)),
             align="center",
         )
-        net_sub = (
-            f"NET ({m.primary_net_iface})  ↓ {rx_fmt}/s   ↑ {tx_fmt}/s"
-            if m.primary_net_iface
-            else "NET OFFLINE"
-        )
+        net_sub = f"NETWORK    ↓ {rx_fmt}/s  ↑ {tx_fmt}/s"
         self.draw_text(
             cr,
             net_sub,
             col_mid_x,
-            telem_y + 49.0 * ui_scale,
+            telem_y + 47.0 * ui_scale,
             self.FONT_MONO,
-            11.0 * ui_scale,
+            10.5 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade * 0.90)),
+            align="center",
+        )
+        mem_bus_sub = f"MEM BUS    {m.mem_used_gib:3.1f}G ACT · {m.mem_avail_gib:3.1f}G FREE"
+        self.draw_text(
+            cr,
+            mem_bus_sub,
+            col_mid_x,
+            telem_y + 70.0 * ui_scale,
+            self.FONT_MONO,
+            10.5 * ui_scale,
             self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
             align="center",
         )
 
-        # Column 3: Platform & Session (Aligned under Memory Dial)
+        # Column 3: Kernel & System Runtime (Aligned under Memory Dial)
         self.draw_text(
             cr,
-            "●  SYSTEM PLATFORM",
+            "●  KERNEL & RUNTIME",
             col_right_x,
             telem_y,
             self.FONT_MONO,
@@ -667,21 +701,32 @@ class SystemDashboardMode(BaseMode):
         )
         self.draw_text(
             cr,
-            f"KERNEL {m.kernel}",
+            f"KERNEL     {m.kernel} · {m.user}",
             col_right_x,
-            telem_y + 25.0 * ui_scale,
+            telem_y + 24.0 * ui_scale,
             self.FONT_MONO,
-            11.5 * ui_scale,
+            10.5 * ui_scale,
             self.oled_color(self.theme.text_secondary_color(fade)),
             align="center",
         )
         self.draw_text(
             cr,
-            f"UPTIME {m.uptime_str}   ·   {m.user}@{m.hostname}",
+            f"LOAD AVG   {m.load_avg} ({m.cpu_cores}C)",
             col_right_x,
-            telem_y + 49.0 * ui_scale,
+            telem_y + 47.0 * ui_scale,
             self.FONT_MONO,
-            11.0 * ui_scale,
+            10.5 * ui_scale,
+            self.oled_color(self.theme.text_secondary_color(fade * 0.90)),
+            align="center",
+        )
+        gov_short = m.cpu_governor.split()[0]
+        self.draw_text(
+            cr,
+            f"GOVERNOR   {gov_short} · UP {m.uptime_str}",
+            col_right_x,
+            telem_y + 70.0 * ui_scale,
+            self.FONT_MONO,
+            10.5 * ui_scale,
             self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
             align="center",
         )

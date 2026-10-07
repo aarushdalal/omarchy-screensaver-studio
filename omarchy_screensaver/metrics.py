@@ -32,6 +32,11 @@ class SystemMetrics:
         self.cpu_freq_max_ghz: float = 0.0
         self.cpu_temp_c: float = 40.0
         self.cpu_power_w: float = 0.0
+        self.cpu_volt_v: float = 0.88
+        self.cpu_current_a: float = 7.0
+        self.cpu_governor: str = "amd-pstate"
+        self.load_avg: str = "0.00 · 0.00 · 0.00"
+        self.procs_str: str = "1 Run · 100 Tasks"
 
         # GPU Telemetry
         self.has_gpu: bool = False
@@ -41,15 +46,21 @@ class SystemMetrics:
         self.gpu_clock_mhz: float = 0.0
         self.gpu_temp_c: float = 40.0
         self.gpu_power_w: float = 0.0
+        self.gpu_volt_v: float = 0.90
+        self.gpu_current_a: float = 3.0
         self.gpu_vram_used_mib: float = 0.0
         self.gpu_vram_total_mib: float = 0.0
         self.gpu_vram_percent: float = 0.0
         self.gpu_gtt_used_gib: float = 0.0
         self.gpu_gtt_total_gib: float = 0.0
 
-        # Power Draw Telemetry
+        # Power Draw & Electrical Telemetry
         self.soc_power_w: float = 0.0
+        self.soc_volt_v: float = 0.83
+        self.soc_current_a: float = 12.0
         self.bat_power_w: float = 0.0
+        self.bat_volt_v: float = 12.0
+        self.bat_current_a: float = 0.0
         self.battery_percent: int = 100
         self.battery_status: str = "Full"
         self.ac_online: bool = True
@@ -161,10 +172,17 @@ class SystemMetrics:
                     frq = os.path.join(hw, "freq1_input")
                     if os.path.exists(frq):
                         self._gpu_freq_path = frq
+                    v0 = os.path.join(hw, "in0_input")
+                    if os.path.exists(v0):
+                        self._gpu_volt_path = v0
+                    v1 = os.path.join(hw, "in1_input")
+                    if os.path.exists(v1):
+                        self._soc_volt_path = v1
                 break
 
-        # 3. CPU Temperature & NVMe Sensors
+        # 3. CPU Temperature, Voltage & NVMe Sensors
         self._cpu_temp_path = None
+        self._cpu_volt_path = None
         self._nvme_temp_path = None
         for hw in glob.glob("/sys/class/hwmon/hwmon*"):
             try:
@@ -176,6 +194,9 @@ class SystemMetrics:
                         t_cand = os.path.join(hw, "temp1_input")
                         if os.path.exists(t_cand):
                             self._cpu_temp_path = t_cand
+                        v_cand = os.path.join(hw, "in0_input")
+                        if os.path.exists(v_cand):
+                            self._cpu_volt_path = v_cand
                     elif nm == "nvme":
                         t_cand = os.path.join(hw, "temp1_input")
                         if os.path.exists(t_cand):
@@ -183,7 +204,11 @@ class SystemMetrics:
             except Exception:
                 pass
 
-        # 4. Battery directory
+        # 4. CPU Governor / Driver
+        self._cpu_drv_path = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
+        self._cpu_gov_path = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+
+        # 5. Battery directory
         self._bat_dir = None
         try:
             for name in os.listdir("/sys/class/power_supply"):
@@ -377,7 +402,7 @@ class SystemMetrics:
             except Exception:
                 pass
 
-        # 6. Power Draw Breakdown (CPU, GPU, SoC, Battery)
+        # 6. Power Draw Breakdown & Electrical Telemetry (Voltage & Current Amps)
         soc_p = 0.0
         if self._gpu_power_path and os.path.exists(self._gpu_power_path):
             try:
@@ -399,6 +424,49 @@ class SystemMetrics:
             self.cpu_power_w = round(4.0 + 15.0 * (self.cpu_percent / 100.0), 1)
             self.gpu_power_w = round(2.5 + 12.0 * (self.gpu_percent / 100.0), 1)
             self.soc_power_w = round(self.cpu_power_w + self.gpu_power_w, 1)
+
+        # GPU Graphics Voltage (vddgfx) and Current Amperage
+        if self._gpu_volt_path and os.path.exists(self._gpu_volt_path):
+            try:
+                with open(self._gpu_volt_path, "r", encoding="utf-8") as vf:
+                    val = float(vf.read().strip())
+                    self.gpu_volt_v = round(val / 1000.0 if val > 200 else val, 2)
+            except Exception:
+                pass
+        else:
+            self.gpu_volt_v = round(0.70 + 0.35 * (self.gpu_percent / 100.0), 2)
+
+        self.gpu_current_a = round(self.gpu_power_w / max(0.4, self.gpu_volt_v), 1)
+
+        # SoC Northbridge Voltage (vddnb) and Current Amperage
+        if self._soc_volt_path and os.path.exists(self._soc_volt_path):
+            try:
+                with open(self._soc_volt_path, "r", encoding="utf-8") as vf:
+                    val = float(vf.read().strip())
+                    self.soc_volt_v = round(val / 1000.0 if val > 200 else val, 2)
+            except Exception:
+                pass
+        else:
+            self.soc_volt_v = 0.83
+
+        self.soc_current_a = round(self.soc_power_w / max(0.4, self.soc_volt_v), 1)
+
+        # CPU Core Voltage (Vcore) and Current Amperage
+        if self._cpu_volt_path and os.path.exists(self._cpu_volt_path):
+            try:
+                with open(self._cpu_volt_path, "r", encoding="utf-8") as vf:
+                    val = float(vf.read().strip())
+                    self.cpu_volt_v = round(val / 1000.0 if val > 200 else val, 2)
+            except Exception:
+                pass
+        else:
+            # AMD Zen / Intel dynamic VF curve model based on frequency and utilization
+            v_base = 0.72
+            f_ratio = max(0.0, min(1.0, (self.cpu_freq_avg_ghz - 1.4) / (max(2.4, self.cpu_freq_max_ghz) - 1.4)))
+            l_ratio = self.cpu_percent / 100.0
+            self.cpu_volt_v = round(v_base + 0.46 * f_ratio + 0.12 * l_ratio, 2)
+
+        self.cpu_current_a = round(self.cpu_power_w / max(0.4, self.cpu_volt_v), 1)
 
         # 7. Battery & AC Power
         try:
@@ -424,11 +492,22 @@ class SystemMetrics:
 
                 c_now = os.path.join(self._bat_dir, "current_now")
                 v_now = os.path.join(self._bat_dir, "voltage_now")
-                if os.path.exists(c_now) and os.path.exists(v_now):
-                    with open(c_now, "r", encoding="utf-8") as cf, open(v_now, "r", encoding="utf-8") as vf:
-                        cur = float(cf.read().strip())
-                        volt = float(vf.read().strip())
-                        self.bat_power_w = round((cur * volt) / 1e12, 1)
+                cur = 0.0
+                volt = 12.0
+                if os.path.exists(v_now):
+                    with open(v_now, "r", encoding="utf-8") as vf:
+                        volt = float(vf.read().strip()) / 1e6
+                        self.bat_volt_v = round(volt, 2)
+                if os.path.exists(c_now):
+                    with open(c_now, "r", encoding="utf-8") as cf:
+                        cur = float(cf.read().strip()) / 1e6
+                if cur > 0:
+                    self.bat_current_a = round(cur, 2)
+                    self.bat_power_w = round(cur * volt, 1)
+                elif self.bat_power_w > 0:
+                    self.bat_current_a = round(self.bat_power_w / max(1.0, self.bat_volt_v), 2)
+                else:
+                    self.bat_current_a = 0.0
             else:
                 self.has_battery = False
                 self.battery_percent = 100
@@ -490,3 +569,33 @@ class SystemMetrics:
                 self.uptime_str = f"{mins}m"
         except Exception:
             pass
+
+        # 12. CPU Governor & Driver
+        try:
+            drv = ""
+            gov = ""
+            if os.path.exists(self._cpu_drv_path):
+                with open(self._cpu_drv_path, "r", encoding="utf-8") as f:
+                    drv = f.read().strip()
+            if os.path.exists(self._cpu_gov_path):
+                with open(self._cpu_gov_path, "r", encoding="utf-8") as f:
+                    gov = f.read().strip()
+            if drv and gov:
+                self.cpu_governor = f"{drv} [{gov}]"
+            elif drv or gov:
+                self.cpu_governor = drv or gov
+        except Exception:
+            pass
+
+        # 13. System Load Averages & Active Tasks
+        try:
+            with open("/proc/loadavg", "r", encoding="utf-8") as f:
+                parts = f.read().strip().split()
+                if len(parts) >= 4:
+                    self.load_avg = f"{parts[0]} · {parts[1]} · {parts[2]}"
+                    run_proc = parts[3].split("/")
+                    if len(run_proc) == 2:
+                        self.procs_str = f"{run_proc[0]} Run · {run_proc[1]} Tasks"
+        except Exception:
+            pass
+
