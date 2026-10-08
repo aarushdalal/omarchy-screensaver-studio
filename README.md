@@ -21,7 +21,7 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
   - `warp`: Relativistic 3D starfield hyperspace jump with speed streaks and depth scaling.
   - `geometry`: Hypnotic 4D rotating hypercube (tesseract) with depth cueing and chromatic glow.
   - `singularity`: Kerr rotating black hole with relativistic Doppler-beamed accretion disk.
-  - `system`: Spacious Speedometer Telemetry Cluster — Automotive instrument panel with precision tachometer dials (CPU, GPU, RAM), 10-division automotive ticks, dual-trace Bezier live system sparkline (60s), and a dedicated 3-column telemetry bay (Power & Battery, Storage & Network, Platform & Session) with generous breathing room.
+  - `system`: Digital Cockpit Speedometer Telemetry Cluster — Automotive instrument cluster with precision tachometers (CPU, GPU, RAM), dynamic voltage & amperage badges, dual-trace Bezier 60-second activity sparkline, and an elevated 3-column precision telemetry deck (`ELECTRICAL & POWER` with CPU/GPU/Total SoC/DRAM wattage/volts/amps, `STORAGE & MEMORY I/O` with live NVMe read/write MB/s, IOPS, lifetime transfer totals, and RAM bus bandwidth, and `KERNEL & RUNTIME` with 16-thread queue capacity and load averages).
   - `terminal`: Borderless diagnostic waterfall streaming live Linux kernel and procfs metrics.
   - `visualizer`: Floating reactive equalizer bars with real-time PipeWire spectrum and MPRIS metadata.
   - `aurora`: Multi-octave harmonic spline ribbons with celestial stardust motes.
@@ -101,7 +101,7 @@ This project contains native Python GTK4 rendering code and optional C extension
   - `geometry`: 4D rotating hypercube (tesseract) with depth cueing
   - `singularity`: Kerr black hole with Doppler-beamed accretion disk (220 particles)
   - `terminal`: Borderless holographic diagnostic stream
-  - `system`: Digital Cockpit Speedometer Telemetry Cluster with GPU/CPU tachometers, power draw, and VRAM HUD
+  - `system`: Digital Cockpit Speedometer Telemetry Cluster — Automotive tachometers, live CPU/GPU/SoC/DRAM electrical rails (W, V, A), real-time NVMe read/write speeds, IOPS, and lifetime stats, memory bus bandwidth (GB/s), and 16-thread run queue capacity
   - `visualizer`: Real-time PipeWire audio spectrum & MPRIS metadata
   - `aurora`: Harmonic Perlin spline ribbons with stardust motes (20 FPS smooth flow)
   - `cyber_nexus`: Subtle glowing neural nodes connected by pulsing data lines in deep OLED black
@@ -117,6 +117,15 @@ This project contains native Python GTK4 rendering code and optional C extension
 - **Omarchy Menu Integration**: Bundled `omarchy-menu-extension.jsonc` adds direct screensaver controls into Omarchy launcher menus
 - **Idle Lifecycle Integration**: App ID `org.omarchy.screensaver` — integrates with Quickshell idle services, dismisses instantly on input
 - **Real-Time Audio Spectrum**: Optional C/PipeWire backend with 36 Goertzel filters, sub-10ms latency
+
+### Advanced System Telemetry Cockpit (v1.6.0)
+
+The `system` mode provides an automotive-grade telemetry cluster engineered for technical depth and visual harmony:
+- **Vertical Geometry Rebalance**: Elevated geometry (+173px upshift) reclaims the upper ~40% display margin on 1080p+ screens, centering the instrument dials and telemetry deck for optimal viewing.
+- **Electrical & Power Deck**: Real-time wattage, voltage, and current monitoring across CPU Core (`V_core`, `I_core`), GPU Graphics (`V_gfx`, `I_gfx`), Total Package SoC (`V_soc`, `I_soc`), physical DRAM memory rails (`1.20V DDR4`), and Battery/AC supply.
+- **Storage & Memory I/O Mesh**: Live primary NVMe read/write throughput (`↓ MB/s`, `↑ MB/s`), active IOPS, lifetime cumulative storage transactions (`GB R`, `GB W`, `M IO`), active/free RAM bus distribution, and real-time memory bandwidth (`↔ GB/s`, `M PG/s`).
+- **Kernel & Capacity Analytics**: Kernel release, 1/5/15-minute load averages, 16-thread queue saturation percentage (`QUEUE: X.X RUNNABLE / 16C (XX%)`), live network throughput, scaling governor, and uptime.
+- **Zero-Jitter Tabular Layout**: Fixed 10-character keys with monospace alignment, hairline dividers, and theme-adaptive coloring across dark and light palettes.
 
 ## Showcase Gallery
 
