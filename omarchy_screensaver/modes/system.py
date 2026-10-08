@@ -43,6 +43,17 @@ class SystemDashboardMode(BaseMode):
         self.eased_bat_volt: float = 12.0
         self.eased_bat_current: float = 0.0
 
+        # Eased storage I/O and RAM throughput metrics
+        self.eased_disk_read_mb: float = 0.0
+        self.eased_disk_write_mb: float = 0.0
+        self.eased_disk_read_iops: float = 0.0
+        self.eased_disk_write_iops: float = 0.0
+        self.eased_ram_power: float = 1.8
+        self.eased_ram_volt: float = 1.20
+        self.eased_ram_current: float = 1.5
+        self.eased_ram_speed_gbs: float = 0.0
+        self.eased_ram_mops: float = 0.0
+
         # Cached clock strings to eliminate redundant per-frame strftime allocations
         self._cached_sec: int = -1
         self._cached_time_str: str = ""
@@ -70,6 +81,17 @@ class SystemDashboardMode(BaseMode):
             self.eased_soc_current += (metrics.soc_current_a - self.eased_soc_current) * min(1.0, dt * 4.5)
             self.eased_bat_volt += (metrics.bat_volt_v - self.eased_bat_volt) * min(1.0, dt * 4.5)
             self.eased_bat_current += (metrics.bat_current_a - self.eased_bat_current) * min(1.0, dt * 4.5)
+
+            self.eased_disk_read_mb += (metrics.disk_read_mb_s - self.eased_disk_read_mb) * min(1.0, dt * 5.0)
+            self.eased_disk_write_mb += (metrics.disk_write_mb_s - self.eased_disk_write_mb) * min(1.0, dt * 5.0)
+            self.eased_disk_read_iops += (metrics.disk_read_iops - self.eased_disk_read_iops) * min(1.0, dt * 5.0)
+            self.eased_disk_write_iops += (metrics.disk_write_iops - self.eased_disk_write_iops) * min(1.0, dt * 5.0)
+
+            self.eased_ram_power += (metrics.ram_power_w - self.eased_ram_power) * min(1.0, dt * 4.5)
+            self.eased_ram_volt += (metrics.ram_volt_v - self.eased_ram_volt) * min(1.0, dt * 4.5)
+            self.eased_ram_current += (metrics.ram_current_a - self.eased_ram_current) * min(1.0, dt * 4.5)
+            self.eased_ram_speed_gbs += (metrics.ram_speed_gbs - self.eased_ram_speed_gbs) * min(1.0, dt * 4.5)
+            self.eased_ram_mops += (metrics.ram_mops - self.eased_ram_mops) * min(1.0, dt * 4.5)
 
     def _draw_speedometer_gauge(
         self,
@@ -430,9 +452,9 @@ class SystemDashboardMode(BaseMode):
         time_str = self._cached_time_str
         date_str = self._cached_date_str
 
-        top_y = cy - 252.0 * ui_scale
+        top_y = min(115.0 * ui_scale, height * 0.11) + self.burn_y + self.jitter_y
 
-        # Floating holographic header
+        # Floating holographic header (upshifted for optimal vertical balance)
         self.draw_text(
             cr,
             time_str,
@@ -463,9 +485,9 @@ class SystemDashboardMode(BaseMode):
         m = self.metrics
 
         # 1. Tri-Gauge Instrument Cluster (CPU, GPU, RAM) with Speedometer Tachometer Styling
-        gauge_radius = min(88.0 * ui_scale, width * 0.088)
+        gauge_radius = min(86.0 * ui_scale, width * 0.086)
         gauge_offset_x = min(380.0 * ui_scale, width * 0.28)
-        gauge_y = top_y + 195.0 * ui_scale
+        gauge_y = top_y + 182.0 * ui_scale
 
         # Unified theme palette: all instrument dials share the active theme's signature accent
         gauge_color = self.theme.accent
@@ -531,11 +553,10 @@ class SystemDashboardMode(BaseMode):
         )
 
         # 2. Central Live Dual-Trace Bezier Telemetry Sparkline (Theme-Synchronized)
-        # Width matches exactly the distance from left dial center to right dial center
         chart_w = gauge_offset_x * 2.0
         chart_h = 74.0 * ui_scale
         chart_x = cx - chart_w * 0.5
-        chart_y = gauge_y + gauge_radius + 85.0 * ui_scale
+        chart_y = gauge_y + gauge_radius + 80.0 * ui_scale
 
         # Sparkline colors strictly from active theme palette
         cpu_curve_color = self.theme.accent
@@ -598,8 +619,8 @@ class SystemDashboardMode(BaseMode):
 
         # 3. Dedicated 3-Column Telemetry Bay (Spacious, Uncluttered, Precision Aligned)
         # Vertically aligned with each instrument dial above for intuitive glanceability
-        telem_y = chart_y + chart_h + 54.0 * ui_scale
-        col_w = 330.0 * ui_scale
+        telem_y = chart_y + chart_h + 52.0 * ui_scale
+        col_w = 340.0 * ui_scale
 
         # Formats for network throughput
         rx_fmt = (
@@ -624,11 +645,15 @@ class SystemDashboardMode(BaseMode):
         if m.has_battery:
             bat_row = f"BATTERY     {m.battery_percent:4d}% · {self.eased_bat_volt:4.1f}V · {self.eased_bat_current:4.1f}A [{bat_status_short}]"
         else:
-            bat_row = "AC POWER    ONLINE · LINE MAINS ACTIVE"
+            bat_row = "BATTERY     NONE · NO CELL INSTALLED"
+
+        ac_supply_str = "ONLINE · LINE PASS-THROUGH [AC]" if m.ac_online else "OFFLINE · DISCHARGING ON BAT"
 
         disk_temp_str = f" · {m.nvme_temp_c:2.0f}°C" if m.nvme_temp_c > 0 else ""
         net_iface_str = f" [{m.primary_net_iface}]" if m.primary_net_iface else ""
         gov_short = m.cpu_governor.split()[0] if m.cpu_governor else "powersave"
+
+        queue_note = m.load_queue_str if m.load_queue_str else f"QUEUE: {m.procs_str}"
 
         cols_data = [
             (
@@ -638,17 +663,21 @@ class SystemDashboardMode(BaseMode):
                     f"CPU RAIL    {self.eased_cpu_power:4.1f}W · {self.eased_cpu_volt:4.2f}V · {self.eased_cpu_current:4.1f}A",
                     f"GPU RAIL    {self.eased_gpu_power:4.1f}W · {self.eased_gpu_volt:4.2f}V · {self.eased_gpu_current:4.1f}A",
                     f"TOTAL SoC   {self.eased_soc_power:4.1f}W · {self.eased_soc_volt:4.2f}V · {self.eased_soc_current:4.1f}A",
+                    f"DRAM POWER  {self.eased_ram_power:4.1f}W · {self.eased_ram_volt:4.2f}V · {self.eased_ram_current:4.1f}A",
                     bat_row,
+                    f"AC SUPPLY   {ac_supply_str}",
                 ],
             ),
             (
                 cx,
-                "●  STORAGE & I/O MESH",
+                "●  STORAGE & MEMORY I/O",
                 [
                     f"SSD NVMe    {m.disk_used_gib:3.0f}/{m.disk_total_gib:3.0f} GB ({m.disk_percent:2.0f}%){disk_temp_str}",
-                    f"NETWORK     ↓ {rx_fmt}/s  ↑ {tx_fmt}/s{net_iface_str}",
+                    f"SSD READ    ↓ {self.eased_disk_read_mb:4.1f} MB/s · {int(self.eased_disk_read_iops):3d} IOPS",
+                    f"SSD WRITE   ↑ {self.eased_disk_write_mb:4.1f} MB/s · {int(self.eased_disk_write_iops):3d} IOPS",
+                    f"SSD TOTAL   {m.disk_total_read_gib:4.1f}G R · {m.disk_total_write_gib:4.1f}G W ({m.disk_total_ops_m:3.2f}M IO)",
                     f"MEM BUS     {m.mem_used_gib:3.1f}G ACT · {m.mem_avail_gib:3.1f}G FREE",
-                    f"SWAP MEM    {m.swap_used_gib:3.1f}G ({m.swap_percent:2.0f}%) · {m.swap_total_gib:3.1f}G TOT",
+                    f"MEM SPEED   ↔ {self.eased_ram_speed_gbs:4.2f} GB/s · {self.eased_ram_mops:4.1f}M PG/s",
                 ],
             ),
             (
@@ -657,6 +686,8 @@ class SystemDashboardMode(BaseMode):
                 [
                     f"KERNEL      {m.kernel}",
                     f"LOAD AVG    {m.load_avg} ({m.cpu_cores}C)",
+                    f"LOAD QUEUE  {queue_note}",
+                    f"NETWORK     ↓ {rx_fmt}/s  ↑ {tx_fmt}/s{net_iface_str}",
                     f"GOVERNOR    {gov_short} · UP {m.uptime_str}",
                     f"HOST/USER   {m.user}@{m.hostname}",
                 ],
@@ -685,7 +716,7 @@ class SystemDashboardMode(BaseMode):
 
             y_row = telem_y + 26.0 * ui_scale
             for r_idx, r_text in enumerate(rows):
-                alpha = fade if r_idx == 0 else (fade * 0.92 if r_idx < 2 else fade * 0.85)
+                alpha = fade if r_idx == 0 else (fade * 0.92 if r_idx < 3 else fade * 0.85)
                 self.draw_text(
                     cr,
                     r_text,
@@ -696,5 +727,6 @@ class SystemDashboardMode(BaseMode):
                     self.oled_color(self.theme.text_secondary_color(alpha)),
                     align="left",
                 )
-                y_row += 21.0 * ui_scale
+                y_row += 22.0 * ui_scale
+
 

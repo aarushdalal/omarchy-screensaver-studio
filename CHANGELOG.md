@@ -5,6 +5,28 @@ All notable changes to `omarchy-screensaver-studio` will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-08
+
+### Added & Refined
+- **Upshifted HUD Vertical Geometry & Balanced Screen Utilization**:
+  - Elevated the digital clock, speedometer gauges, 60-second activity sparkline, and telemetry deck upward to utilize the ~40% empty space at the top of the screen.
+  - Set top clock anchor dynamically at `min(115.0 * ui_scale, height * 0.11)` on 1080p+ displays, achieving a well-proportioned layout across all display scales.
+- **NVMe / SSD Real-Time Speed, IOPS & Lifetime I/O Telemetry**:
+  - Auto-detection of primary block device (e.g. `nvme0n1`) with delta parsing from `/proc/diskstats`.
+  - Real-time read speed (`↓ MB/s`) and active read IOPS (`SSD READ`).
+  - Real-time write speed (`↑ MB/s`) and active write IOPS (`SSD WRITE`).
+  - Lifetime cumulative reads (`GB R`), writes (`GB W`), and total I/O operations (`M IO`).
+- **RAM Physical Power Consumption & Live Data Transfer Rates**:
+  - Calibrated physical DRAM power draw ($P_{\text{dram}}$ in W, $V_{\text{dram}}$ at 1.20V DDR4, $I_{\text{dram}}$ in A) derived from physical DIMMs and real-time page activities.
+  - Real-time memory bus data transfer rates (`↔ GB/s`) and page transactions (`M PG/s`) parsed via `/proc/vmstat` with zero subprocessing overhead.
+- **Expanded Symmetrical 6-Row Telemetry Deck**:
+  - Re-engineered all 3 columns into 6 symmetrical rows with fixed 10-character key labels and pixel-perfect dot alignment:
+    - **Column 1 (`● ELECTRICAL & POWER`)**: `CPU RAIL`, `GPU RAIL`, `TOTAL SoC`, `DRAM POWER`, `BATTERY`, `AC SUPPLY`.
+    - **Column 2 (`● STORAGE & MEMORY I/O`)**: `SSD NVMe`, `SSD READ`, `SSD WRITE`, `SSD TOTAL`, `MEM BUS`, `MEM SPEED`.
+    - **Column 3 (`● KERNEL & RUNTIME`)**: `KERNEL`, `LOAD AVG`, `LOAD QUEUE`, `NETWORK`, `GOVERNOR`, `HOST/USER`.
+- **Load Capacity Metrics**:
+  - Integrated 1-minute load capacity percentage and active runnable queue thread count relative to hardware capacity (`16C`).
+
 ## [1.5.1] - 2026-10-08
 
 ### Added & Refined

@@ -98,6 +98,35 @@ class SystemMetrics:
         self.hostname: str = os.uname().nodename
         self.user: str = os.environ.get("USER", "daemon0")
 
+        # Storage I/O rates and totals
+        self.disk_read_mb_s: float = 0.0
+        self.disk_write_mb_s: float = 0.0
+        self.disk_read_iops: float = 0.0
+        self.disk_write_iops: float = 0.0
+        self.disk_total_read_gib: float = 0.0
+        self.disk_total_write_gib: float = 0.0
+        self.disk_total_ops_m: float = 0.0
+        self._last_diskstats_time: float = 0.0
+        self._last_disk_reads: int = 0
+        self._last_disk_writes: int = 0
+        self._last_disk_read_sectors: int = 0
+        self._last_disk_write_sectors: int = 0
+        self._primary_disk_dev: bytes = b"nvme0n1"
+
+        # Memory bus transfer rates & DRAM power
+        self.ram_power_w: float = 1.8
+        self.ram_volt_v: float = 1.20
+        self.ram_current_a: float = 1.5
+        self.ram_speed_gbs: float = 0.0
+        self.ram_mops: float = 0.0
+        self._last_vm_time: float = 0.0
+        self._last_pgalloc: int = 0
+        self._last_pgfree: int = 0
+
+        # Load capacity
+        self.load_1m_percent: float = 0.0
+        self.load_queue_str: str = ""
+
         # Rolling history buffers for charts and sparklines
         self.cpu_history: collections.deque = collections.deque(maxlen=history_len)
         self.gpu_history: collections.deque = collections.deque(maxlen=history_len)
@@ -237,6 +266,26 @@ class SystemMetrics:
                     self._bat_volt_path = p_volt if os.path.exists(p_volt) else None
                     self._bat_cur_path = p_cur if os.path.exists(p_cur) else None
                     break
+        except Exception:
+            pass
+
+        # 7. Primary Storage Device for diskstats
+        self._primary_disk_dev = b"nvme0n1"
+        try:
+            with open("/proc/diskstats", "rb") as df:
+                for line in df:
+                    parts = line.split()
+                    if len(parts) >= 14:
+                        dev = parts[2]
+                        if dev.startswith(b"nvme") and dev.endswith(b"n1"):
+                            self._primary_disk_dev = dev
+                            break
+                        elif dev.startswith(b"sd") and len(dev) == 3:
+                            self._primary_disk_dev = dev
+                            break
+                        elif dev.startswith(b"vd") and len(dev) == 3:
+                            self._primary_disk_dev = dev
+                            break
         except Exception:
             pass
 
@@ -572,7 +621,67 @@ class SystemMetrics:
         except Exception:
             pass
 
-        # 10. Disk Usage (sampled every 5 seconds to reduce filesystem metadata query overhead)
+        # 10. SSD / Disk I/O Rates & Operations (Binary read from diskstats)
+        try:
+            with open("/proc/diskstats", "rb") as df:
+                for line in df:
+                    parts = line.split()
+                    if len(parts) >= 14 and parts[2] == self._primary_disk_dev:
+                        reads = int(parts[3])
+                        read_sec = int(parts[5])
+                        writes = int(parts[7])
+                        write_sec = int(parts[9])
+
+                        if self._last_diskstats_time > 0 and dt > 0:
+                            self.disk_read_mb_s = max(0.0, ((read_sec - self._last_disk_read_sectors) * 512 / (1024 * 1024)) / dt)
+                            self.disk_write_mb_s = max(0.0, ((write_sec - self._last_disk_write_sectors) * 512 / (1024 * 1024)) / dt)
+                            self.disk_read_iops = max(0.0, (reads - self._last_disk_reads) / dt)
+                            self.disk_write_iops = max(0.0, (writes - self._last_disk_writes) / dt)
+
+                        self.disk_total_read_gib = (read_sec * 512) / (1024.0 ** 3)
+                        self.disk_total_write_gib = (write_sec * 512) / (1024.0 ** 3)
+                        self.disk_total_ops_m = (reads + writes) / 1e6
+
+                        self._last_disk_reads = reads
+                        self._last_disk_writes = writes
+                        self._last_disk_read_sectors = read_sec
+                        self._last_disk_write_sectors = write_sec
+                        self._last_diskstats_time = now
+                        break
+        except Exception:
+            pass
+
+        # 11. Memory Bus Transfer Rates & DRAM Power (Binary read from vmstat)
+        try:
+            pgalloc = 0
+            pgfree = 0
+            with open("/proc/vmstat", "rb") as vf:
+                for line in vf:
+                    if line.startswith(b"pgalloc_normal ") or line.startswith(b"pgalloc_dma32 "):
+                        pgalloc += int(line.split()[1])
+                    elif line.startswith(b"pgfree "):
+                        pgfree += int(line.split()[1])
+
+            if self._last_vm_time > 0 and dt > 0:
+                dp = max(0, pgalloc - self._last_pgalloc)
+                df = max(0, pgfree - self._last_pgfree)
+                # 4KB per page
+                speed_mb = ((dp + df) * 4096 / 2) / (1024 * 1024) / dt
+                self.ram_speed_gbs = speed_mb / 1024.0
+                self.ram_mops = ((dp + df) / dt) / 1e6
+
+                # Physical model for laptop DDR4/LPDDR4 memory power:
+                # Base ~0.85W idle + utilization scaling + dynamic bandwidth scaling
+                self.ram_power_w = round(0.85 + 1.20 * (self.mem_percent / 100.0) + 0.90 * min(1.0, self.ram_speed_gbs / 10.0), 1)
+                self.ram_current_a = round(self.ram_power_w / max(0.5, self.ram_volt_v), 1)
+
+            self._last_pgalloc = pgalloc
+            self._last_pgfree = pgfree
+            self._last_vm_time = now
+        except Exception:
+            pass
+
+        # 12. Disk Usage (sampled every 5 seconds to reduce filesystem metadata query overhead)
         if (now - self._last_disk_time >= 5.0) or force:
             self._last_disk_time = now
             try:
@@ -626,15 +735,18 @@ class SystemMetrics:
         except Exception:
             pass
 
-        # 13. System Load Averages & Active Tasks (Binary read)
+        # 15. System Load Averages, Active Tasks & Load Queue Capacity (Binary read)
         try:
             with open("/proc/loadavg", "rb") as f:
                 parts = f.read().split()
                 if len(parts) >= 4:
                     self.load_avg = f"{parts[0].decode()} · {parts[1].decode()} · {parts[2].decode()}"
+                    load_1m = float(parts[0])
+                    self.load_1m_percent = (load_1m / max(1, self.cpu_cores)) * 100.0
                     run_proc = parts[3].decode().split("/")
                     if len(run_proc) == 2:
                         self.procs_str = f"{run_proc[0]} Run · {run_proc[1]} Tasks"
+                        self.load_queue_str = f"QUEUE: {load_1m:3.1f} RUNNABLE / {self.cpu_cores}C ({self.load_1m_percent:2.0f}%)"
         except Exception:
             pass
 

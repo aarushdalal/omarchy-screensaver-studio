@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.2.0",
+  "version": "1.6.0",
   "author": "Daemon0",
   "description": "15-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
   "kinds": [
