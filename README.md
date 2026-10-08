@@ -197,25 +197,25 @@ AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A  VRAM 480/512 MB · 0.89V · 6.0A   FREE 
 
 ## Showcase Gallery
 
-All 15 visual modes have playable WebM recordings generated directly from the automated showcase suite:
+All 15 visual modes feature animated previews generated directly from the automated showcase suite (click any preview to view the full 60 FPS WebM recording):
 
-| Mode | Showcase Video | Visual Description |
+| Mode | Live Animated Preview | Visual Description |
 |---|---|---|
-| `aurora` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/aurora.webm" type="video/webm">Aurora showcase</video> | Multi-octave harmonic spline ribbons with stardust motes |
-| `celestial_orbit` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/celestial_orbit.webm" type="video/webm">Celestial Orbit showcase</video> | Gravitational multi-orbital planetary system with trajectory trails |
-| `clock` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/clock.webm" type="video/webm">Clock showcase</video> | Floating typographic clock with orbital aura & telemetry |
-| `cyber_nexus` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/cyber_nexus.webm" type="video/webm">Cyber Nexus showcase</video> | OLED true-black neural node constellation with data pulses |
-| `geometry` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/geometry.webm" type="video/webm">Geometry showcase</video> | 4D rotating tesseract with chromatic depth glow |
-| `matrix` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/matrix.webm" type="video/webm">Matrix showcase</video> | 3D parallax Katakana digital rain & phosphor decay |
-| `particles` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/particles.webm" type="video/webm">Particles showcase</video> | Volumetric cosmic constellation with wandering attractor |
-| `quantum_helix` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/quantum_helix.webm" type="video/webm">Quantum Helix showcase</video> | Dual counter-rotating quantum double-helix strands |
-| `singularity` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/singularity.webm" type="video/webm">Singularity showcase</video> | Kerr rotating black hole with Doppler accretion disk |
-| `synthwave` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/synthwave.webm" type="video/webm">Synthwave showcase</video> | 3D wireframe perspective neon horizon & gradient sun |
-| `system` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/system.webm" type="video/webm">System showcase</video> | Digital Cockpit HUD with tachometers, electricals & IOPS |
-| `terminal` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/terminal.webm" type="video/webm">Terminal showcase</video> | Diagnostic kernel & procfs metric waterfall |
-| `topography` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/topography.webm" type="video/webm">Topography showcase</video> | Fluid undulating topographic elevation contour lines |
-| `visualizer` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/visualizer.webm" type="video/webm">Visualizer showcase</video> | Real-time PipeWire audio spectrum equalizer bars |
-| `warp` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/warp.webm" type="video/webm">Warp showcase</video> | Relativistic 3D starfield hyperspace jump streaks |
+| `aurora` | <a href="assets/showcase/aurora.webm"><img src="assets/showcase/previews/showcase_screensaver_aurora.gif" width="320" alt="aurora showcase"></a> | Multi-octave harmonic spline ribbons with stardust motes |
+| `celestial_orbit` | <a href="assets/showcase/celestial_orbit.webm"><img src="assets/showcase/previews/showcase_screensaver_celestial_orbit.gif" width="320" alt="celestial orbit showcase"></a> | Gravitational multi-orbital planetary system with trajectory trails |
+| `clock` | <a href="assets/showcase/clock.webm"><img src="assets/showcase/previews/showcase_screensaver_clock.gif" width="320" alt="clock showcase"></a> | Floating typographic clock with orbital aura & telemetry |
+| `cyber_nexus` | <a href="assets/showcase/cyber_nexus.webm"><img src="assets/showcase/previews/showcase_screensaver_cyber_nexus.gif" width="320" alt="cyber nexus showcase"></a> | OLED true-black neural node constellation with data pulses |
+| `geometry` | <a href="assets/showcase/geometry.webm"><img src="assets/showcase/previews/showcase_screensaver_geometry.gif" width="320" alt="geometry showcase"></a> | 4D rotating tesseract with chromatic depth glow |
+| `matrix` | <a href="assets/showcase/matrix.webm"><img src="assets/showcase/previews/showcase_screensaver_matrix.gif" width="320" alt="matrix showcase"></a> | 3D parallax Katakana digital rain & phosphor decay |
+| `particles` | <a href="assets/showcase/particles.webm"><img src="assets/showcase/previews/showcase_screensaver_particles.gif" width="320" alt="particles showcase"></a> | Volumetric cosmic constellation with wandering attractor |
+| `quantum_helix` | <a href="assets/showcase/quantum_helix.webm"><img src="assets/showcase/previews/showcase_screensaver_quantum_helix.gif" width="320" alt="quantum helix showcase"></a> | Dual counter-rotating quantum double-helix strands |
+| `singularity` | <a href="assets/showcase/singularity.webm"><img src="assets/showcase/previews/showcase_screensaver_singularity.gif" width="320" alt="singularity showcase"></a> | Kerr rotating black hole with Doppler accretion disk |
+| `synthwave` | <a href="assets/showcase/synthwave.webm"><img src="assets/showcase/previews/showcase_screensaver_synthwave.gif" width="320" alt="synthwave showcase"></a> | 3D wireframe perspective neon horizon & gradient sun |
+| `system` | <a href="assets/showcase/system.webm"><img src="assets/showcase/previews/showcase_screensaver_system.gif" width="320" alt="system showcase"></a> | Digital Cockpit HUD with tachometers, electricals & IOPS |
+| `terminal` | <a href="assets/showcase/terminal.webm"><img src="assets/showcase/previews/showcase_screensaver_terminal.gif" width="320" alt="terminal showcase"></a> | Diagnostic kernel & procfs metric waterfall |
+| `topography` | <a href="assets/showcase/topography.webm"><img src="assets/showcase/previews/showcase_screensaver_topography.gif" width="320" alt="topography showcase"></a> | Fluid undulating topographic elevation contour lines |
+| `visualizer` | <a href="assets/showcase/visualizer.webm"><img src="assets/showcase/previews/showcase_screensaver_visualizer.gif" width="320" alt="visualizer showcase"></a> | Real-time PipeWire audio spectrum equalizer bars |
+| `warp` | <a href="assets/showcase/warp.webm"><img src="assets/showcase/previews/showcase_screensaver_warp.gif" width="320" alt="warp showcase"></a> | Relativistic 3D starfield hyperspace jump streaks |
 
 
 ---
