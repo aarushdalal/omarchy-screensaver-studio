@@ -596,12 +596,10 @@ class SystemDashboardMode(BaseMode):
             fade,
         )
 
-        # 3. Dedicated 3-Column Telemetry Bay (Spacious, Uncluttered, Relaxing)
+        # 3. Dedicated 3-Column Telemetry Bay (Spacious, Uncluttered, Precision Aligned)
         # Vertically aligned with each instrument dial above for intuitive glanceability
-        telem_y = chart_y + chart_h + 56.0 * ui_scale
-        col_left_x = cx - gauge_offset_x
-        col_mid_x = cx
-        col_right_x = cx + gauge_offset_x
+        telem_y = chart_y + chart_h + 54.0 * ui_scale
+        col_w = 330.0 * ui_scale
 
         # Formats for network throughput
         rx_fmt = (
@@ -615,143 +613,88 @@ class SystemDashboardMode(BaseMode):
             else f"{m.net_tx_rate / 1024:4.0f}K"
         )
 
-        # Column 1: Electrical & Power (Aligned under CPU Dial)
-        self.draw_text(
-            cr,
-            "●  ELECTRICAL & POWER",
-            col_left_x,
-            telem_y,
-            self.FONT_MONO,
-            10.0 * ui_scale,
-            self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
-            align="center",
-            weight=Pango.Weight.BOLD,
-        )
-        self.draw_text(
-            cr,
-            f"CPU RAIL   {self.eased_cpu_power:4.1f}W · {self.eased_cpu_volt:4.2f}V · {self.eased_cpu_current:4.1f}A",
-            col_left_x,
-            telem_y + 24.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade)),
-            align="center",
-        )
-        self.draw_text(
-            cr,
-            f"GPU RAIL   {self.eased_gpu_power:4.1f}W · {self.eased_gpu_volt:4.2f}V · {self.eased_gpu_current:4.1f}A",
-            col_left_x,
-            telem_y + 47.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade * 0.90)),
-            align="center",
-        )
+        bat_status_short = m.battery_status.upper()
+        if bat_status_short == "DISCHARGING":
+            bat_status_short = "DIS"
+        elif bat_status_short == "CHARGING":
+            bat_status_short = "CHG"
+        elif bat_status_short == "NOT CHARGING":
+            bat_status_short = "IDLE"
+
         if m.has_battery:
-            bat_sub = f"BATTERY    {m.battery_percent}% · {self.eased_bat_volt:4.1f}V · {self.eased_bat_current:4.1f}A [{m.battery_status.upper()}]"
+            bat_row = f"BATTERY     {m.battery_percent:4d}% · {self.eased_bat_volt:4.1f}V · {self.eased_bat_current:4.1f}A [{bat_status_short}]"
         else:
-            bat_sub = f"TOTAL SoC  {self.eased_soc_power:4.1f}W · {self.eased_soc_volt:4.2f}V · {self.eased_soc_current:4.1f}A"
-        self.draw_text(
-            cr,
-            bat_sub,
-            col_left_x,
-            telem_y + 70.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
-            align="center",
-        )
+            bat_row = "AC POWER    ONLINE · LINE MAINS ACTIVE"
 
-        # Column 2: Storage & I/O Mesh (Aligned under GPU Dial)
-        self.draw_text(
-            cr,
-            "●  STORAGE & I/O MESH",
-            col_mid_x,
-            telem_y,
-            self.FONT_MONO,
-            10.0 * ui_scale,
-            self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
-            align="center",
-            weight=Pango.Weight.BOLD,
-        )
-        disk_sub = (
-            f"SSD NVMe   {m.disk_used_gib:3.0f}/{m.disk_total_gib:3.0f} GB · {m.nvme_temp_c:2.0f}°C"
-            if m.nvme_temp_c > 0
-            else f"SSD NVMe   {m.disk_used_gib:3.0f}/{m.disk_total_gib:3.0f} GB"
-        )
-        self.draw_text(
-            cr,
-            disk_sub,
-            col_mid_x,
-            telem_y + 24.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade)),
-            align="center",
-        )
-        net_sub = f"NETWORK    ↓ {rx_fmt}/s  ↑ {tx_fmt}/s"
-        self.draw_text(
-            cr,
-            net_sub,
-            col_mid_x,
-            telem_y + 47.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade * 0.90)),
-            align="center",
-        )
-        mem_bus_sub = f"MEM BUS    {m.mem_used_gib:3.1f}G ACT · {m.mem_avail_gib:3.1f}G FREE"
-        self.draw_text(
-            cr,
-            mem_bus_sub,
-            col_mid_x,
-            telem_y + 70.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
-            align="center",
-        )
+        disk_temp_str = f" · {m.nvme_temp_c:2.0f}°C" if m.nvme_temp_c > 0 else ""
+        net_iface_str = f" [{m.primary_net_iface}]" if m.primary_net_iface else ""
+        gov_short = m.cpu_governor.split()[0] if m.cpu_governor else "powersave"
 
-        # Column 3: Kernel & System Runtime (Aligned under Memory Dial)
-        self.draw_text(
-            cr,
-            "●  KERNEL & RUNTIME",
-            col_right_x,
-            telem_y,
-            self.FONT_MONO,
-            10.0 * ui_scale,
-            self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
-            align="center",
-            weight=Pango.Weight.BOLD,
-        )
-        self.draw_text(
-            cr,
-            f"KERNEL     {m.kernel} · {m.user}",
-            col_right_x,
-            telem_y + 24.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade)),
-            align="center",
-        )
-        self.draw_text(
-            cr,
-            f"LOAD AVG   {m.load_avg} ({m.cpu_cores}C)",
-            col_right_x,
-            telem_y + 47.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade * 0.90)),
-            align="center",
-        )
-        gov_short = m.cpu_governor.split()[0]
-        self.draw_text(
-            cr,
-            f"GOVERNOR   {gov_short} · UP {m.uptime_str}",
-            col_right_x,
-            telem_y + 70.0 * ui_scale,
-            self.FONT_MONO,
-            10.5 * ui_scale,
-            self.oled_color(self.theme.text_secondary_color(fade * 0.85)),
-            align="center",
-        )
+        cols_data = [
+            (
+                cx - gauge_offset_x,
+                "●  ELECTRICAL & POWER",
+                [
+                    f"CPU RAIL    {self.eased_cpu_power:4.1f}W · {self.eased_cpu_volt:4.2f}V · {self.eased_cpu_current:4.1f}A",
+                    f"GPU RAIL    {self.eased_gpu_power:4.1f}W · {self.eased_gpu_volt:4.2f}V · {self.eased_gpu_current:4.1f}A",
+                    f"TOTAL SoC   {self.eased_soc_power:4.1f}W · {self.eased_soc_volt:4.2f}V · {self.eased_soc_current:4.1f}A",
+                    bat_row,
+                ],
+            ),
+            (
+                cx,
+                "●  STORAGE & I/O MESH",
+                [
+                    f"SSD NVMe    {m.disk_used_gib:3.0f}/{m.disk_total_gib:3.0f} GB ({m.disk_percent:2.0f}%){disk_temp_str}",
+                    f"NETWORK     ↓ {rx_fmt}/s  ↑ {tx_fmt}/s{net_iface_str}",
+                    f"MEM BUS     {m.mem_used_gib:3.1f}G ACT · {m.mem_avail_gib:3.1f}G FREE",
+                    f"SWAP MEM    {m.swap_used_gib:3.1f}G ({m.swap_percent:2.0f}%) · {m.swap_total_gib:3.1f}G TOT",
+                ],
+            ),
+            (
+                cx + gauge_offset_x,
+                "●  KERNEL & RUNTIME",
+                [
+                    f"KERNEL      {m.kernel}",
+                    f"LOAD AVG    {m.load_avg} ({m.cpu_cores}C)",
+                    f"GOVERNOR    {gov_short} · UP {m.uptime_str}",
+                    f"HOST/USER   {m.user}@{m.hostname}",
+                ],
+            ),
+        ]
+
+        for col_center_x, title, rows in cols_data:
+            start_x = col_center_x - col_w * 0.5
+            self.draw_text(
+                cr,
+                title,
+                start_x,
+                telem_y,
+                self.FONT_MONO,
+                10.0 * ui_scale,
+                self.oled_color(with_alpha(self.theme.accent, fade * 0.90)),
+                align="left",
+                weight=Pango.Weight.BOLD,
+            )
+            cr.new_path()
+            cr.set_source_rgba(*self.oled_color(self.theme.track_arc_color(fade * 0.45)))
+            cr.set_line_width(1.0)
+            cr.move_to(start_x, telem_y + 16.0 * ui_scale)
+            cr.line_to(start_x + col_w, telem_y + 16.0 * ui_scale)
+            cr.stroke()
+
+            y_row = telem_y + 26.0 * ui_scale
+            for r_idx, r_text in enumerate(rows):
+                alpha = fade if r_idx == 0 else (fade * 0.92 if r_idx < 2 else fade * 0.85)
+                self.draw_text(
+                    cr,
+                    r_text,
+                    start_x,
+                    y_row,
+                    self.FONT_MONO,
+                    10.2 * ui_scale,
+                    self.oled_color(self.theme.text_secondary_color(alpha)),
+                    align="left",
+                )
+                y_row += 21.0 * ui_scale
+

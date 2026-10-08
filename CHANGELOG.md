@@ -5,6 +5,18 @@ All notable changes to `omarchy-screensaver-studio` will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-10-08
+
+### Added & Refined
+- **Prominent Total SoC Telemetry Bay Restoration**:
+  - Restored dedicated `TOTAL SoC` telemetry line showing total package power ($P_{\text{soc}}$ in W), Northbridge/SoC voltage ($V_{\text{soc}}$ in V), and total SoC amperage ($I_{\text{soc}}$ in A) alongside `BATTERY` / `AC POWER`.
+  - Fixed logic where laptop battery detection previously overrode and hid the Total SoC package power reading.
+- **Precision Telemetry UI & Grid Layout Refinement**:
+  - Replaced ragged, center-aligned text lines with a flush left-aligned, tabular column design anchored beneath each instrument gauge.
+  - Added subtle, theme-adaptive hairline dividers (`0.45` alpha track arc color) below each of the 3 column headers (`● ELECTRICAL & POWER`, `● STORAGE & I/O MESH`, `● KERNEL & RUNTIME`).
+  - Strict monospace character padding ensures all metric labels (10-char fixed keys), numerical values, and middle dot separators (`·`) align into vertical columns with zero horizontal jitter.
+  - Balanced 4-row layout across all three telemetry columns with 50px gutters between columns.
+
 ## [1.5.0] - 2026-10-07
 
 ### Added & Refined
