@@ -120,29 +120,103 @@ This project contains native Python GTK4 rendering code and optional C extension
 
 ### Advanced System Telemetry Cockpit (v1.6.0)
 
-The `system` mode provides an automotive-grade telemetry cluster engineered for technical depth and visual harmony:
-- **Vertical Geometry Rebalance**: Elevated geometry (+173px upshift) reclaims the upper ~40% display margin on 1080p+ screens, centering the instrument dials and telemetry deck for optimal viewing.
-- **Electrical & Power Deck**: Real-time wattage, voltage, and current monitoring across CPU Core (`V_core`, `I_core`), GPU Graphics (`V_gfx`, `I_gfx`), Total Package SoC (`V_soc`, `I_soc`), physical DRAM memory rails (`1.20V DDR4`), and Battery/AC supply.
-- **Storage & Memory I/O Mesh**: Live primary NVMe read/write throughput (`↓ MB/s`, `↑ MB/s`), active IOPS, lifetime cumulative storage transactions (`GB R`, `GB W`, `M IO`), active/free RAM bus distribution, and real-time memory bandwidth (`↔ GB/s`, `M PG/s`).
-- **Kernel & Capacity Analytics**: Kernel release, 1/5/15-minute load averages, 16-thread queue saturation percentage (`QUEUE: X.X RUNNABLE / 16C (XX%)`), live network throughput, scaling governor, and uptime.
-- **Zero-Jitter Tabular Layout**: Fixed 10-character keys with monospace alignment, hairline dividers, and theme-adaptive coloring across dark and light palettes.
+The `system` mode provides an automotive-grade telemetry cluster engineered for technical depth, zero visual jitter, and 100% theme harmony:
+
+```text
+                                     20:46:40
+                  // SYSTEM TELEMETRY HUD — THURSDAY · 08 OCTOBER 2026
+
+        ( CPU LOAD )                     ( GPU LOAD )                     (  MEMORY  )
+           45.6%                            77.0%                            70.7%
+       1.86 GHz · 74°C                  400 MHz · 71°C                  10.6 / 14.9 GB
+AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A  VRAM 480/512 MB · 0.89V · 6.0A   FREE 4.4G · SWAP 1.6G ( 5%)
+
+   SYSTEM ACTIVITY (60s)  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  CPU 45.6%  ·  GPU 77.0%
+
+ ● ELECTRICAL & POWER          ● STORAGE & MEMORY I/O         ● KERNEL & RUNTIME
+ CPU RAIL   2.7W · 0.98V · 2.8A  SSD NVMe   127/186 GB (68%) · 36°C KERNEL     7.2.3-arch1-3
+ GPU RAIL   5.3W · 0.89V · 6.0A  SSD READ   ↓  0.0 MB/s ·     0 IOPS LOAD AVG   6.59 · 6.54 · 6.40 (16C)
+ TOTAL SoC  8.0W · 0.82V · 9.8A  SSD WRITE  ↑  1.5 MB/s ·   113 IOPS LOAD QUEUE QUEUE: 6.6 RUNNABLE / 16C (41%)
+ DRAM POWER 1.7W · 1.20V · 1.4A  SSD TOTAL  17.6G R · 29.0G W (2.05M IO) NETWORK    ↓ 4K/s ↑ 69K/s [wlp1s0]
+ BATTERY    100% · 12.8V · 0.0A [FULL] MEM BUS    10.6G ACT · 4.4G FREE  GOVERNOR   amd-pstate-epp · UP 6h 7m
+ AC SUPPLY  ONLINE · LINE PASS-THROUGH [AC] MEM SPEED  ↔ 0.25 GB/s · 0.1M PG/s HOST/USER  daemon0@Daemon0
+```
+
+#### Detailed HUD Field Reference & What Each Value Means
+
+##### 1. Instrument Tachometer Dials & Badges (Center Section)
+| Display Field | Example Value | Description & Technical Source |
+|---|---|---|
+| **`CPU LOAD` Dial** | `45.6%` | Total normalized CPU core utilization across all 16 execution threads (parsed from `/proc/stat`). |
+| **`CPU Clock & Temp`** | `1.86 GHz · 74°C` | Live average core clock frequency (`/proc/cpuinfo`) and package die temperature from `k10temp` / `zenpower`. |
+| **`CPU Spec Badge`** | `AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A` | Processor model, dynamic core rail voltage ($V_{\text{core}}$), and instantaneous CPU amperage ($I_{\text{core}} = P_{\text{cpu}} / V_{\text{core}}$). |
+| **`GPU LOAD` Dial** | `77.0%` | Active Radeon Vega 8 graphics engine load from `/sys/class/drm/card0/device/gpu_busy_percent`. |
+| **`GPU Clock & Temp`** | `400 MHz · 71°C` | Current GPU core clock speed (`pp_dpm_sclk`) and edge/junction temperature from `amdgpu` hwmon. |
+| **`GPU Spec Badge`** | `VRAM 480/512 MB · 0.89V · 6.0A` | Allocated video RAM used vs reserved, graphics rail voltage ($V_{\text{gfx}}$ from `in0_input`), and VRM current ($I_{\text{gfx}}$). |
+| **`MEMORY` Dial** | `70.7%` | Physical RAM consumption percentage: $(\text{MemTotal} - \text{MemAvailable}) / \text{MemTotal}$. |
+| **`RAM Allocation`** | `10.6 / 14.9 GB` | Active memory in use vs total system memory capacity (from `/proc/meminfo`). |
+| **`RAM Spec Badge`** | `FREE 4.4G · SWAP 1.6G ( 5%)` | Immediately reclaimable/free memory headroom plus active swap utilization and percentage. |
+
+##### 2. 60-Second Activity Sparkline
+| Display Field | Example Value | Description & Technical Source |
+|---|---|---|
+| **`SYSTEM ACTIVITY (60s)`** | Smooth Bezier Curve | 60-sample historical trace showing CPU load (primary theme color) and GPU load (secondary accent) with zero rendering lag. |
+| **`Sparkline Legend`** | `CPU 45.6% · GPU 77.0%` | Instantaneous readings corresponding to the latest recorded timestamp on the right edge of the chart. |
+
+##### 3. Column 1: `● ELECTRICAL & POWER`
+| Row Key | Example Value | Description & Technical Source |
+|---|---|---|
+| **`CPU RAIL`** | `2.7W · 0.98V · 2.8A` | Real-time CPU core package power draw ($W$), dynamic core rail voltage ($V$), and core amperage ($A$). |
+| **`GPU RAIL`** | `5.3W · 0.89V · 6.0A` | Real-time integrated GPU power draw ($W$), graphics rail voltage ($V$), and GPU VRM current ($A$). |
+| **`TOTAL SoC`** | `8.0W · 0.82V · 9.8A` | Total AMD package power draw ($P_{\text{soc}}$), Northbridge/SoC voltage ($V_{\text{soc}}$), and combined package current ($I_{\text{soc}}$). |
+| **`DRAM POWER`** | `1.7W · 1.20V · 1.4A` | Physical DRAM power draw ($W$), JEDEC DDR4 rail voltage ($1.20\text{V}$), and DRAM current ($A$) calibrated across dual DIMMs and active page swaps. |
+| **`BATTERY`** | `100% · 12.8V · 0.0A [FULL]` | Battery state of charge (%), terminal pack voltage ($V$), charging/discharging current ($A$), and battery charge status. |
+| **`AC SUPPLY`** | `ONLINE · LINE PASS-THROUGH [AC]` | AC mains connection status and power delivery mode from `/sys/class/power_supply/ACAD`. |
+
+##### 4. Column 2: `● STORAGE & MEMORY I/O`
+| Row Key | Example Value | Description & Technical Source |
+|---|---|---|
+| **`SSD NVMe`** | `127/186 GB (68%) · 36°C` | Root storage partition disk space used vs total capacity, utilization percentage, and NVMe controller temperature. |
+| **`SSD READ`** | `↓ 0.0 MB/s · 0 IOPS` | Real-time disk read throughput ($\text{MB/s}$) and active read operations per second (`IOPS`) derived from delta parsing of `/proc/diskstats`. |
+| **`SSD WRITE`** | `↑ 1.5 MB/s · 113 IOPS` | Real-time disk write throughput ($\text{MB/s}$) and active write operations per second (`IOPS`). |
+| **`SSD TOTAL`** | `17.6G R · 29.0G W (2.05M IO)` | Cumulative lifetime storage metrics since boot: total reads (`GB R`), total writes (`GB W`), and total I/O transactions (`M IO`). |
+| **`MEM BUS`** | `10.6G ACT · 4.4G FREE` | Memory allocation breakdown: active in-use pages allocated to processes vs unallocated/free memory pages. |
+| **`MEM SPEED`** | `↔ 0.25 GB/s · 0.1M PG/s` | Live memory bus transfer bandwidth ($\text{GB/s}$) and virtual memory page transaction rate ($\text{M PG/s}$) from `/proc/vmstat`. |
+
+##### 5. Column 3: `● KERNEL & RUNTIME`
+| Row Key | Example Value | Description & Technical Source |
+|---|---|---|
+| **`KERNEL`** | `7.2.3-arch1-3` | Active Linux kernel release string running on Arch Linux. |
+| **`LOAD AVG`** | `6.59 · 6.54 · 6.40 (16C)` | 1-min, 5-min, and 15-min moving load averages. In Linux, this counts both CPU runnable state (`R`) and uninterruptible disk/NVMe I/O sleep (`D`). `(16C)` represents hardware capacity ceiling. |
+| **`LOAD QUEUE`** | `QUEUE: 6.6 RUNNABLE / 16C (41%)` | Instant capacity engagement: 6.6 active runnable/uninterruptible threads relative to 16 hardware execution threads (41% capacity engaged). |
+| **`NETWORK`** | `↓ 4K/s ↑ 69K/s [wlp1s0]` | Real-time downstream ($\downarrow$) and upstream ($\uparrow$) network throughput and active network interface name. |
+| **`GOVERNOR`** | `amd-pstate-epp · UP 6h 7m` | Active CPU frequency scaling governor / energy performance preference (`amd-pstate-epp`) and system uptime. |
+| **`HOST/USER`** | `daemon0@Daemon0` | Host machine hostname and active user session identifier. |
+
+---
 
 ## Showcase Gallery
 
-Each visual mode has a playable WebM recording generated from the showcase suite:
+All 15 visual modes have playable WebM recordings generated directly from the automated showcase suite:
 
-| Mode | Showcase |
-|---|---|
-| `aurora` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_aurora.webm" type="video/webm">Aurora showcase</video> |
-| `clock` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_clock.webm" type="video/webm">Clock showcase</video> |
-| `geometry` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_geometry.webm" type="video/webm">Geometry showcase</video> |
-| `matrix` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_matrix.webm" type="video/webm">Matrix showcase</video> |
-| `particles` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_particles.webm" type="video/webm">Particles showcase</video> |
-| `singularity` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_singularity.webm" type="video/webm">Singularity showcase</video> |
-| `system` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_system.webm" type="video/webm">System showcase</video> |
-| `terminal` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_terminal.webm" type="video/webm">Terminal showcase</video> |
-| `visualizer` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_visualizer.webm" type="video/webm">Visualizer showcase</video> |
-| `warp` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/showcase_screensaver_warp.webm" type="video/webm">Warp showcase</video> |
+| Mode | Showcase Video | Visual Description |
+|---|---|---|
+| `aurora` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/aurora.webm" type="video/webm">Aurora showcase</video> | Multi-octave harmonic spline ribbons with stardust motes |
+| `celestial_orbit` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/celestial_orbit.webm" type="video/webm">Celestial Orbit showcase</video> | Gravitational multi-orbital planetary system with trajectory trails |
+| `clock` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/clock.webm" type="video/webm">Clock showcase</video> | Floating typographic clock with orbital aura & telemetry |
+| `cyber_nexus` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/cyber_nexus.webm" type="video/webm">Cyber Nexus showcase</video> | OLED true-black neural node constellation with data pulses |
+| `geometry` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/geometry.webm" type="video/webm">Geometry showcase</video> | 4D rotating tesseract with chromatic depth glow |
+| `matrix` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/matrix.webm" type="video/webm">Matrix showcase</video> | 3D parallax Katakana digital rain & phosphor decay |
+| `particles` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/particles.webm" type="video/webm">Particles showcase</video> | Volumetric cosmic constellation with wandering attractor |
+| `quantum_helix` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/quantum_helix.webm" type="video/webm">Quantum Helix showcase</video> | Dual counter-rotating quantum double-helix strands |
+| `singularity` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/singularity.webm" type="video/webm">Singularity showcase</video> | Kerr rotating black hole with Doppler accretion disk |
+| `synthwave` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/synthwave.webm" type="video/webm">Synthwave showcase</video> | 3D wireframe perspective neon horizon & gradient sun |
+| `system` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/system.webm" type="video/webm">System showcase</video> | Digital Cockpit HUD with tachometers, electricals & IOPS |
+| `terminal` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/terminal.webm" type="video/webm">Terminal showcase</video> | Diagnostic kernel & procfs metric waterfall |
+| `topography` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/topography.webm" type="video/webm">Topography showcase</video> | Fluid undulating topographic elevation contour lines |
+| `visualizer` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/visualizer.webm" type="video/webm">Visualizer showcase</video> | Real-time PipeWire audio spectrum equalizer bars |
+| `warp` | <video controls preload="metadata" width="320"><source src="https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/warp.webm" type="video/webm">Warp showcase</video> | Relativistic 3D starfield hyperspace jump streaks |
+
 
 ---
 
