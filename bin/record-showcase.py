@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
 """
 ==============================================================================
-  OMARCHY SCREENSAVER STUDIO - DYNAMIC SHOWCASE RECORDER
+  OMARCHY SCREENSAVER STUDIO - AUTOMATED SHOWCASE RECORDER
 ==============================================================================
-Showcase recording for each screensaver mode:
-  1. Set visual mode dynamically in config
-  2. Trigger ambient screensaver via Super + I (omarchy-screensaver-toggle)
-  3. WAIT until screensaver surface is active & displayed
-  4. Dismiss all notification toasts (omarchy-shell notifications dismissAll)
-  5. START GPU hardware VAAPI recorder (60 FPS, H.264)
-  6. Record pure, spotless screensaver sample
-  7. STOP GPU recorder and finalize video file
-  8. DISMISS screensaver cleanly and restore previous state
-  9. Settle desktop and advance to next mode
-  10. Restore initial screensaver mode on completion or interruption
+Records full-fidelity showcase video samples for all screensavers:
+  1. Cycles through ALL available screensaver modes (all 15 modes)
+  2. Names each recording directly after the screensaver: <mode>.mp4 & <mode>.webm
+  3. Launches screensaver in ambient mode
+  4. Waits until screensaver surface is active & displayed
+  5. Dismisses any notification toasts (omarchy-shell notifications dismissAll)
+  6. Starts GPU hardware VAAPI recorder (60 FPS, H.264)
+  7. Captures 5.0s pristine sample
+  8. Stops GPU recorder and transcode to VP9 WebM
+  9. Dismisses screensaver cleanly and settles desktop
+  10. Advances to the next screensaver mode automatically
+  11. Restores the user's initial screensaver on completion or exit
 
 Features:
-  - 100% Dynamic Discovery: Automatically finds all 15 modes.
-  - Spotless Visual Recording: Only records when screensaver is displayed; zero toasts.
-  - SIGHUP & SIGPIPE Immune: Continues running even if terminal is closed.
+  - Records ALL 15 screensavers by default in a single continuous session.
+  - Strictly names files after the screensaver name: <mode>.mp4, <mode>.webm.
+  - SIGHUP & SIGPIPE Immune: Safe to run detached or close terminal.
   - Hardware-Accelerated VAAPI: Zero dropped frames at 60 FPS via gpu-screen-recorder.
-  - Dual MP4 & WebM Transcoding: Outputs web-ready VP9 WebM alongside H.264 MP4.
-  - Auto-Fallback Audio: Resolves active audio tracks from ~/Music/ for visualizer.
-  - Universal Path Portability: Works from repo bin/, ~/.local/bin, or omarchy-showcase/.
+  - Audio Reactivity: Resolves local music tracks from ~/Music/ for visualizer mode.
 ==============================================================================
 """
 
@@ -151,7 +150,7 @@ def get_primary_monitor():
     return "eDP-1"
 
 def discover_modes():
-    """Dynamically discover all available screensaver visual modes."""
+    """Dynamically discover all available screensaver visual modes in presentation order."""
     modes = []
     # 1. Try omarchy-screensaver-select list-modes
     res = run_cmd(["omarchy-screensaver-select", "list-modes"])
@@ -169,7 +168,7 @@ def discover_modes():
             if name and not name.startswith("_") and name not in ["base", "common"] and name not in modes:
                 modes.append(name)
                 
-    # Fallback to known modes if empty
+    # Fallback to all 15 known modes if empty
     if not modes:
         modes = [
             "aurora", "celestial_orbit", "clock", "cyber_nexus", "geometry",
@@ -234,7 +233,6 @@ def force_stop_screensaver():
             pid_file.unlink(missing_ok=True)
         except Exception:
             pass
-    # Wait for process to fully terminate
     for _ in range(10):
         if not is_screensaver_running():
             break
@@ -244,7 +242,6 @@ def start_screensaver_for_mode(mode):
     """Reliably launch the screensaver for the requested mode."""
     force_stop_screensaver()
     time.sleep(0.2)
-    # Launch ambient screensaver
     cmd = ["omarchy-screensaver", "--ambient", f"--mode={mode}"]
     subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -271,11 +268,12 @@ def sig_handler(sig, frame):
 signal.signal(signal.SIGINT, sig_handler)
 signal.signal(signal.SIGTERM, sig_handler)
 
-def record_mode_showcase(mode, monitor, duration=5.0, gen_gif=False, gen_webm=True, dry_run=False, audio_path=None):
-    """Record pure sample for a single screensaver mode only when displayed."""
-    output_video = OUTPUT_DIR / f"showcase_screensaver_{mode}.mp4"
-    output_webm = OUTPUT_DIR / f"showcase_screensaver_{mode}.webm"
-    output_gif = OUTPUT_DIR / f"showcase_screensaver_{mode}.gif"
+def record_mode_showcase(mode, monitor, duration=5.0, gen_gif=False, gen_webm=True, dry_run=False, audio_path=None, prefix="", legacy_alias=True):
+    """Record pure sample named strictly according to the screensaver name."""
+    file_stem = f"{prefix}{mode}" if prefix else mode
+    output_video = OUTPUT_DIR / f"{file_stem}.mp4"
+    output_webm = OUTPUT_DIR / f"{file_stem}.webm"
+    output_gif = OUTPUT_DIR / f"{file_stem}.gif"
 
     log(f"▶ [{mode.upper()}] Preparing screensaver showcase capture ({duration}s)...", "STEP")
     
@@ -291,7 +289,7 @@ def record_mode_showcase(mode, monitor, duration=5.0, gen_gif=False, gen_webm=Tr
         return output_video
 
     audio_proc = None
-    # Strictly play audio ONLY for visualizer mode
+    # Play music for visualizer mode
     if mode == "visualizer":
         song_candidate = audio_path
         if not song_candidate or not Path(song_candidate).exists():
@@ -381,7 +379,7 @@ def record_mode_showcase(mode, monitor, duration=5.0, gen_gif=False, gen_webm=Tr
     if output_video.exists() and output_video.stat().st_size > 0:
         log(f"  ✓ Saved MP4: {output_video.name} ({output_video.stat().st_size // 1024} KB)", "STEP")
         
-        # Convert/Generate WebM (VP9) for repo web showcase gallery
+        # Convert/Generate WebM (VP9) for web showcase gallery
         if gen_webm:
             log(f"  Transcoding WebM (VP9): {output_webm.name}...", "INFO")
             webm_cmd = [
@@ -403,6 +401,18 @@ def record_mode_showcase(mode, monitor, duration=5.0, gen_gif=False, gen_webm=Tr
             run_cmd(gif_cmd)
             if output_gif.exists():
                 log(f"  ✓ Saved GIF: {output_gif.name}", "STEP")
+
+        # Create backwards-compatible legacy symlinks if alias requested
+        if legacy_alias and file_stem != f"showcase_screensaver_{mode}":
+            legacy_mp4 = OUTPUT_DIR / f"showcase_screensaver_{mode}.mp4"
+            legacy_webm = OUTPUT_DIR / f"showcase_screensaver_{mode}.webm"
+            try:
+                if not legacy_mp4.exists():
+                    os.symlink(output_video.name, legacy_mp4)
+                if output_webm.exists() and not legacy_webm.exists():
+                    os.symlink(output_webm.name, legacy_webm)
+            except Exception:
+                pass
     else:
         log(f"  ✗ Failed to record screensaver mode: {mode}", "ERR")
 
@@ -412,14 +422,16 @@ def main():
     global initial_mode, OUTPUT_DIR, LOG_PATH
     
     parser = argparse.ArgumentParser(description="Omarchy Screensaver Studio Automated Showcase Recorder")
-    parser.add_argument("--all", action="store_true", help="Record showcase for all discovered modes")
+    parser.add_argument("--all", action="store_true", help="Record showcase for all discovered modes (default behavior)")
     parser.add_argument("--only", nargs="+", help="Record showcase only for specified mode(s)")
+    parser.add_argument("--prefix", type=str, default="", help="Optional filename prefix (default: none, named strictly after screensaver)")
     parser.add_argument("--duration", type=float, default=5.0, help="Recording duration per screensaver mode (seconds, default 5s)")
     parser.add_argument("--countdown", type=int, default=5, help="Grace period countdown before start (seconds)")
     parser.add_argument("--no-countdown", action="store_true", help="Skip countdown grace period")
     parser.add_argument("--output", "-o", type=str, default="", help="Custom output directory for recordings")
     parser.add_argument("--gif", action="store_true", help="Also generate optimized GIF versions")
     parser.add_argument("--no-webm", action="store_true", help="Skip WebM generation (only generate MP4)")
+    parser.add_argument("--no-alias", action="store_true", help="Do not create legacy showcase_screensaver_<mode> symlinks")
     parser.add_argument("--list", action="store_true", help="List all dynamically discovered modes and exit")
     parser.add_argument("--dry-run", action="store_true", help="Simulate sequence without recording")
     parser.add_argument("--audio", type=str, default="", help="Audio file path to play during visualizer mode recording")
@@ -440,7 +452,7 @@ def main():
             print(f"  • {m}")
         sys.exit(0)
 
-    # Determine target modes: defaults to ALL modes unless --only is given
+    # Determine target modes: defaults to ALL modes (all 15 screensavers)
     if args.only:
         targets = [m for m in args.only if m in all_modes]
         if not targets:
@@ -455,9 +467,10 @@ def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     log("=" * 70, "INFO")
-    log("  🎬 OMARCHY SCREENSAVER STUDIO SHOWCASE RECORDER (DYNAMIC)", "INFO")
+    log("  🎬 OMARCHY SCREENSAVER STUDIO SHOWCASE RECORDER (ALL MODES)", "INFO")
     log(f"  Monitor: {monitor} | Total Modes to Record: {len(targets)}", "INFO")
-    log(f"  Modes: {', '.join(targets)}", "INFO")
+    log(f"  Screensavers: {', '.join(targets)}", "INFO")
+    log(f"  Naming format: <screensaver_name>.mp4 / <screensaver_name>.webm", "INFO")
     if "visualizer" in targets and args.audio:
         log(f"  Visualizer Audio Track: {Path(args.audio).name}", "INFO")
     log(f"  Output Directory: {OUTPUT_DIR}", "INFO")
@@ -468,7 +481,7 @@ def main():
     countdown = 0 if args.no_countdown else args.countdown
     if countdown > 0:
         log(f"⏳ Grace period: {countdown}s to close or minimize terminal windows...", "WARN")
-        notify("Omarchy Screensaver Showcase", f"Recording starts in {countdown}s for {len(targets)} modes. You can close your terminal now!")
+        notify("Omarchy Screensaver Showcase", f"Recording starts in {countdown}s for all {len(targets)} screensavers. You can close your terminal now!")
         for c in range(countdown, 0, -1):
             try:
                 print(f"\r  🕒 Starting in {c} seconds... (Close this terminal anytime)\r", end="", flush=True)
@@ -480,11 +493,11 @@ def main():
         except Exception:
             pass
 
-    # Main recording loop across ALL modes
+    # Main recording loop across ALL screensavers
     successful = 0
     try:
         for idx, mode in enumerate(targets, 1):
-            log(f"[{idx}/{len(targets)}] Processing mode: {mode}...", "INFO")
+            log(f"[{idx}/{len(targets)}] Processing screensaver: {mode}...", "INFO")
             out = record_mode_showcase(
                 mode,
                 monitor=monitor,
@@ -492,18 +505,20 @@ def main():
                 gen_gif=args.gif,
                 gen_webm=not args.no_webm,
                 dry_run=args.dry_run,
-                audio_path=args.audio
+                audio_path=args.audio,
+                prefix=args.prefix,
+                legacy_alias=not args.no_alias
             )
             if out.exists() or args.dry_run:
                 successful += 1
-            time.sleep(0.8) # Settle desktop cleanly between modes
+            time.sleep(0.8) # Settle desktop cleanly between screensavers
     finally:
         cleanup()
 
     log("=" * 70, "INFO")
-    log(f"✨ Finished recording! {successful}/{len(targets)} modes successfully recorded.", "STEP")
+    log(f"✨ Finished recording! {successful}/{len(targets)} screensavers successfully recorded.", "STEP")
     log(f"All files saved to: {OUTPUT_DIR}", "INFO")
-    notify("Omarchy Screensaver Showcase", f"Completed! {successful}/{len(targets)} modes recorded.")
+    notify("Omarchy Screensaver Showcase", f"Completed! All {successful}/{len(targets)} screensavers recorded.")
 
 if __name__ == "__main__":
     main()
