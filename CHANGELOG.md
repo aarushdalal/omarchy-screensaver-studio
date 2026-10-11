@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0] - 2026-10-11
+
+- Portable recorder paths, audio helper installation at its loadable runtime location, sanitized sample previews.
+- Clean current release files and retire workstation captures. Existing public history is preserved. Future commits use a GitHub noreply address; CI checks current release payloads.
+- See docs/RELEASE-PRIVACY.md for scope and limitations. Sample artwork illustrates the design, rather than proving a live runtime result.
+
 All notable changes to `omarchy-screensaver-studio` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

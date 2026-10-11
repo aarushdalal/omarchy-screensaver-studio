@@ -139,7 +139,7 @@ AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A  VRAM 480/512 MB · 0.89V · 6.0A   FREE 
  TOTAL SoC  8.0W · 0.82V · 9.8A  SSD WRITE  ↑  1.5 MB/s ·   113 IOPS LOAD QUEUE QUEUE: 6.6 RUNNABLE / 16C (41%)
  DRAM POWER 1.7W · 1.20V · 1.4A  SSD TOTAL  17.6G R · 29.0G W (2.05M IO) NETWORK    ↓ 4K/s ↑ 69K/s [wlp1s0]
  BATTERY    100% · 12.8V · 0.0A [FULL] MEM BUS    10.6G ACT · 4.4G FREE  GOVERNOR   amd-pstate-epp · UP 6h 7m
- AC SUPPLY  ONLINE · LINE PASS-THROUGH [AC] MEM SPEED  ↔ 0.25 GB/s · 0.1M PG/s HOST/USER  daemon0@Daemon0
+ AC SUPPLY  ONLINE · LINE PASS-THROUGH [AC] MEM SPEED  ↔ 0.25 GB/s · 0.1M PG/s HOST/USER  user@workstation
 ```
 
 #### Detailed HUD Field Reference & What Each Value Means
@@ -191,7 +191,7 @@ AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A  VRAM 480/512 MB · 0.89V · 6.0A   FREE 
 | **`LOAD QUEUE`** | `QUEUE: 6.6 RUNNABLE / 16C (41%)` | Instant capacity engagement: 6.6 active runnable/uninterruptible threads relative to 16 hardware execution threads (41% capacity engaged). |
 | **`NETWORK`** | `↓ 4K/s ↑ 69K/s [wlp1s0]` | Real-time downstream ($\downarrow$) and upstream ($\uparrow$) network throughput and active network interface name. |
 | **`GOVERNOR`** | `amd-pstate-epp · UP 6h 7m` | Active CPU frequency scaling governor / energy performance preference (`amd-pstate-epp`) and system uptime. |
-| **`HOST/USER`** | `daemon0@Daemon0` | Host machine hostname and active user session identifier. |
+| **`HOST/USER`** | `user@workstation` | Host machine hostname and active user session identifier. |
 
 ---
 
@@ -201,21 +201,21 @@ All 15 visual modes feature animated previews generated directly from the automa
 
 | Mode | Live Animated Preview | Visual Description |
 |---|---|---|
-| `aurora` | <a href="assets/showcase/aurora.webm"><img src="assets/showcase/previews/showcase_screensaver_aurora.gif" width="320" alt="aurora showcase"></a> | Multi-octave harmonic spline ribbons with stardust motes |
-| `celestial_orbit` | <a href="assets/showcase/celestial_orbit.webm"><img src="assets/showcase/previews/showcase_screensaver_celestial_orbit.gif" width="320" alt="celestial orbit showcase"></a> | Gravitational multi-orbital planetary system with trajectory trails |
-| `clock` | <a href="assets/showcase/clock.webm"><img src="assets/showcase/previews/showcase_screensaver_clock.gif" width="320" alt="clock showcase"></a> | Floating typographic clock with orbital aura & telemetry |
-| `cyber_nexus` | <a href="assets/showcase/cyber_nexus.webm"><img src="assets/showcase/previews/showcase_screensaver_cyber_nexus.gif" width="320" alt="cyber nexus showcase"></a> | OLED true-black neural node constellation with data pulses |
-| `geometry` | <a href="assets/showcase/geometry.webm"><img src="assets/showcase/previews/showcase_screensaver_geometry.gif" width="320" alt="geometry showcase"></a> | 4D rotating tesseract with chromatic depth glow |
-| `matrix` | <a href="assets/showcase/matrix.webm"><img src="assets/showcase/previews/showcase_screensaver_matrix.gif" width="320" alt="matrix showcase"></a> | 3D parallax Katakana digital rain & phosphor decay |
-| `particles` | <a href="assets/showcase/particles.webm"><img src="assets/showcase/previews/showcase_screensaver_particles.gif" width="320" alt="particles showcase"></a> | Volumetric cosmic constellation with wandering attractor |
-| `quantum_helix` | <a href="assets/showcase/quantum_helix.webm"><img src="assets/showcase/previews/showcase_screensaver_quantum_helix.gif" width="320" alt="quantum helix showcase"></a> | Dual counter-rotating quantum double-helix strands |
-| `singularity` | <a href="assets/showcase/singularity.webm"><img src="assets/showcase/previews/showcase_screensaver_singularity.gif" width="320" alt="singularity showcase"></a> | Kerr rotating black hole with Doppler accretion disk |
-| `synthwave` | <a href="assets/showcase/synthwave.webm"><img src="assets/showcase/previews/showcase_screensaver_synthwave.gif" width="320" alt="synthwave showcase"></a> | 3D wireframe perspective neon horizon & gradient sun |
-| `system` | <a href="assets/showcase/system.webm"><img src="assets/showcase/previews/showcase_screensaver_system.gif" width="320" alt="system showcase"></a> | Digital Cockpit HUD with tachometers, electricals & IOPS |
-| `terminal` | <a href="assets/showcase/terminal.webm"><img src="assets/showcase/previews/showcase_screensaver_terminal.gif" width="320" alt="terminal showcase"></a> | Diagnostic kernel & procfs metric waterfall |
-| `topography` | <a href="assets/showcase/topography.webm"><img src="assets/showcase/previews/showcase_screensaver_topography.gif" width="320" alt="topography showcase"></a> | Fluid undulating topographic elevation contour lines |
-| `visualizer` | <a href="assets/showcase/visualizer.webm"><img src="assets/showcase/previews/showcase_screensaver_visualizer.gif" width="320" alt="visualizer showcase"></a> | Real-time PipeWire audio spectrum equalizer bars |
-| `warp` | <a href="assets/showcase/warp.webm"><img src="assets/showcase/previews/showcase_screensaver_warp.gif" width="320" alt="warp showcase"></a> | Relativistic 3D starfield hyperspace jump streaks |
+| `aurora` | [Sample preview](assets/showcase/preview.svg) | Multi-octave harmonic spline ribbons with stardust motes |
+| `celestial_orbit` | [Sample preview](assets/showcase/preview.svg) | Gravitational multi-orbital planetary system with trajectory trails |
+| `clock` | [Sample preview](assets/showcase/preview.svg) | Floating typographic clock with orbital aura & telemetry |
+| `cyber_nexus` | [Sample preview](assets/showcase/preview.svg) | OLED true-black neural node constellation with data pulses |
+| `geometry` | [Sample preview](assets/showcase/preview.svg) | 4D rotating tesseract with chromatic depth glow |
+| `matrix` | [Sample preview](assets/showcase/preview.svg) | 3D parallax Katakana digital rain & phosphor decay |
+| `particles` | [Sample preview](assets/showcase/preview.svg) | Volumetric cosmic constellation with wandering attractor |
+| `quantum_helix` | [Sample preview](assets/showcase/preview.svg) | Dual counter-rotating quantum double-helix strands |
+| `singularity` | [Sample preview](assets/showcase/preview.svg) | Kerr rotating black hole with Doppler accretion disk |
+| `synthwave` | [Sample preview](assets/showcase/preview.svg) | 3D wireframe perspective neon horizon & gradient sun |
+| `system` | [Sample preview](assets/showcase/preview.svg) | Digital Cockpit HUD with tachometers, electricals & IOPS |
+| `terminal` | [Sample preview](assets/showcase/preview.svg) | Diagnostic kernel & procfs metric waterfall |
+| `topography` | [Sample preview](assets/showcase/preview.svg) | Fluid undulating topographic elevation contour lines |
+| `visualizer` | [Sample preview](assets/showcase/preview.svg) | Real-time PipeWire audio spectrum equalizer bars |
+| `warp` | [Sample preview](assets/showcase/preview.svg) | Relativistic 3D starfield hyperspace jump streaks |
 
 
 ---
@@ -356,3 +356,7 @@ Contributions are welcome!
 - Built for the [Omarchy](https://github.com/basecamp/omarchy) desktop environment.
 - Powered by [Quickshell](https://quickshell.outfoxxed.me/), [Hyprland](https://hyprland.org/), GTK4, and [PipeWire](https://pipewire.org/).
 - Not an official Omarchy product.
+
+## Refinement and privacy update
+
+Ambient motion · optional telemetry · private previews. Current showcases use sample data; see [release privacy](docs/RELEASE-PRIVACY.md). Existing Git history is preserved.

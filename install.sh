@@ -111,18 +111,19 @@ do_install() {
   fi
 
   
-  # Optional compilation of native audio spectrum library for screensaver
-  if [[ -f "$SCRIPT_DIR/omarchy_screensaver/audio_spectrum.c" ]]; then
-    if command -v gcc >/dev/null 2>&1 && pkg-config --exists libpulse-simple 2>/dev/null; then
-      echo "Compiling native audio spectrum shared object (optional)..."
-      run_cmd gcc -shared -fPIC -O3 "$SCRIPT_DIR/omarchy_screensaver/audio_spectrum.c" -o "$TARGET_PLUGIN_DIR/omarchy_screensaver/libomarchy_audio.so" $(pkg-config --cflags --libs libpulse-simple) -lm -lpthread 2>/dev/null || echo "Note: Audio spectrum library compilation skipped."
-    fi
-  fi
-
   # Install package to ~/.local/share/omarchy-screensaver
   local share_target="${XDG_DATA_HOME:-$HOME/.local/share}/omarchy-screensaver"
   run_cmd mkdir -p "$share_target"
   run_cmd cp -r "$SCRIPT_DIR/omarchy_screensaver" "$share_target/"
+
+  # Optional compilation of native audio spectrum library for screensaver
+  if [[ -f "$SCRIPT_DIR/omarchy_screensaver/audio_spectrum.c" ]]; then
+    if command -v gcc >/dev/null 2>&1 && pkg-config --exists libpulse-simple 2>/dev/null; then
+      echo "Compiling native audio spectrum shared object (optional)..."
+      run_cmd gcc -shared -fPIC -O3 "$SCRIPT_DIR/omarchy_screensaver/audio_spectrum.c" -o "$share_target/omarchy_screensaver/libomarchy_audio.so" $(pkg-config --cflags --libs libpulse-simple) -lm -lpthread 2>/dev/null || echo "Note: Audio spectrum library compilation skipped."
+    fi
+  fi
+
 
 
   echo "Validating installed plugin with Omarchy..."

@@ -1,39 +1,17 @@
 import QtQuick
-import QtQuick.Layouts
-import Quickshell
 import Quickshell.Io
+import qs.Commons
+import qs.Ui
 
-Item {
-  id: root
-  implicitWidth: 32
-  implicitHeight: 32
-
-  Rectangle {
-    anchors.centerIn: parent
-    width: 28
-    height: 28
-    radius: 6
-    color: mouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent"
-
-    Text {
-      anchors.centerIn: parent
-      text: "󱄄"
-      font.pixelSize: 16
-      color: "#ffffff"
+BarWidget {
+    id: root
+    moduleName: "daemon0.screensaver-studio"
+    implicitWidth: button.implicitWidth
+    implicitHeight: button.implicitHeight
+    BarIconButton {
+        id: button; anchors.fill: parent; bar: root.bar
+        text: "󱄄"; tooltipText: "Screensaver"
+        onPressed: { if (!menu.running) menu.running = true; }
     }
-
-    MouseArea {
-      id: mouseArea
-      anchors.fill: parent
-      hoverEnabled: true
-      onClicked: function() {
-        screensaverMenuProc.running = true
-      }
-    }
-  }
-
-  Process {
-    id: screensaverMenuProc
-    command: ["omarchy-menu-screensaver"]
-  }
+    Process { id: menu; command: ["omarchy-menu-screensaver"] }
 }

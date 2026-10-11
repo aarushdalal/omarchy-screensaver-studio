@@ -51,7 +51,7 @@ def resolve_default_output_dir():
         out.mkdir(parents=True, exist_ok=True)
         return out
     # If studio repo exists in Work
-    studio_showcase = Path("/home/daemon0/Work/omarchy-public-release/omarchy-screensaver-studio/assets/showcase")
+    studio_showcase = Path.home() / "Work" / "omarchy-public-release" / "omarchy-screensaver-studio" / "assets" / "showcase"
     if studio_showcase.exists():
         return studio_showcase
     # Local fallback
@@ -63,7 +63,7 @@ def get_modes_dir():
     candidates = [
         SCRIPT_DIR.parent / "omarchy_screensaver" / "modes",
         Path.home() / ".local" / "share" / "omarchy-screensaver" / "omarchy_screensaver" / "modes",
-        Path("/home/daemon0/Work/omarchy-public-release/omarchy-screensaver-studio/omarchy_screensaver/modes"),
+        Path.home() / "Work" / "omarchy-public-release" / "omarchy-screensaver-studio" / "omarchy_screensaver" / "modes",
     ]
     for c in candidates:
         if c.exists():
