@@ -219,11 +219,11 @@ class ScreensaverApp(Gtk.Application):
             and not is_playing
             and not self.forced_mode
             and not self.is_preview
+            and not getattr(self, "_saved_mode_before_visualizer_toggle", None)
         ):
             if self.current_mode == "visualizer":
                 target_mode = (
-                    getattr(self, "_saved_mode_before_visualizer_toggle", None)
-                    or getattr(self, "_saved_mode_before_audio", None)
+                    getattr(self, "_saved_mode_before_audio", None)
                     or self.selected_mode
                 )
                 if target_mode == "auto":
@@ -232,7 +232,6 @@ class ScreensaverApp(Gtk.Application):
                     self.switch_mode(target_mode)
                     self.log(f"Media paused/stopped: reverted to mode '{target_mode}'")
                 self._saved_mode_before_audio = None
-                self._saved_mode_before_visualizer_toggle = None
 
         return GLib.SOURCE_CONTINUE
 
@@ -253,8 +252,8 @@ class ScreensaverApp(Gtk.Application):
                 win.set_mode(mode_name)
 
     def toggle_visualizer(self) -> bool:
-        """Toggle audio visualizer in ambient study mode when media is playing."""
-        if not self.is_ambient or self._is_dismissed:
+        """Toggle audio visualizer in screensaver mode."""
+        if self._is_dismissed:
             return False
 
         # Ensure MPRIS client is available and poll fresh media status
@@ -271,27 +270,27 @@ class ScreensaverApp(Gtk.Application):
 
         # 1. If visualizer is currently active, toggle back to previous mode
         if self.current_mode == "visualizer":
-            target = getattr(self, "_saved_mode_before_visualizer_toggle", None) \
-                or getattr(self, "_saved_mode_before_audio", None) \
-                or self.selected_mode
+            target = (
+                getattr(self, "_saved_mode_before_visualizer_toggle", None)
+                or getattr(self, "_saved_mode_before_audio", None)
+                or (self.selected_mode if self.selected_mode != "visualizer" else None)
+                or "system"
+            )
             if target == "auto":
                 target = self._rotation_modes[0]
             if target == "visualizer":
-                target = "clock"
+                target = "system"
             self.switch_mode(target)
             self._saved_mode_before_visualizer_toggle = None
-            self.log(f"Study mode visualizer toggled OFF -> restored mode '{target}'")
+            self.log(f"Visualizer toggled OFF -> restored mode '{target}'")
             return True
 
-        # 2. Only toggle visualizer ON if audio is actually playing
-        if not is_playing:
-            self.log("Study mode visualizer toggle ignored: no active audio playing")
-            return False
-
-        # Switch to visualizer mode
+        # 2. Toggle visualizer ON
         self._saved_mode_before_visualizer_toggle = self.current_mode
         self.switch_mode("visualizer")
-        self.log(f"Study mode visualizer toggled ON (saved mode: '{self._saved_mode_before_visualizer_toggle}')")
+        self.log(
+            f"Visualizer toggled ON (saved mode: '{self._saved_mode_before_visualizer_toggle}', media_playing={is_playing})"
+        )
         return True
 
     def dismiss(self):

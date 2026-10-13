@@ -730,3 +730,5 @@ class SystemDashboardMode(BaseMode):
                 y_row += 22.0 * ui_scale
 
 
+# Backwards compatibility alias
+SystemMode = SystemDashboardMode

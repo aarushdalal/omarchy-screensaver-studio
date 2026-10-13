@@ -82,33 +82,12 @@ class VisualizerMode(BaseMode):
         fallback_name = getattr(self.config, "visualizer_fallback_mode", "selected").lower()
         if fallback_name in ("selected", "auto", "idle", "visualizer", ""):
             self._fallback_mode = None
-        elif fallback_name == "clock":
-            from .clock import ClockMode
-            self._fallback_mode = ClockMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "matrix":
-            from .matrix import MatrixMode
-            self._fallback_mode = MatrixMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "particles":
-            from .particles import ParticlesMode
-            self._fallback_mode = ParticlesMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "warp":
-            from .warp import WarpMode
-            self._fallback_mode = WarpMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "geometry":
-            from .geometry import GeometryMode
-            self._fallback_mode = GeometryMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "singularity":
-            from .singularity import SingularityMode
-            self._fallback_mode = SingularityMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "aurora":
-            from .aurora import AuroraMode
-            self._fallback_mode = AuroraMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "system":
-            from .system import SystemMode
-            self._fallback_mode = SystemMode(self.theme, self.config, self.monitor_index)
-        elif fallback_name == "terminal":
-            from .terminal import TerminalMode
-            self._fallback_mode = TerminalMode(self.theme, self.config, self.monitor_index)
+        else:
+            try:
+                from . import create_mode
+                self._fallback_mode = create_mode(fallback_name, self.theme, self.config, self.monitor_index)
+            except Exception:
+                self._fallback_mode = None
 
     def update_theme(self, theme: ThemePalette):
         super().update_theme(theme)

@@ -118,8 +118,8 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
             return True
 
         if self.is_ambient:
-            # In ambient study mode: 't' / 'T' toggles audio visualizer if media is playing
-            if keyval in (Gdk.KEY_t, Gdk.KEY_T):
+            # In ambient study mode: 't' / 'T' or 'v' / 'V' toggles audio visualizer
+            if keyval in (Gdk.KEY_t, Gdk.KEY_T, Gdk.KEY_v, Gdk.KEY_V):
                 app = self.get_application()
                 if hasattr(app, "toggle_visualizer"):
                     app.toggle_visualizer()
