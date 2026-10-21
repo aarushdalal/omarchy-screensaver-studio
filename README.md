@@ -197,26 +197,27 @@ AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A  VRAM 480/512 MB · 0.89V · 6.0A   FREE 
 
 ## Showcase Gallery
 
-All 15 visual modes feature animated previews generated directly from the automated showcase suite (click any preview to view the full 60 FPS WebM recording):
+15 recorded screensaver modes with animated previews. Click a preview or **Video** to open the full silent MP4 recording.
 
-| Mode | Live Animated Preview | Visual Description |
+| Mode | Animated preview | Description |
 |---|---|---|
-| `aurora` | [Sample preview](assets/showcase/preview.svg) | Multi-octave harmonic spline ribbons with stardust motes |
-| `celestial_orbit` | [Sample preview](assets/showcase/preview.svg) | Gravitational multi-orbital planetary system with trajectory trails |
-| `clock` | [Sample preview](assets/showcase/preview.svg) | Floating typographic clock with orbital aura & telemetry |
-| `cyber_nexus` | [Sample preview](assets/showcase/preview.svg) | OLED true-black neural node constellation with data pulses |
-| `geometry` | [Sample preview](assets/showcase/preview.svg) | 4D rotating tesseract with chromatic depth glow |
-| `matrix` | [Sample preview](assets/showcase/preview.svg) | 3D parallax Katakana digital rain & phosphor decay |
-| `particles` | [Sample preview](assets/showcase/preview.svg) | Volumetric cosmic constellation with wandering attractor |
-| `quantum_helix` | [Sample preview](assets/showcase/preview.svg) | Dual counter-rotating quantum double-helix strands |
-| `singularity` | [Sample preview](assets/showcase/preview.svg) | Kerr rotating black hole with Doppler accretion disk |
-| `synthwave` | [Sample preview](assets/showcase/preview.svg) | 3D wireframe perspective neon horizon & gradient sun |
-| `system` | [Sample preview](assets/showcase/preview.svg) | Digital Cockpit HUD with tachometers, electricals & IOPS |
-| `terminal` | [Sample preview](assets/showcase/preview.svg) | Diagnostic kernel & procfs metric waterfall |
-| `topography` | [Sample preview](assets/showcase/preview.svg) | Fluid undulating topographic elevation contour lines |
-| `visualizer` | [Sample preview](assets/showcase/preview.svg) | Real-time PipeWire audio spectrum equalizer bars |
-| `warp` | [Sample preview](assets/showcase/preview.svg) | Relativistic 3D starfield hyperspace jump streaks |
+| `aurora` | [![Aurora preview](assets/showcase/previews/aurora.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/aurora.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/aurora.mp4) | Multi-octave harmonic spline ribbons with stardust motes |
+| `celestial_orbit` | [![Celestial Orbit preview](assets/showcase/previews/celestial_orbit.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/celestial_orbit.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/celestial_orbit.mp4) | Gravitational multi-orbital planetary system with trajectory trails |
+| `clock` | [![Clock preview](assets/showcase/previews/clock.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/clock.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/clock.mp4) | Floating typographic clock with orbital aura & telemetry |
+| `cyber_nexus` | [![Cyber Nexus preview](assets/showcase/previews/cyber_nexus.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/cyber_nexus.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/cyber_nexus.mp4) | OLED true-black neural node constellation with data pulses |
+| `geometry` | [![Geometry preview](assets/showcase/previews/geometry.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/geometry.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/geometry.mp4) | 4D rotating tesseract with chromatic depth glow |
+| `matrix` | [![Matrix preview](assets/showcase/previews/matrix.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/matrix.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/matrix.mp4) | 3D parallax Katakana digital rain & phosphor decay |
+| `particles` | [![Particles preview](assets/showcase/previews/particles.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/particles.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/particles.mp4) | Volumetric cosmic constellation with wandering attractor |
+| `quantum_helix` | [![Quantum Helix preview](assets/showcase/previews/quantum_helix.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/quantum_helix.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/quantum_helix.mp4) | Dual counter-rotating quantum double-helix strands |
+| `singularity` | [![Singularity preview](assets/showcase/previews/singularity.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/singularity.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/singularity.mp4) | Kerr rotating black hole with Doppler accretion disk |
+| `synthwave` | [![Synthwave preview](assets/showcase/previews/synthwave.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/synthwave.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/synthwave.mp4) | 3D wireframe perspective neon horizon & gradient sun |
+| `system` | [![System preview](assets/showcase/previews/system.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/system.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/system.mp4) | Digital Cockpit HUD with tachometers, electricals & IOPS |
+| `terminal` | [![Terminal preview](assets/showcase/previews/terminal.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/terminal.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/terminal.mp4) | Diagnostic kernel & procfs metric waterfall |
+| `topography` | [![Topography preview](assets/showcase/previews/topography.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/topography.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/topography.mp4) | Fluid undulating topographic elevation contour lines |
+| `visualizer` | [![Visualizer preview](assets/showcase/previews/visualizer.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/visualizer.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/visualizer.mp4) | Real-time PipeWire audio spectrum equalizer bars |
+| `warp` | [![Warp preview](assets/showcase/previews/warp.gif)](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/warp.mp4)<br>[Video](https://raw.githubusercontent.com/aarushdalal/omarchy-screensaver-studio/main/assets/showcase/warp.mp4) | Relativistic 3D starfield hyperspace jump streaks |
 
+Recordings are historical demonstrations of the project. Workstation identity is replaced in the system and terminal recordings. Audio and source metadata are removed. See [showcase details](docs/SHOWCASE.md).
 
 ---
 
@@ -359,4 +360,4 @@ Contributions are welcome!
 
 ## Refinement and privacy update
 
-Ambient motion · optional telemetry · private previews. Current showcases use sample data; see [release privacy](docs/RELEASE-PRIVACY.md). Existing Git history is preserved.
+Ambient motion · optional telemetry · private previews. The showcase gallery includes reviewed recordings; see [release privacy](docs/RELEASE-PRIVACY.md). Existing Git history is preserved.
