@@ -1,107 +1,14 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# omarchy-menu-screensaver: Dedicated Floating HUD for Screensaver Engine
-# ==============================================================================
+# Browse Screensaver Studio with Omarchy's native collection selector.
 set -euo pipefail
-
-# If HUD modal is already open, toggle it off
-if pgrep -f "omarchy-menu-select.*Screensaver" >/dev/null 2>&1; then
-    pkill -f "omarchy-menu-select.*Screensaver" 2>/dev/null || true
-    omarchy-shell shell hide omarchy.menu 2>/dev/null || true
-    exit 0
-fi
-
-# Ensure commands are found
 export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
-
-sub="${1-}"
-
-case "$sub" in
-  --themes|themes)
-    output_themes() {
-      cat << 'THEMES'
-󰸌	Theme: Auto (Omarchy Sync)	Dynamically synchronizes with active system theme	omarchy-screensaver-select theme auto
-󰑮	Theme: Cyberpunk Neon	Electric cyan & hot magenta synthwave aesthetic	omarchy-screensaver-select theme cyberpunk
-󰅟	Theme: Matrix Phosphor	Phosphor green cybernetic matrix monochrome	omarchy-screensaver-select theme matrix
-󰒲	Theme: Nordic Aurora	Glacial emerald, cyan & arctic violet hues	omarchy-screensaver-select theme aurora
-󰄛	Theme: Osaka Night	Deep purple and neon amber Japanese nightscape	omarchy-screensaver-select theme osaka
-󰔎	Theme: Monochrome Minimal	Clean high-contrast grayscale minimalism	omarchy-screensaver-select theme minimal
-󰁍	Back to Main Screensaver Menu	Return to visual mode selector	omarchy-menu-screensaver
-THEMES
-    }
-    records=$(output_themes)
-    selection=$(cut -f1,2,3 <<<"$records" | omarchy-menu-select "Screensaver Theme Palette" -- --width 800 --height 450)
-    if [[ -n "$selection" ]]; then
-      cmd=$(awk -F '\t' -v sel="$selection" '$1 "\t" $2 == sel || $2 == sel { print $4; exit }' <<<"$records")
-      if [[ -n "$cmd" ]]; then
-        eval "$cmd"
-      fi
-    fi
-    ;;
-
-  --preview-picker|preview-picker)
-    output_previews() {
-      cat << 'PREVIEWS'
-󱑂	Preview: Minimal Floating Clock	5-second live fullscreen preview	omarchy-screensaver-preview clock 5
-󰅟	Preview: Cybernetic Matrix Rain	5-second live fullscreen preview	omarchy-screensaver-preview matrix 5
-󰘔	Preview: Volumetric Particles	5-second live fullscreen preview	omarchy-screensaver-preview particles 5
-󰐎	Preview: Relativistic Starfield Warp	5-second live fullscreen preview	omarchy-screensaver-preview warp 5
-󰦪	Preview: 4D Rotating Tesseract	5-second live fullscreen preview	omarchy-screensaver-preview geometry 5
-󰇯	Preview: Gravitational Singularity	5-second live fullscreen preview	omarchy-screensaver-preview singularity 5
-	Preview: Borderless Diagnostic Stream	5-second live fullscreen preview	omarchy-screensaver-preview terminal 5
-󰎈	Preview: Floating Spectrum Visualizer	5-second live fullscreen preview	omarchy-screensaver-preview visualizer 5
-󰒲	Preview: Aurora Solar Plasma Flow	5-second live fullscreen preview	omarchy-screensaver-preview aurora 5
-󰑮	Preview: Cyber Nexus (Hex Flow)	5-second live fullscreen preview	omarchy-screensaver-preview cyber_nexus 5
-󰾏	Preview: Synthwave (Dark Horizon)	5-second live fullscreen preview	omarchy-screensaver-preview synthwave 5
-󰘔	Preview: Quantum Helix (DNA)	5-second live fullscreen preview	omarchy-screensaver-preview quantum_helix 5
-󰮈	Preview: Topography (Depth Contours)	5-second live fullscreen preview	omarchy-screensaver-preview topography 5
-󰇯	Preview: Celestial Orbit (Kepler)	5-second live fullscreen preview	omarchy-screensaver-preview celestial_orbit 5
-󰁍	Back to Main Screensaver Menu	Return to visual mode selector	omarchy-menu-screensaver
-PREVIEWS
-    }
-    records=$(output_previews)
-    selection=$(cut -f1,2,3 <<<"$records" | omarchy-menu-select "Preview Visual Modes" -- --width 820 --height 520)
-    if [[ -n "$selection" ]]; then
-      cmd=$(awk -F '\t' -v sel="$selection" '$1 "\t" $2 == sel || $2 == sel { print $4; exit }' <<<"$records")
-      if [[ -n "$cmd" ]]; then
-        eval "$cmd"
-      fi
-    fi
-    ;;
-
-  *)
-    output_main() {
-      cat << 'MAIN'
-󱑂	Mode: Minimal Floating Clock	Typographic clock with celestial orbital aura	omarchy-screensaver-select mode clock
-󰅟	Mode: Cybernetic Matrix Rain	3D parallax Katakana & hex cascading rain	omarchy-screensaver-select mode matrix
-󰘔	Mode: Volumetric Particles	Cosmic constellation with wandering attractor	omarchy-screensaver-select mode particles
-󰐎	Mode: Relativistic Starfield Warp	3D perspective hyperspace with speed streaks	omarchy-screensaver-select mode warp
-󰦪	Mode: 4D Rotating Tesseract	Hypnotic 4D hypercube with depth cueing	omarchy-screensaver-select mode geometry
-󰇯	Mode: Gravitational Singularity	Kerr black hole with relativistic Doppler disk	omarchy-screensaver-select mode singularity
-	Mode: Borderless Diagnostic Stream	Real-time kernel & hardware telemetry stream	omarchy-screensaver-select mode terminal
-󰓅	Mode: Holographic Telemetry HUD	Radial arc tachometers & flowing Bezier graphs	omarchy-screensaver-select mode system
-󰎈	Mode: Floating Spectrum Visualizer	Real-time PipeWire spectrum & MPRIS media	omarchy-screensaver-select mode visualizer
-󰒲	Mode: Aurora Solar Plasma Flow	Harmonic Perlin splines with stardust motes	omarchy-screensaver-select mode aurora
-󰑮	Mode: Cyber Nexus (Hex Flow)	Hexagonal energy grid & circuit packet pulses	omarchy-screensaver-select mode cyber_nexus
-󰾏	Mode: Synthwave (Dark Horizon)	Muted perspective grid with segmented retro sun	omarchy-screensaver-select mode synthwave
-󰘔	Mode: Quantum Helix (DNA)	3D rotating double helix with subdued bioluminescence	omarchy-screensaver-select mode quantum_helix
-󰮈	Mode: Topography (Depth Contours)	Subdued generative elevation contour wave flow	omarchy-screensaver-select mode topography
-󰇯	Mode: Celestial Orbit (Kepler)	N-body orbital resonance & phosphorescent trails	omarchy-screensaver-select mode celestial_orbit
-󰑖	Toggle Auto-Rotation Mode	Cycle through all modes automatically (300s)	omarchy-screensaver-select toggle-rotation
-󰏘	Select Color Theme Palette...	Choose between Auto, Cyberpunk, Matrix, etc.	omarchy-menu-screensaver --themes
-󱄄	Preview Current Screensaver (5s)	Instant interactive full-screen preview	omarchy-screensaver-preview 5
-󰘔	Preview Any Mode...	Test different visual modes without changing default	omarchy-menu-screensaver --preview-picker
-󰐥	Launch Screensaver Fullscreen Now	Activate screensaver immediately	omarchy-launch-screensaver force
-⚙	Edit Configuration (config.toml)	Open settings in default editor	omarchy-launch-config-editor "$HOME/.config/omarchy-screensaver/config.toml"
-MAIN
-    }
-    records=$(output_main)
-    selection=$(cut -f1,2,3 <<<"$records" | omarchy-menu-select "Screensaver Engine & Visual Modes" -- --width 850 --height 600)
-    if [[ -n "$selection" ]]; then
-      cmd=$(awk -F '\t' -v sel="$selection" '$1 "\t" $2 == sel || $2 == sel { print $4; exit }' <<<"$records")
-      if [[ -n "$cmd" ]]; then
-        eval "$cmd"
-      fi
-    fi
-    ;;
-esac
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/omarchy-screensaver-browser-${UID}.lock"
+flock -n 9 || exit 0
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+share_dir="${XDG_DATA_HOME:-$HOME/.local/share}/omarchy-screensaver"
+if [[ -f "$share_dir/omarchy_screensaver/browser.py" ]]; then
+  export PYTHONPATH="$share_dir${PYTHONPATH:+:$PYTHONPATH}"
+else
+  export PYTHONPATH="$script_dir/..${PYTHONPATH:+:$PYTHONPATH}"
+fi
+exec /usr/bin/python3 -m omarchy_screensaver.browser "$@"

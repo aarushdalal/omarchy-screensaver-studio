@@ -38,6 +38,9 @@ VALID_MODES = [
     "quantum_helix",
     "topography",
     "celestial_orbit",
+    "eclipse",
+    "ink_flow",
+    "rain",
 ]
 VALID_THEMES = ["auto", "aurora", "cyberpunk", "matrix", "minimal", "osaka"]
 

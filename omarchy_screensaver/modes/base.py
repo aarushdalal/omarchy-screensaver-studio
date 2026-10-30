@@ -155,6 +155,7 @@ class BaseMode:
         align: str = "center",
         weight: Pango.Weight = Pango.Weight.NORMAL,
         glow: bool = False,
+        max_width: Optional[float] = None,
     ) -> Tuple[float, float]:
         """Render text with Pango using high-performance layout reuse and cached font metrics."""
         if self._shared_layout is None:
@@ -165,6 +166,9 @@ class BaseMode:
 
         layout.set_font_description(self._get_font_desc(font_family, font_size_pt, weight))
         layout.set_text(text, -1)
+        layout.set_width(int(max_width * Pango.SCALE) if max_width else -1)
+        layout.set_ellipsize(Pango.EllipsizeMode.END if max_width else Pango.EllipsizeMode.NONE)
+        layout.set_single_paragraph_mode(True)
 
         w, h = layout.get_pixel_size()
 

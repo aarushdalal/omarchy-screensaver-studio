@@ -1,3 +1,106 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Screensaver Studio · Omarchy community</title>
-<style>body{margin:0;background:#10151b;color:#edf1f4;font:16px/1.6 system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:72px 28px}p{color:#a2b0bb}h1{font-size:clamp(32px,6vw,64px);letter-spacing:-.045em;line-height:1.1}a{color:#81c3b1;text-decoration:none}nav{display:flex;gap:24px;flex-wrap:wrap}img{width:100%;border-radius:24px;margin-top:40px}small{color:#899aa7}.tag{letter-spacing:.13em;font-size:12px} @media(prefers-reduced-motion:no-preference){main{animation:enter .3s ease-out}@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}</style>
-<main><div class="tag">OMARCHY COMMUNITY · REFINEMENT UPDATE</div><h1>Screensaver Studio</h1><p>Ambient motion · optional telemetry · private previews</p><nav><a href="https://github.com/aarushdalal/omarchy-screensaver-studio#readme">Read the guide</a><a href="https://github.com/aarushdalal/omarchy-screensaver-studio/tree/main">View source</a><a href="https://github.com/aarushdalal/omarchy-screensaver-studio/blob/main/docs/RELEASE-PRIVACY.md">Release privacy</a></nav><img src="../assets/showcase/preview.svg" alt="Sample design illustration"><p><small>Sample illustration. Native implementation and validation are documented in the repository. Existing desktop colors, fonts and themes remain user choices.</small></p></main></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Watch all 18 Screensaver Studio 1.8.0 scenes, including Eclipse, Ink Flow, Rain on Glass and the animated System Cockpit.">
+<title>Screensaver Studio 1.8 · All 18 recorded previews</title><style>
+:root{color-scheme:dark;--bg:#090c10;--panel:#10161c;--text:#e5eae7;--muted:#94a6a0;--accent:#9bbcaf;--line:#28362f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,sans-serif}a{color:var(--accent);text-underline-offset:4px}a:hover{color:white}a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:5px}main{max-width:1280px;margin:auto;padding:70px 28px 48px}.eyebrow,.tag{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}header{padding:0 0 42px;border-bottom:1px solid var(--line)}h1{font-size:clamp(42px,7vw,78px);line-height:1.05;letter-spacing:-.055em;margin:20px 0}header p{font-size:18px;max-width:710px;color:var(--muted)}nav{display:flex;gap:24px;flex-wrap:wrap;margin-top:28px}.toolbar{display:flex;justify-content:space-between;align-items:end;gap:24px;padding:34px 0 24px}.toolbar label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}input{background:#11191a;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:13px 16px;font:inherit;width:min(450px,75vw)}#count{color:var(--muted);font-size:13px;white-space:nowrap}.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}article{background:var(--panel);border:1px solid var(--line);border-radius:17px;overflow:hidden;scroll-margin-top:24px}article:target{border-color:var(--accent)}article[hidden]{display:none}.cardhead{padding:23px 24px 19px;display:flex;align-items:center;gap:12px;justify-content:space-between}h2{font-size:19px;font-weight:600;line-height:1.3;margin:0;letter-spacing:-.02em}.new{border:1px solid #415e50;border-radius:99px;padding:2px 9px;color:#b7d2c3;font-size:10px;letter-spacing:.1em}video{display:block;width:100%;aspect-ratio:16/9;background:black;object-fit:contain}.cardbody{padding:16px 24px 22px}.cardbody p{margin:0;color:var(--muted);font-size:14px;min-height:46px}.downloads{display:flex;gap:16px;margin-top:13px;font-size:12px}footer{margin-top:42px;border-top:1px solid var(--line);padding-top:24px;color:var(--muted);font-size:12px}footer p{max-width:820px}#empty{color:var(--muted)}@media(max-width:740px){main{padding:40px 18px}.gallery{grid-template-columns:1fr}.toolbar{align-items:start;flex-direction:column;gap:12px}.cardhead,.cardbody{padding-left:19px;padding-right:19px}}@media(prefers-reduced-motion:no-preference){article{transition:border-color .18s ease}}
+</style></head>
+<body><main><header><div class="eyebrow">Omarchy community · Version 1.8.0</div><h1>Motion for a<br>quieter desktop.</h1><p>18 screensavers, matched to your desktop palette. Meet Eclipse, Ink Flow and Rain on Glass, plus a clearer animated system cockpit.</p>
+<nav aria-label="Project links"><a href="https://github.com/aarushdalal/omarchy-screensaver-studio#readme">Read the guide</a><a href="https://github.com/aarushdalal/omarchy-screensaver-studio/releases/tag/v1.8.0">Get version 1.8.0</a><a href="https://github.com/aarushdalal/omarchy-screensaver-studio/blob/main/docs/CONFIGURATION.md">Controls &amp; settings</a></nav></header>
+<section aria-label="Recorded screensavers"><div class="toolbar"><div><label for="scene-search">Find a screensaver</label><input id="scene-search" type="search" placeholder="Search Clock, Eclipse, Rain…" autocomplete="off"></div><span id="count" aria-live="polite">18 scenes · click play to watch</span></div><p id="empty" hidden>No matching scenes. Try another name.</p><div class="gallery"><article id="eclipse" data-search="eclipse eclipse a lunar silhouette with a breathing solar corona">
+<div class="cardhead"><h2>Eclipse</h2><span class="new">NEW</span></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/eclipse.jpg" aria-label="Eclipse recorded preview">
+<source src="../assets/showcase/eclipse.webm" type="video/webm"><source src="../assets/showcase/eclipse.mp4" type="video/mp4">
+<a href="../assets/showcase/eclipse.mp4">Download Eclipse recording</a></video>
+<div class="cardbody"><p>A lunar silhouette with a breathing solar corona</p><div class="downloads"><a href="../assets/showcase/eclipse.mp4">MP4 video</a><a href="../assets/showcase/eclipse.webm">Full HD WebM</a><a href="../assets/showcase/previews/eclipse.gif">Animated preview</a></div></div></article><article id="ink_flow" data-search="ink flow ink_flow layered silk filaments folding through darkness">
+<div class="cardhead"><h2>Ink Flow</h2><span class="new">NEW</span></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/ink_flow.jpg" aria-label="Ink Flow recorded preview">
+<source src="../assets/showcase/ink_flow.webm" type="video/webm"><source src="../assets/showcase/ink_flow.mp4" type="video/mp4">
+<a href="../assets/showcase/ink_flow.mp4">Download Ink Flow recording</a></video>
+<div class="cardbody"><p>Layered silk filaments folding through darkness</p><div class="downloads"><a href="../assets/showcase/ink_flow.mp4">MP4 video</a><a href="../assets/showcase/ink_flow.webm">Full HD WebM</a><a href="../assets/showcase/previews/ink_flow.gif">Animated preview</a></div></div></article><article id="rain" data-search="rain on glass rain quiet droplets, soft night lights and reflections">
+<div class="cardhead"><h2>Rain on Glass</h2><span class="new">NEW</span></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/rain.jpg" aria-label="Rain on Glass recorded preview">
+<source src="../assets/showcase/rain.webm" type="video/webm"><source src="../assets/showcase/rain.mp4" type="video/mp4">
+<a href="../assets/showcase/rain.mp4">Download Rain on Glass recording</a></video>
+<div class="cardbody"><p>Quiet droplets, soft night lights and reflections</p><div class="downloads"><a href="../assets/showcase/rain.mp4">MP4 video</a><a href="../assets/showcase/rain.webm">Full HD WebM</a><a href="../assets/showcase/previews/rain.gif">Animated preview</a></div></div></article><article id="clock" data-search="floating clock clock clean typography, orbital halo and date">
+<div class="cardhead"><h2>Floating Clock</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/clock.jpg" aria-label="Floating Clock recorded preview">
+<source src="../assets/showcase/clock.webm" type="video/webm"><source src="../assets/showcase/clock.mp4" type="video/mp4">
+<a href="../assets/showcase/clock.mp4">Download Floating Clock recording</a></video>
+<div class="cardbody"><p>Clean typography, orbital halo and date</p><div class="downloads"><a href="../assets/showcase/clock.mp4">MP4 video</a><a href="../assets/showcase/clock.webm">Full HD WebM</a><a href="../assets/showcase/previews/clock.gif">Animated preview</a></div></div></article><article id="aurora" data-search="aurora aurora slow luminous ribbons and drifting stardust">
+<div class="cardhead"><h2>Aurora</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/aurora.jpg" aria-label="Aurora recorded preview">
+<source src="../assets/showcase/aurora.webm" type="video/webm"><source src="../assets/showcase/aurora.mp4" type="video/mp4">
+<a href="../assets/showcase/aurora.mp4">Download Aurora recording</a></video>
+<div class="cardbody"><p>Slow luminous ribbons and drifting stardust</p><div class="downloads"><a href="../assets/showcase/aurora.mp4">MP4 video</a><a href="../assets/showcase/aurora.webm">Full HD WebM</a><a href="../assets/showcase/previews/aurora.gif">Animated preview</a></div></div></article><article id="topography" data-search="topography topography living islands traced by nested contour lines">
+<div class="cardhead"><h2>Topography</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/topography.jpg" aria-label="Topography recorded preview">
+<source src="../assets/showcase/topography.webm" type="video/webm"><source src="../assets/showcase/topography.mp4" type="video/mp4">
+<a href="../assets/showcase/topography.mp4">Download Topography recording</a></video>
+<div class="cardbody"><p>Living islands traced by nested contour lines</p><div class="downloads"><a href="../assets/showcase/topography.mp4">MP4 video</a><a href="../assets/showcase/topography.webm">Full HD WebM</a><a href="../assets/showcase/previews/topography.gif">Animated preview</a></div></div></article><article id="celestial_orbit" data-search="celestial orbit celestial_orbit elliptical planetary paths and fading trails">
+<div class="cardhead"><h2>Celestial Orbit</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/celestial_orbit.jpg" aria-label="Celestial Orbit recorded preview">
+<source src="../assets/showcase/celestial_orbit.webm" type="video/webm"><source src="../assets/showcase/celestial_orbit.mp4" type="video/mp4">
+<a href="../assets/showcase/celestial_orbit.mp4">Download Celestial Orbit recording</a></video>
+<div class="cardbody"><p>Elliptical planetary paths and fading trails</p><div class="downloads"><a href="../assets/showcase/celestial_orbit.mp4">MP4 video</a><a href="../assets/showcase/celestial_orbit.webm">Full HD WebM</a><a href="../assets/showcase/previews/celestial_orbit.gif">Animated preview</a></div></div></article><article id="singularity" data-search="singularity singularity a dark core surrounded by swirling matter">
+<div class="cardhead"><h2>Singularity</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/singularity.jpg" aria-label="Singularity recorded preview">
+<source src="../assets/showcase/singularity.webm" type="video/webm"><source src="../assets/showcase/singularity.mp4" type="video/mp4">
+<a href="../assets/showcase/singularity.mp4">Download Singularity recording</a></video>
+<div class="cardbody"><p>A dark core surrounded by swirling matter</p><div class="downloads"><a href="../assets/showcase/singularity.mp4">MP4 video</a><a href="../assets/showcase/singularity.webm">Full HD WebM</a><a href="../assets/showcase/previews/singularity.gif">Animated preview</a></div></div></article><article id="geometry" data-search="tesseract geometry a rotating four-dimensional wireframe">
+<div class="cardhead"><h2>Tesseract</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/geometry.jpg" aria-label="Tesseract recorded preview">
+<source src="../assets/showcase/geometry.webm" type="video/webm"><source src="../assets/showcase/geometry.mp4" type="video/mp4">
+<a href="../assets/showcase/geometry.mp4">Download Tesseract recording</a></video>
+<div class="cardbody"><p>A rotating four-dimensional wireframe</p><div class="downloads"><a href="../assets/showcase/geometry.mp4">MP4 video</a><a href="../assets/showcase/geometry.webm">Full HD WebM</a><a href="../assets/showcase/previews/geometry.gif">Animated preview</a></div></div></article><article id="quantum_helix" data-search="quantum helix quantum_helix continuous double strands with depth and dust">
+<div class="cardhead"><h2>Quantum Helix</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/quantum_helix.jpg" aria-label="Quantum Helix recorded preview">
+<source src="../assets/showcase/quantum_helix.webm" type="video/webm"><source src="../assets/showcase/quantum_helix.mp4" type="video/mp4">
+<a href="../assets/showcase/quantum_helix.mp4">Download Quantum Helix recording</a></video>
+<div class="cardbody"><p>Continuous double strands with depth and dust</p><div class="downloads"><a href="../assets/showcase/quantum_helix.mp4">MP4 video</a><a href="../assets/showcase/quantum_helix.webm">Full HD WebM</a><a href="../assets/showcase/previews/quantum_helix.gif">Animated preview</a></div></div></article><article id="particles" data-search="constellation particles drifting particles joined by delicate filaments">
+<div class="cardhead"><h2>Constellation</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/particles.jpg" aria-label="Constellation recorded preview">
+<source src="../assets/showcase/particles.webm" type="video/webm"><source src="../assets/showcase/particles.mp4" type="video/mp4">
+<a href="../assets/showcase/particles.mp4">Download Constellation recording</a></video>
+<div class="cardbody"><p>Drifting particles joined by delicate filaments</p><div class="downloads"><a href="../assets/showcase/particles.mp4">MP4 video</a><a href="../assets/showcase/particles.webm">Full HD WebM</a><a href="../assets/showcase/previews/particles.gif">Animated preview</a></div></div></article><article id="warp" data-search="starfield warp warp perspective stars and flowing light trails">
+<div class="cardhead"><h2>Starfield Warp</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/warp.jpg" aria-label="Starfield Warp recorded preview">
+<source src="../assets/showcase/warp.webm" type="video/webm"><source src="../assets/showcase/warp.mp4" type="video/mp4">
+<a href="../assets/showcase/warp.mp4">Download Starfield Warp recording</a></video>
+<div class="cardbody"><p>Perspective stars and flowing light trails</p><div class="downloads"><a href="../assets/showcase/warp.mp4">MP4 video</a><a href="../assets/showcase/warp.webm">Full HD WebM</a><a href="../assets/showcase/previews/warp.gif">Animated preview</a></div></div></article><article id="synthwave" data-search="synthwave horizon synthwave a distant striped sun over a wireframe landscape">
+<div class="cardhead"><h2>Synthwave Horizon</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/synthwave.jpg" aria-label="Synthwave Horizon recorded preview">
+<source src="../assets/showcase/synthwave.webm" type="video/webm"><source src="../assets/showcase/synthwave.mp4" type="video/mp4">
+<a href="../assets/showcase/synthwave.mp4">Download Synthwave Horizon recording</a></video>
+<div class="cardbody"><p>A distant striped sun over a wireframe landscape</p><div class="downloads"><a href="../assets/showcase/synthwave.mp4">MP4 video</a><a href="../assets/showcase/synthwave.webm">Full HD WebM</a><a href="../assets/showcase/previews/synthwave.gif">Animated preview</a></div></div></article><article id="cyber_nexus" data-search="cyber nexus cyber_nexus honeycomb circuitry with travelling signals">
+<div class="cardhead"><h2>Cyber Nexus</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/cyber_nexus.jpg" aria-label="Cyber Nexus recorded preview">
+<source src="../assets/showcase/cyber_nexus.webm" type="video/webm"><source src="../assets/showcase/cyber_nexus.mp4" type="video/mp4">
+<a href="../assets/showcase/cyber_nexus.mp4">Download Cyber Nexus recording</a></video>
+<div class="cardbody"><p>Honeycomb circuitry with travelling signals</p><div class="downloads"><a href="../assets/showcase/cyber_nexus.mp4">MP4 video</a><a href="../assets/showcase/cyber_nexus.webm">Full HD WebM</a><a href="../assets/showcase/previews/cyber_nexus.gif">Animated preview</a></div></div></article><article id="matrix" data-search="matrix rain matrix cascading katakana and phosphor trails">
+<div class="cardhead"><h2>Matrix Rain</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/matrix.jpg" aria-label="Matrix Rain recorded preview">
+<source src="../assets/showcase/matrix.webm" type="video/webm"><source src="../assets/showcase/matrix.mp4" type="video/mp4">
+<a href="../assets/showcase/matrix.mp4">Download Matrix Rain recording</a></video>
+<div class="cardbody"><p>Cascading Katakana and phosphor trails</p><div class="downloads"><a href="../assets/showcase/matrix.mp4">MP4 video</a><a href="../assets/showcase/matrix.webm">Full HD WebM</a><a href="../assets/showcase/previews/matrix.gif">Animated preview</a></div></div></article><article id="visualizer" data-search="audio visualizer visualizer live music spectrum and track information">
+<div class="cardhead"><h2>Audio Visualizer</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/visualizer.jpg" aria-label="Audio Visualizer recorded preview">
+<source src="../assets/showcase/visualizer.webm" type="video/webm"><source src="../assets/showcase/visualizer.mp4" type="video/mp4">
+<a href="../assets/showcase/visualizer.mp4">Download Audio Visualizer recording</a></video>
+<div class="cardbody"><p>Live music spectrum and track information</p><div class="downloads"><a href="../assets/showcase/visualizer.mp4">MP4 video</a><a href="../assets/showcase/visualizer.webm">Full HD WebM</a><a href="../assets/showcase/previews/visualizer.gif">Animated preview</a></div></div></article><article id="system" data-search="system cockpit system seven gauges, startup sweep and daily/lifetime ssd telemetry">
+<div class="cardhead"><h2>System Cockpit</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/system.jpg" aria-label="System Cockpit recorded preview">
+<source src="../assets/showcase/system.webm" type="video/webm"><source src="../assets/showcase/system.mp4" type="video/mp4">
+<a href="../assets/showcase/system.mp4">Download System Cockpit recording</a></video>
+<div class="cardbody"><p>Seven gauges, startup sweep and daily/lifetime SSD telemetry</p><div class="downloads"><a href="../assets/showcase/system.mp4">MP4 video</a><a href="../assets/showcase/system.webm">Full HD WebM</a><a href="../assets/showcase/previews/system.gif">Animated preview</a></div></div></article><article id="terminal" data-search="diagnostic stream terminal a borderless stream of system activity">
+<div class="cardhead"><h2>Diagnostic Stream</h2></div>
+<video controls muted playsinline preload="none" poster="../assets/showcase/previews/terminal.jpg" aria-label="Diagnostic Stream recorded preview">
+<source src="../assets/showcase/terminal.webm" type="video/webm"><source src="../assets/showcase/terminal.mp4" type="video/mp4">
+<a href="../assets/showcase/terminal.mp4">Download Diagnostic Stream recording</a></video>
+<div class="cardbody"><p>A borderless stream of system activity</p><div class="downloads"><a href="../assets/showcase/terminal.mp4">MP4 video</a><a href="../assets/showcase/terminal.webm">Full HD WebM</a><a href="../assets/showcase/previews/terminal.gif">Animated preview</a></div></div></article></div></section>
+<footer><p>Fresh recordings from 30 October 2026. Playback is silent and starts only when you choose it. The System Cockpit preview includes the updated seven-gauge layout. Workstation identity is replaced with demo labels in telemetry recordings.</p><p><a href="https://github.com/aarushdalal/omarchy-screensaver-studio/blob/main/docs/SHOWCASE.md">Recording details</a> · <a href="https://github.com/aarushdalal/omarchy-screensaver-studio/blob/main/docs/RELEASE-PRIVACY.md">Release privacy</a> · Independent community project; not an official Omarchy product.</p></footer></main><script>
+const search=document.querySelector('#scene-search');
+const cards=[...document.querySelectorAll('article[data-search]')];
+search.addEventListener('input',()=>{const query=search.value.trim().toLowerCase();let count=0;for(const card of cards){card.hidden=!card.dataset.search.includes(query);if(!card.hidden)count++}document.querySelector('#count').textContent=count+' of '+cards.length+' scenes';document.querySelector('#empty').hidden=count!==0});
+for(const video of document.querySelectorAll('video'))video.addEventListener('play',()=>{for(const other of document.querySelectorAll('video'))if(other!==video)other.pause()});
+</script></body></html>

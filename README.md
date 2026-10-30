@@ -2,11 +2,23 @@
 
 > **Unofficial / Community Plugin**: An independent multi-mode screensaver suite for Omarchy.
 
-A native Wayland screensaver engine with 10 generative visual modes, OLED burn-in prevention, dynamic Omarchy theme synchronization, real-time PipeWire audio spectrum visualization, and full integration with Quickshell's idle monitor and Omarchy launcher menus — running under application ID `org.omarchy.screensaver`.
+A native Wayland screensaver engine with 18 generative visual modes, OLED burn-in prevention, dynamic Omarchy theme synchronization, real-time PipeWire audio spectrum visualization, and full integration with Quickshell's idle monitor and Omarchy launcher menus — running under application ID `org.omarchy.screensaver`.
 
 This project was developed through an AI-assisted workflow. The concept, customization, configuration, testing, integration, and final iteration were directed and carried out by me.
 
 ---
+
+## Ambient collection refresh (1.8.0)
+
+The native Screensaver Studio browser lists all 18 modes directly in one searchable menu. Open it with `omarchy-menu-screensaver`, type a name such as Rain or Eclipse, and choose it to apply. The current selection is marked with a check. **Preview Screensavers** opens separate 12-second previews. **Follow Desktop Colours** keeps scenes matched to the active desktop palette. Running screensavers pick up mode, palette and rotation edits within 1.5 seconds without restarting.
+
+New scenes: **Eclipse** (lunar silhouette and solar corona), **Ink Flow** (slow silk filaments), and **Rain on Glass** (night lights and drifting droplets). These inherit the active desktop palette.
+
+Rebuilt Cyber Nexus eliminates accidental filled triangles and an unbounded packet refill loop. Topography now draws nested island contours; Quantum Helix has continuous depth-sorted strands; Celestial Orbit uses matching eccentric guides and time-based trails. Synthwave has opaque terrain silhouettes. Initial allocation and later resizes reach each mode, logical pixel scaling avoids doubled high-DPI effects, the system cockpit fits smaller screens, and long media titles are truncated within the available width.
+
+Existing selected mode, palette, rotation list, ambient controls, audio backend and idle/lock integration are retained during the local upgrade. The default configuration for new installations includes the new scenes in rotation.
+
+Validation: `/usr/bin/python3 -m unittest discover -s tests -v`. These rendering and integration checks require the system PyGObject and Cairo packages.
 
 ## My Contribution
 
@@ -14,7 +26,10 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
 
 - **Plugin Architecture**: Designed and structured this as a conformant Omarchy plugin with `manifest.json` and `BarWidget.qml` following the Omarchy plugin conventions.
 - **Python GTK4/Cairo Screensaver Engine**: Designed and implemented the multi-mode screensaver as a native GTK4 Wayland window under application ID `org.omarchy.screensaver` (integrates with Hyprland window rules and Quickshell's `IdleMonitor`). Core modules: `app.py`, `window.py`, `modes/`, `theme.py`, `config.py`.
-- **15 Signature Visual Modes**: Authored all visual mode rendering logic:
+- **18 Signature Visual Modes**: Authored all visual mode rendering logic:
+  - `eclipse`: A lunar silhouette encircled by a softly breathing solar corona.
+  - `ink_flow`: Layered silk filaments slowly folding through black space.
+  - `rain`: Quiet droplets over distant night lights and reflections.
   - `clock`: Minimalist floating typographic clock with celestial orbital aura, date, and battery status.
   - `matrix`: 3D parallax cybernetic rain with authentic Katakana glyphs, hex numbers, and phosphor decay.
   - `particles`: Volumetric cosmic constellation with wandering gravitational attractor.
@@ -38,9 +53,9 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
 - **Interactive Menu Suite & Extensions**: Designed the floating modal HUD selector (`omarchy-menu-screensaver`), keyboard-driven terminal manager (`omarchy-screensaver-menu` via Gum), CLI state manager (`omarchy-screensaver-select`), and `omarchy-menu-extension.jsonc` for Omarchy application launcher integration.
 - **Bar Widget**: Implemented `BarWidget.qml` showing screensaver mode and controls in the Omarchy top bar.
 - **Theme Definitions**: Authored `themes/` directory with per-mode color palette overrides.
-- **Performance Tuning**: Optimized rendering for AMD Ryzen 7 PRO 5850U integrated Vega graphics (<1% total CPU, ~55 MB RAM at 60 FPS).
+- **Performance Tuning**: Bounded particle populations, local random generators and mode-specific frame limits; the ambient collection targets 30 FPS. Actual throughput varies with resolution, theme, graphics driver and load.
 - **Installer**: Authored `./install.sh` with timestamped backup manifests.
-- **Testing**: Tested all 15 modes on Omarchy 4.0.2 / Quickshell 0.3.1 / GTK4 Wayland / Hyprland 0.56.2.
+- **Testing**: 26 rendering, selection, theme and telemetry regression checks pass locally. All 18 modes redraw under palette changes; native selection and the updated cockpit recording were checked on the local Hyprland desktop.
 
 ---
 
@@ -68,9 +83,9 @@ This repository includes a valid `manifest.json` for the Omarchy plugin system:
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.2.0",
+  "version": "1.8.0",
   "author": "Daemon0",
-  "description": "15-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
+  "description": "18-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit, eclipse, ink_flow, rain) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
   "kinds": ["bar-widget"],
   "entryPoints": { "barWidget": "BarWidget.qml" },
   "barWidget": {
@@ -93,7 +108,10 @@ This project contains native Python GTK4 rendering code and optional C extension
 ## Features
 
 - **Sub-Second Latency & Low Resource Consumption**: Instant startup ($\le 0.45$s) using deferred background subsystem initialization and optimized lightweight rendering loops.
-- **15 Signature Visual Modes**:
+- **18 Signature Visual Modes**:
+  - `eclipse`: A lunar silhouette encircled by a softly breathing solar corona.
+  - `ink_flow`: Layered silk filaments slowly folding through black space.
+  - `rain`: Quiet droplets over distant night lights and reflections.
   - `clock`: Minimal typographic clock with orbital aura
   - `matrix`: 3D Katakana & hex cybernetic cascading rain with glyph caching
   - `particles`: Volumetric constellation network with wandering attractor (clamped to 90 particles for low CPU load)
@@ -118,106 +136,49 @@ This project contains native Python GTK4 rendering code and optional C extension
 - **Idle Lifecycle Integration**: App ID `org.omarchy.screensaver` — integrates with Quickshell idle services, dismisses instantly on input
 - **Real-Time Audio Spectrum**: Optional C/PipeWire backend with 36 Goertzel filters, sub-10ms latency
 
-### Advanced System Telemetry Cockpit (v1.6.0)
+### System Cockpit in 1.8.0
 
-The `system` mode provides an automotive-grade telemetry cluster engineered for technical depth, zero visual jitter, and 100% theme harmony:
+The system display now puts the most useful readings first, with larger text and seven animated gauges. On launch, a labelled car-style instrument check sweeps every needle to 100, back to zero, then hands over to real utilization:
 
-```text
-                                     20:46:40
-                  // SYSTEM TELEMETRY HUD — THURSDAY · 08 OCTOBER 2026
+1. **Core load:** CPU, GPU and memory utilization. Smooth needles follow the readings; a separate outer marker holds the recent peak. Per-core activity, VRAM and swap bars sit below the main instruments.
+2. **Capacity and thermals:** CPU temperature, root-storage usage, normalized one-minute load and battery charge. The temperature instrument uses a labelled 0–100°C display scale. Unsupported sensors show N/A.
+3. **Activity:** separate processor and network histories, with solid/dashed traces that remain distinguishable in monochrome themes, pulsing live endpoints and a subtle moving scan line.
+4. **Details:** power/electrical readings; today’s disk reads/writes; lifetime NVMe reads, writes, I/O-command snapshot and estimated endurance; current disk throughput/IOPS; memory activity; and kernel, tasks, governor, uptime and Linux resource pressure.
 
-        ( CPU LOAD )                     ( GPU LOAD )                     (  MEMORY  )
-           45.6%                            77.0%                            70.7%
-       1.86 GHz · 74°C                  400 MHz · 71°C                  10.6 / 14.9 GB
-AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A  VRAM 480/512 MB · 0.89V · 6.0A   FREE 4.4G · SWAP 1.6G ( 5%)
+Per-core activity comes from successive `/proc/stat` samples. Pressure readings use `some avg10` from `/proc/pressure`: the percentage of the preceding ten seconds in which at least one task was stalled. The load/capacity gauge divides one-minute load average by logical CPU count; it is not CPU utilization. Network rates aggregate non-loopback interfaces and use an explicitly labelled automatic graph scale.
 
-   SYSTEM ACTIVITY (60s)  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  CPU 45.6%  ·  GPU 77.0%
+CPU/GPU power allocation and DRAM values are estimates and are labelled **est.** A readable hardware power sensor is shown separately. **VM page flow** describes allocation/free-page activity; it is not a measured physical memory-bus benchmark. Missing pressure/temperature sensors remain unavailable rather than inventing readings.
 
- ● ELECTRICAL & POWER          ● STORAGE & MEMORY I/O         ● KERNEL & RUNTIME
- CPU RAIL   2.7W · 0.98V · 2.8A  SSD NVMe   127/186 GB (68%) · 36°C KERNEL     7.2.3-arch1-3
- GPU RAIL   5.3W · 0.89V · 6.0A  SSD READ   ↓  0.0 MB/s ·     0 IOPS LOAD AVG   6.59 · 6.54 · 6.40 (16C)
- TOTAL SoC  8.0W · 0.82V · 9.8A  SSD WRITE  ↑  1.5 MB/s ·   113 IOPS LOAD QUEUE QUEUE: 6.6 RUNNABLE / 16C (41%)
- DRAM POWER 1.7W · 1.20V · 1.4A  SSD TOTAL  17.6G R · 29.0G W (2.05M IO) NETWORK    ↓ 4K/s ↑ 69K/s [wlp1s0]
- BATTERY    100% · 12.8V · 0.0A [FULL] MEM BUS    10.6G ACT · 4.4G FREE  GOVERNOR   amd-pstate-epp · UP 6h 7m
- AC SUPPLY  ONLINE · LINE PASS-THROUGH [AC] MEM SPEED  ↔ 0.25 GB/s · 0.1M PG/s HOST/USER  user@workstation
-```
-
-#### Detailed HUD Field Reference & What Each Value Means
-
-##### 1. Instrument Tachometer Dials & Badges (Center Section)
-| Display Field | Example Value | Description & Technical Source |
-|---|---|---|
-| **`CPU LOAD` Dial** | `45.6%` | Total normalized CPU core utilization across all 16 execution threads (parsed from `/proc/stat`). |
-| **`CPU Clock & Temp`** | `1.86 GHz · 74°C` | Live average core clock frequency (`/proc/cpuinfo`) and package die temperature from `k10temp` / `zenpower`. |
-| **`CPU Spec Badge`** | `AMD Ryzen 7 PRO 5850U · 0.98V · 2.8A` | Processor model, dynamic core rail voltage ($V_{\text{core}}$), and instantaneous CPU amperage ($I_{\text{core}} = P_{\text{cpu}} / V_{\text{core}}$). |
-| **`GPU LOAD` Dial** | `77.0%` | Active Radeon Vega 8 graphics engine load from `/sys/class/drm/card0/device/gpu_busy_percent`. |
-| **`GPU Clock & Temp`** | `400 MHz · 71°C` | Current GPU core clock speed (`pp_dpm_sclk`) and edge/junction temperature from `amdgpu` hwmon. |
-| **`GPU Spec Badge`** | `VRAM 480/512 MB · 0.89V · 6.0A` | Allocated video RAM used vs reserved, graphics rail voltage ($V_{\text{gfx}}$ from `in0_input`), and VRM current ($I_{\text{gfx}}$). |
-| **`MEMORY` Dial** | `70.7%` | Physical RAM consumption percentage: $(\text{MemTotal} - \text{MemAvailable}) / \text{MemTotal}$. |
-| **`RAM Allocation`** | `10.6 / 14.9 GB` | Active memory in use vs total system memory capacity (from `/proc/meminfo`). |
-| **`RAM Spec Badge`** | `FREE 4.4G · SWAP 1.6G ( 5%)` | Immediately reclaimable/free memory headroom plus active swap utilization and percentage. |
-
-##### 2. 60-Second Activity Sparkline
-| Display Field | Example Value | Description & Technical Source |
-|---|---|---|
-| **`SYSTEM ACTIVITY (60s)`** | Smooth Bezier Curve | 60-sample historical trace showing CPU load (primary theme color) and GPU load (secondary accent) with zero rendering lag. |
-| **`Sparkline Legend`** | `CPU 45.6% · GPU 77.0%` | Instantaneous readings corresponding to the latest recorded timestamp on the right edge of the chart. |
-
-##### 3. Column 1: `● ELECTRICAL & POWER`
-| Row Key | Example Value | Description & Technical Source |
-|---|---|---|
-| **`CPU RAIL`** | `2.7W · 0.98V · 2.8A` | Real-time CPU core package power draw ($W$), dynamic core rail voltage ($V$), and core amperage ($A$). |
-| **`GPU RAIL`** | `5.3W · 0.89V · 6.0A` | Real-time integrated GPU power draw ($W$), graphics rail voltage ($V$), and GPU VRM current ($A$). |
-| **`TOTAL SoC`** | `8.0W · 0.82V · 9.8A` | Total AMD package power draw ($P_{\text{soc}}$), Northbridge/SoC voltage ($V_{\text{soc}}$), and combined package current ($I_{\text{soc}}$). |
-| **`DRAM POWER`** | `1.7W · 1.20V · 1.4A` | Physical DRAM power draw ($W$), JEDEC DDR4 rail voltage ($1.20\text{V}$), and DRAM current ($A$) calibrated across dual DIMMs and active page swaps. |
-| **`BATTERY`** | `100% · 12.8V · 0.0A [FULL]` | Battery state of charge (%), terminal pack voltage ($V$), charging/discharging current ($A$), and battery charge status. |
-| **`AC SUPPLY`** | `ONLINE · LINE PASS-THROUGH [AC]` | AC mains connection status and power delivery mode from `/sys/class/power_supply/ACAD`. |
-
-##### 4. Column 2: `● STORAGE & MEMORY I/O`
-| Row Key | Example Value | Description & Technical Source |
-|---|---|---|
-| **`SSD NVMe`** | `127/186 GB (68%) · 36°C` | Root storage partition disk space used vs total capacity, utilization percentage, and NVMe controller temperature. |
-| **`SSD READ`** | `↓ 0.0 MB/s · 0 IOPS` | Real-time disk read throughput ($\text{MB/s}$) and active read operations per second (`IOPS`) derived from delta parsing of `/proc/diskstats`. |
-| **`SSD WRITE`** | `↑ 1.5 MB/s · 113 IOPS` | Real-time disk write throughput ($\text{MB/s}$) and active write operations per second (`IOPS`). |
-| **`SSD TOTAL`** | `17.6G R · 29.0G W (2.05M IO)` | Cumulative lifetime storage metrics since boot: total reads (`GB R`), total writes (`GB W`), and total I/O transactions (`M IO`). |
-| **`MEM BUS`** | `10.6G ACT · 4.4G FREE` | Memory allocation breakdown: active in-use pages allocated to processes vs unallocated/free memory pages. |
-| **`MEM SPEED`** | `↔ 0.25 GB/s · 0.1M PG/s` | Live memory bus transfer bandwidth ($\text{GB/s}$) and virtual memory page transaction rate ($\text{M PG/s}$) from `/proc/vmstat`. |
-
-##### 5. Column 3: `● KERNEL & RUNTIME`
-| Row Key | Example Value | Description & Technical Source |
-|---|---|---|
-| **`KERNEL`** | `7.2.3-arch1-3` | Active Linux kernel release string running on Arch Linux. |
-| **`LOAD AVG`** | `6.59 · 6.54 · 6.40 (16C)` | 1-min, 5-min, and 15-min moving load averages. In Linux, this counts both CPU runnable state (`R`) and uninterruptible disk/NVMe I/O sleep (`D`). `(16C)` represents hardware capacity ceiling. |
-| **`LOAD QUEUE`** | `QUEUE: 6.6 RUNNABLE / 16C (41%)` | Instant capacity engagement: 6.6 active runnable/uninterruptible threads relative to 16 hardware execution threads (41% capacity engaged). |
-| **`NETWORK`** | `↓ 4K/s ↑ 69K/s [wlp1s0]` | Real-time downstream ($\downarrow$) and upstream ($\uparrow$) network throughput and active network interface name. |
-| **`GOVERNOR`** | `amd-pstate-epp · UP 6h 7m` | Active CPU frequency scaling governor / energy performance preference (`amd-pstate-epp`) and system uptime. |
-| **`HOST/USER`** | `user@workstation` | Host machine hostname and active user session identifier. |
+Rendering targets 30 FPS with bounded drawing work, while metrics are sampled about twice a second. Actual throughput depends on hardware, resolution and load. The layout scales together to preserve its hierarchy on smaller displays. All accents and highlights follow the active palette. See [the full cockpit field and layout guide](docs/SYSTEM-COCKPIT.md), including daily-total coverage, the optional SMART snapshot refresh and what **PRESSURE 10s / PSI** means.
 
 ---
 
 ## Showcase Gallery
 
-15 recorded screensaver modes with animated previews. Click a preview or **Video** to open its browser video player.
+**18 fresh recordings for version 1.8.0.** Click an animated preview or **Watch video** to open its player. The three new scenes appear first.
 
-| Mode | Animated preview | Description |
+| Screensaver | Animated preview | Description |
 |---|---|---|
-| `aurora` | [![Aurora preview](assets/showcase/previews/aurora.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora) | Multi-octave harmonic spline ribbons with stardust motes |
-| `celestial_orbit` | [![Celestial Orbit preview](assets/showcase/previews/celestial_orbit.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit) | Gravitational multi-orbital planetary system with trajectory trails |
-| `clock` | [![Clock preview](assets/showcase/previews/clock.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock) | Floating typographic clock with orbital aura & telemetry |
-| `cyber_nexus` | [![Cyber Nexus preview](assets/showcase/previews/cyber_nexus.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus) | OLED true-black neural node constellation with data pulses |
-| `geometry` | [![Geometry preview](assets/showcase/previews/geometry.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry) | 4D rotating tesseract with chromatic depth glow |
-| `matrix` | [![Matrix preview](assets/showcase/previews/matrix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix) | 3D parallax Katakana digital rain & phosphor decay |
-| `particles` | [![Particles preview](assets/showcase/previews/particles.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles) | Volumetric cosmic constellation with wandering attractor |
-| `quantum_helix` | [![Quantum Helix preview](assets/showcase/previews/quantum_helix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix) | Dual counter-rotating quantum double-helix strands |
-| `singularity` | [![Singularity preview](assets/showcase/previews/singularity.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity) | Kerr rotating black hole with Doppler accretion disk |
-| `synthwave` | [![Synthwave preview](assets/showcase/previews/synthwave.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave) | 3D wireframe perspective neon horizon & gradient sun |
-| `system` | [![System preview](assets/showcase/previews/system.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#system)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#system) | Digital Cockpit HUD with tachometers, electricals & IOPS |
-| `terminal` | [![Terminal preview](assets/showcase/previews/terminal.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal) | Diagnostic kernel & procfs metric waterfall |
-| `topography` | [![Topography preview](assets/showcase/previews/topography.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography) | Fluid undulating topographic elevation contour lines |
-| `visualizer` | [![Visualizer preview](assets/showcase/previews/visualizer.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer) | Real-time PipeWire audio spectrum equalizer bars |
-| `warp` | [![Warp preview](assets/showcase/previews/warp.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp)<br>[Video](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp) | Relativistic 3D starfield hyperspace jump streaks |
+| Eclipse · **New** | [![Eclipse preview](assets/showcase/previews/eclipse.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#eclipse)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#eclipse) | A lunar silhouette with a breathing solar corona |
+| Ink Flow · **New** | [![Ink Flow preview](assets/showcase/previews/ink_flow.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_flow)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_flow) | Layered silk filaments folding through darkness |
+| Rain on Glass · **New** | [![Rain on Glass preview](assets/showcase/previews/rain.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#rain)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#rain) | Quiet droplets, soft night lights and reflections |
+| Floating Clock | [![Floating Clock preview](assets/showcase/previews/clock.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock) | Clean typography, orbital halo and date |
+| Aurora | [![Aurora preview](assets/showcase/previews/aurora.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora) | Slow luminous ribbons and drifting stardust |
+| Topography | [![Topography preview](assets/showcase/previews/topography.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography) | Living islands traced by nested contour lines |
+| Celestial Orbit | [![Celestial Orbit preview](assets/showcase/previews/celestial_orbit.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit) | Elliptical planetary paths and fading trails |
+| Singularity | [![Singularity preview](assets/showcase/previews/singularity.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity) | A dark core surrounded by swirling matter |
+| Tesseract | [![Tesseract preview](assets/showcase/previews/geometry.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry) | A rotating four-dimensional wireframe |
+| Quantum Helix | [![Quantum Helix preview](assets/showcase/previews/quantum_helix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix) | Continuous double strands with depth and dust |
+| Constellation | [![Constellation preview](assets/showcase/previews/particles.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles) | Drifting particles joined by delicate filaments |
+| Starfield Warp | [![Starfield Warp preview](assets/showcase/previews/warp.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp) | Perspective stars and flowing light trails |
+| Synthwave Horizon | [![Synthwave Horizon preview](assets/showcase/previews/synthwave.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave) | A distant striped sun over a wireframe landscape |
+| Cyber Nexus | [![Cyber Nexus preview](assets/showcase/previews/cyber_nexus.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus) | Honeycomb circuitry with travelling signals |
+| Matrix Rain | [![Matrix Rain preview](assets/showcase/previews/matrix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix) | Cascading Katakana and phosphor trails |
+| Audio Visualizer | [![Audio Visualizer preview](assets/showcase/previews/visualizer.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer) | Live music spectrum and track information |
+| System Cockpit | [![System Cockpit preview](assets/showcase/previews/system.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#system)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#system) | Seven gauges, startup sweep and daily/lifetime SSD telemetry |
+| Diagnostic Stream | [![Diagnostic Stream preview](assets/showcase/previews/terminal.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal) | A borderless stream of system activity |
 
-Recordings are historical demonstrations of the project. Workstation identity is replaced in the system and terminal recordings. Audio and source metadata are removed. See [showcase details](docs/SHOWCASE.md).
+The System Cockpit clip shows the new seven-gauge dashboard, per-core activity, processor/network histories and resource pressure. All videos are silent; workstation identity is replaced with demo labels in the telemetry clips. See [recording details](docs/SHOWCASE.md).
 
 ---
 

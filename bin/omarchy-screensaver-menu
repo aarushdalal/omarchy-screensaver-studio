@@ -65,6 +65,9 @@ while true; do
     "Auto-Rotation:  $(gum style --foreground 75 --bold "$is_rot")"
 
   choice=$(gum choose --cursor="󰅂 " --header="Select an action or visual mode:" \
+    "󰖔  Mode: Eclipse" \
+    "󰘔  Mode: Ink Flow" \
+    "󰖖  Mode: Rain on Glass" \
     "󱑂  Mode: Minimal Floating Clock" \
     "󰅟  Mode: Cybernetic Matrix Rain" \
     "󰘔  Mode: Volumetric Particles Constellation" \
@@ -80,7 +83,7 @@ while true; do
     "󰘔  Mode: Quantum Helix (DNA)" \
     "󰮈  Mode: Topography (Depth Contours)" \
     "󰇯  Mode: Celestial Orbit (Kepler Resonance)" \
-    "󰑖  Toggle Auto-Rotation (Cycle All Modes)" \
+    "󰑖  Toggle Auto-Rotation (Configured Rotation)" \
     "󰏘  Select Color Palette..." \
     "󱄄  Preview Current Mode (5s)" \
     "󰘔  Preview Any Mode..." \
@@ -89,6 +92,9 @@ while true; do
     "󰅖  Exit") || break
 
   case "$choice" in
+    *"Mode: Eclipse"*) omarchy-screensaver-select mode eclipse ;;
+    *"Mode: Ink Flow"*) omarchy-screensaver-select mode ink_flow ;;
+    *"Mode: Rain on Glass"*) omarchy-screensaver-select mode rain ;;
     *"Minimal Floating Clock"*)
       omarchy-screensaver-select mode clock
       if gum confirm --default=no "Preview Clock mode now?"; then
@@ -227,7 +233,7 @@ while true; do
     *"Preview Any Mode"*)
       preview_mode=$(gum choose --cursor="󰅂 " --header="Select mode to preview:" \
         "clock" "matrix" "particles" "warp" "geometry" "singularity" "terminal" "system" "visualizer" "aurora" \
-        "cyber_nexus" "synthwave" "quantum_helix" "topography" "celestial_orbit" "󰁍 Cancel") || continue
+        "cyber_nexus" "synthwave" "quantum_helix" "topography" "celestial_orbit" "eclipse" "ink_flow" "rain" "󰁍 Cancel") || continue
       if [[ "$preview_mode" != *"Cancel"* ]]; then
         omarchy-screensaver-preview "$preview_mode" 5
       fi

@@ -138,7 +138,7 @@ class SingularityMode(BaseMode):
 
         # 3. Einstein Photon Sphere Ring (Sharp razor-edge relativistic photon orbit)
         cr.arc(cx, cy, event_horizon_r * 1.12, 0, math.pi * 2)
-        cr.set_source_rgba(*self.oled_color(with_alpha((1.0, 1.0, 1.0, 1.0), 0.85 * fade)))
+        cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.foreground, 0.85 * fade)))
         cr.set_line_width(2.2)
         cr.stroke()
 

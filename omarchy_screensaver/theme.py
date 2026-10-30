@@ -275,6 +275,10 @@ class ThemeManager:
                 try:
                     with open(self.CAELESTIA_SCHEME_FILE, "r", encoding="utf-8") as f:
                         scheme = json.load(f)
+                    colours = scheme.get('colours', scheme.get('colors', {}))
+                    if not isinstance(colours, dict) or not colours:
+                        raise ValueError('Desktop scheme contains no colours')
+                    colours = {key: str(value).lstrip('#') for key, value in colours.items()}
                     scheme_mode = str(scheme.get("mode", "dark")).strip().lower()
                     is_caelestia_dark = scheme_mode != "light"
 

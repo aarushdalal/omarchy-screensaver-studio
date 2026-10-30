@@ -156,6 +156,6 @@ class GeometryMode(BaseMode):
             cr.fill()
 
             # Core
-            cr.set_source_rgba(*self.oled_color(with_alpha((1.0, 1.0, 1.0, 1.0), node_alpha * 0.95)))
+            cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.foreground, node_alpha * 0.95)))
             cr.arc(px, py, node_r, 0, math.pi * 2)
             cr.fill()

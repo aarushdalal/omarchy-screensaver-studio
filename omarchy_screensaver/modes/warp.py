@@ -139,5 +139,5 @@ class WarpMode(BaseMode):
             # Star head node when close
             if norm_depth > 0.65:
                 cr.arc(px, py, line_w * 0.65, 0, math.pi * 2)
-                cr.set_source_rgba(*self.oled_color(with_alpha((1.0, 1.0, 1.0, 1.0), alpha)))
+                cr.set_source_rgba(*self.oled_color(with_alpha(self.theme.foreground, alpha)))
                 cr.fill()

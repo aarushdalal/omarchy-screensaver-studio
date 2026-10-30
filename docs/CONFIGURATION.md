@@ -11,11 +11,11 @@ The configuration file is located at `~/.config/omarchy-screensaver/config.toml`
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `enabled` | `bool` | `true` | Enables or disables the screensaver globally. |
-| `mode` | `string` | `"clock"` | Active mode when launching without `--mode`. Options: `"clock"`, `"particles"`, `"terminal"`, `"system"`, `"visualizer"`, `"aurora"`, `"auto"`. |
+| `mode` | `string` | `"clock"` | Active mode when launching without `--mode`. Options: `clock`, `matrix`, `particles`, `warp`, `geometry`, `singularity`, `system`, `terminal`, `visualizer`, `aurora`, `cyber_nexus`, `synthwave`, `quantum_helix`, `topography`, `celestial_orbit`, `eclipse`, `ink_flow`, `rain`, or `auto`. |
 | `rotation` | `bool` | `false` | When true, automatically cycles between visual modes during screensaver operation. |
 | `rotation_interval` | `int` | `300` | Seconds between each mode change during automatic rotation. |
 | `rotation_modes` | `array` | `["clock", "particles", ...]` | Ordered list of modes to cycle through when rotation is active. |
-| `theme` | `string` | `"auto"` | Palette selection. Set to `"auto"` to match active Omarchy desktop theme (`colors.toml`), or specify a custom theme file name from `themes/` (e.g. `"cyberpunk"`, `"matrix"`, `"minimal"`, `"aurora"`, `"osaka"`). |
+| `theme` | `string` | `"auto"` | Palette selection. Set to `"auto"` to follow the active Omarchy (`colors.toml`) or DaemonOS/Caelestia desktop palette, or specify a custom theme file name from `themes/` (e.g. `"cyberpunk"`, `"matrix"`, `"minimal"`, `"aurora"`, `"osaka"`). |
 
 ---
 
@@ -104,7 +104,7 @@ Settings applied when screensaver is toggled as an **ambient study desk display*
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `graph_history_points` | `int` | `50` | Number of historical samples plotted on the live area sparkline charts. |
-| `update_interval` | `float` | `0.8` | Telemetry polling rate in seconds. |
+| `update_interval` | `float` | `0.5` | Legacy setting retained for compatibility; live telemetry uses a fixed 500 ms cadence. |
 
 ---
 
@@ -174,10 +174,21 @@ omarchy-screensaver-select theme neon-synth
 Instead of manually editing `config.toml`, you can use the built-in menu interfaces:
 
 1. **Omarchy Top-Bar Menu**: Open `Style -> Screensaver` in the Omarchy menu (`omarchy-menu toggle screensaver`) to click any visual mode or theme with live checkmarks.
-2. **Floating HUD**: Run `omarchy-menu-screensaver` to open a quick modal selector.
+2. **Floating HUD**: Run `omarchy-menu-screensaver` to see all 18 screensavers in one searchable list. Type a name and press Enter to select it; the menu closes. **Preview Screensavers** provides separate 12-second previews. **Follow Desktop Colours** sets `theme = "auto"`.
 3. **Interactive TUI**: Run `omarchy-screensaver-menu` to use the full-screen terminal manager.
 4. **CLI Control**:
-   - `omarchy-screensaver-select mode <clock|particles|terminal|system|visualizer|aurora>`
+   - `omarchy-screensaver-select mode <mode-name>`
    - `omarchy-screensaver-select theme <auto|cyberpunk|matrix|aurora|osaka|minimal>`
    - `omarchy-screensaver-select rotation toggle`
 
+
+
+## Live changes and the System Cockpit
+
+A running display picks up valid mode, palette and rotation edits within the 1.5-second settings poll. It does not need to restart. Re-selecting the saved mode restores it after a temporary audio-visualizer toggle. Partially written or invalid settings leave the last usable display in place.
+
+The system cockpit has three primary load gauges and four smaller temperature/capacity/battery instruments. Per-core bars, processor/network histories and Linux pressure readings supplement the detailed electrical, disk and runtime rows. Its text and entire layout scale together to fit the available canvas. Pressure is the kernel's `some avg10` statistic. Estimated power values are marked `est.`; missing sensors show unavailable. The temperature dial is labelled with its 0–100°C display scale. See the [README cockpit reference](../README.md#system-cockpit-in-180).
+
+For the startup needle sweep, today versus lifetime SSD counters, SMART refresh and pressure statistics, see [the complete System Cockpit guide](SYSTEM-COCKPIT.md).
+
+The current live telemetry cadence is 500 ms. The older system update_interval value is retained for configuration compatibility; the application uses this fixed cadence for consistent minute-long histories.

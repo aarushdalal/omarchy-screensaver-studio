@@ -8,6 +8,7 @@ import os
 import signal
 import sys
 import time
+import tomllib
 from typing import List, Optional
 
 import gi
@@ -64,6 +65,8 @@ class ScreensaverApp(Gtk.Application):
         self.media_info: Optional[MediaInfo] = None
 
         self._rotation_idx = 0
+        self._rotation_timer_id = 0
+        self._config_signature = self._get_config_signature()
         self._rotation_modes = [m for m in self.config.rotation_modes if m in AVAILABLE_MODES]
         if not self._rotation_modes:
             self._rotation_modes = AVAILABLE_MODES
@@ -163,14 +166,12 @@ class ScreensaverApp(Gtk.Application):
             self.log(f"Deferred MPRIS init notice: {e}")
 
         # Timers
-        GLib.timeout_add(1000, self._on_metrics_timer)
+        GLib.timeout_add(500, self._on_metrics_timer)
         GLib.timeout_add(1500, self._on_theme_timer)
         GLib.timeout_add(250, self._on_mpris_timer)
 
         # Mode rotation timer if enabled
-        if self.config.rotation and not self.forced_mode and not self.is_preview:
-            interval_ms = max(10, self.config.rotation_interval) * 1000
-            GLib.timeout_add(interval_ms, self._on_rotation_timer)
+        self._configure_rotation_timer()
 
         return GLib.SOURCE_REMOVE
 
@@ -183,12 +184,67 @@ class ScreensaverApp(Gtk.Application):
     def _on_theme_timer(self) -> bool:
         if self._is_dismissed:
             return GLib.SOURCE_REMOVE
+        self._reload_config_if_changed()
         if self.theme_manager.check_for_updates():
             new_palette = self.theme_manager.palette
             self.log(f"Theme reloaded: {new_palette.name}")
             for win in self.windows:
                 win.set_theme(new_palette)
         return GLib.SOURCE_CONTINUE
+
+    @staticmethod
+    def _get_config_signature():
+        try:
+            stat = os.stat(Config.CONFIG_FILE)
+            return (stat.st_mtime_ns, stat.st_size)
+        except OSError:
+            return None
+
+    def _configure_rotation_timer(self):
+        if self._rotation_timer_id:
+            GLib.source_remove(self._rotation_timer_id)
+            self._rotation_timer_id = 0
+        if self.config.rotation and not self.forced_mode and not self.is_preview:
+            self._rotation_timer_id = GLib.timeout_add(
+                max(10, self.config.rotation_interval) * 1000, self._on_rotation_timer)
+
+    def _reload_config_if_changed(self):
+        """Apply selections to existing windows without disturbing ambient/idle state."""
+        signature = self._get_config_signature()
+        if signature is None or signature == self._config_signature:
+            return
+        try:
+            with open(Config.CONFIG_FILE, 'rb') as stream:
+                config = Config(tomllib.load(stream))
+        except (OSError, ValueError, TypeError) as error:
+            self.log(f'Config reload deferred: {error}')
+            return
+        if config.mode not in AVAILABLE_MODES and config.mode != 'auto':
+            return
+        self._config_signature = signature
+        old = self.config
+        self.config = config
+        for win in self.windows:
+            win.config = config
+            win.active_mode.config = config
+        if config.theme != old.theme:
+            self.theme_manager = ThemeManager(config.theme, config.THEMES_DIR)
+            for win in self.windows:
+                win.set_theme(self.theme_manager.palette)
+            self.log(f'Palette selection applied: {config.theme}')
+        self._rotation_modes = [m for m in config.rotation_modes if m in AVAILABLE_MODES] or AVAILABLE_MODES
+        selection_requested = config.mode != self.selected_mode or (
+            config.raw == old.raw and self.current_mode != config.mode)
+        if not self.forced_mode and not self.is_preview and selection_requested:
+            self.selected_mode = config.mode
+            self._saved_mode_before_audio = None
+            self._saved_mode_before_visualizer_toggle = None
+            self.switch_mode(self._rotation_modes[0] if config.mode == 'auto' else config.mode)
+            self.log(f'Selection applied live: {config.mode}')
+        self._rotation_idx = self._rotation_modes.index(self.current_mode) if self.current_mode in self._rotation_modes else 0
+        if (old.rotation, old.rotation_interval, old.rotation_modes) != (config.rotation, config.rotation_interval, config.rotation_modes):
+            self._configure_rotation_timer()
+        self.log(f'Settings applied live: mode={config.mode} theme={config.theme} rotation={config.rotation}')
 
     def _on_mpris_timer(self) -> bool:
         if self._is_dismissed:

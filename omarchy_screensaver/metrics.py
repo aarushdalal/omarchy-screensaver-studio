@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple
 class SystemMetrics:
     """Collects and caches live Linux system metrics."""
 
-    def __init__(self, history_len: int = 60):
+    def __init__(self, history_len: int = 120):
         self.history_len = history_len
         self._last_update_time = 0.0
         self._last_cpu_idle = 0.0
@@ -30,6 +30,14 @@ class SystemMetrics:
         # CPU Core Telemetry
         self.cpu_percent: float = 0.0
         self.cpu_cores: int = os.cpu_count() or 8
+        self.cpu_per_core: List[float] = []
+        self._last_per_core = {}
+        self.cpu_temp_valid = False
+        self.nvme_temp_valid = False
+        self.power_sensor_valid = False
+        self.pressure_cpu = None
+        self.pressure_memory = None
+        self.pressure_io = None
         self.cpu_model: str = self._detect_cpu_model()
         self.cpu_freq_avg_ghz: float = 0.0
         self.cpu_freq_max_ghz: float = 0.0
@@ -112,6 +120,14 @@ class SystemMetrics:
         self._last_disk_read_sectors: int = 0
         self._last_disk_write_sectors: int = 0
         self._primary_disk_dev: bytes = b"nvme0n1"
+        from .storage import DailyIOTracker
+        self._daily_io = DailyIOTracker()
+        self.disk_today_read_bytes = None
+        self.disk_today_write_bytes = None
+        self.disk_today_partial = True
+        self.ssd_smart = {}
+        self._smart_reading = False
+        self._last_smart_poll = 0.0
 
         # Memory bus transfer rates & DRAM power
         self.ram_power_w: float = 1.8
@@ -299,8 +315,9 @@ class SystemMetrics:
             try:
                 with open(self._nvme_temp_path, "r", encoding="utf-8") as f:
                     self.nvme_temp_c = float(f.read().strip()) / 1000.0
+                    self.nvme_temp_valid = 0 < self.nvme_temp_c < 150
             except Exception:
-                pass
+                self.nvme_temp_valid = False
             finally:
                 self._nvme_reading = False
 
@@ -314,6 +331,48 @@ class SystemMetrics:
                 self._last_cpu_total = sum(fields)
         except Exception:
             pass
+
+    def _update_per_core(self, lines):
+        """Compute real per-logical-CPU utilization from successive /proc/stat samples."""
+        values, samples = [], {}
+        for line in lines:
+            parts = line.split()
+            if not parts or not parts[0].startswith(b'cpu') or not parts[0][3:].isdigit():
+                continue
+            fields = [float(value) for value in parts[1:9]]
+            if len(fields) < 5:
+                continue
+            total, idle = sum(fields), fields[3] + fields[4]
+            previous = self._last_per_core.get(parts[0])
+            load = 0.0
+            if previous and total > previous[0]:
+                load = 100 * (1 - (idle - previous[1]) / (total - previous[0]))
+            samples[parts[0]] = (total, idle)
+            values.append(max(0, min(100, load)))
+        self._last_per_core = samples
+        self.cpu_per_core = values
+
+    @staticmethod
+    def _parse_pressure(text):
+        """PSI 'some' avg10: percent of the last ten seconds with a stalled task."""
+        for line in text.splitlines():
+            fields = line.split()
+            if fields and fields[0] == 'some':
+                for field in fields[1:]:
+                    if field.startswith('avg10='):
+                        value = float(field.split('=', 1)[1])
+                        if 0 <= value <= 100:
+                            return value
+        return None
+
+    def _update_pressure(self):
+        for resource in ('cpu', 'memory', 'io'):
+            try:
+                with open('/proc/pressure/' + resource, 'r', encoding='utf-8') as stream:
+                    value = self._parse_pressure(stream.read())
+            except (OSError, ValueError):
+                value = None
+            setattr(self, 'pressure_' + resource, value)
 
     def _init_net(self):
         try:
@@ -376,8 +435,10 @@ class SystemMetrics:
                 self._last_cpu_idle = idle
                 self._last_cpu_total = total
                 self.cpu_history.append(self.cpu_percent)
+                self._update_per_core(f.readlines())
         except Exception:
             pass
+        self._update_pressure()
 
         # 2. CPU Frequencies (Direct binary reads)
         if self._cpu_freq_paths:
@@ -397,8 +458,9 @@ class SystemMetrics:
             try:
                 with open(self._cpu_temp_path, "r") as f:
                     self.cpu_temp_c = float(f.read().strip()) / 1000.0
+                    self.cpu_temp_valid = 0 < self.cpu_temp_c < 150
             except Exception:
-                pass
+                self.cpu_temp_valid = False
 
         # 4. Memory & Swap (Binary early-exit parser)
         try:
@@ -489,6 +551,7 @@ class SystemMetrics:
             except Exception:
                 pass
         self.soc_power_w = max(0.0, soc_p)
+        self.power_sensor_valid = soc_p > 0
 
         if self.soc_power_w > 0:
             w_gpu = max(0.2, self.gpu_percent) * 1.15
@@ -641,6 +704,13 @@ class SystemMetrics:
                         self.disk_total_read_gib = (read_sec * 512) / (1024.0 ** 3)
                         self.disk_total_write_gib = (write_sec * 512) / (1024.0 ** 3)
                         self.disk_total_ops_m = (reads + writes) / 1e6
+                        try:
+                            today = self._daily_io.observe(self._primary_disk_dev.decode(), read_sec * 512, write_sec * 512)
+                            self.disk_today_read_bytes = today['read']
+                            self.disk_today_write_bytes = today['write']
+                            self.disk_today_partial = today.get('partial', True)
+                        except (OSError, ValueError, KeyError, TypeError):
+                            pass
 
                         self._last_disk_reads = reads
                         self._last_disk_writes = writes
@@ -650,6 +720,19 @@ class SystemMetrics:
                         break
         except Exception:
             pass
+
+        if not self._smart_reading and now - self._last_smart_poll >= 60:
+            self._smart_reading = True
+            self._last_smart_poll = now
+            def _read_smart():
+                try:
+                    from .storage import nvme_smart
+                    self.ssd_smart = nvme_smart(self._primary_disk_dev.decode())
+                except Exception:
+                    pass
+                finally:
+                    self._smart_reading = False
+            threading.Thread(target=_read_smart, daemon=True).start()
 
         # 11. Memory Bus Transfer Rates & DRAM Power (Binary read from vmstat)
         try:

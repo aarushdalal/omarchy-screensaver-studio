@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Refresh a minimal read-only NVMe SMART snapshot; authentication is explicit."""
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import tempfile
+import time
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--device', default='nvme0n1', help='NVMe namespace (default: nvme0n1)')
+    args = parser.parse_args()
+    if not re.fullmatch(r'nvme\d+n\d+', args.device):
+        parser.error('Use an NVMe namespace such as nvme0n1')
+    tool = shutil.which('smartctl')
+    if not tool:
+        print('Installing the official smartmontools diagnostic package. A desktop authentication prompt may appear.', flush=True)
+        result = subprocess.run(['pkexec', '/usr/bin/pacman', '-S', '--needed', '--noconfirm', '--', 'smartmontools'])
+        if result.returncode:
+            return result.returncode
+        tool = '/usr/bin/smartctl'
+    command = [tool, '-a', '-j', '/dev/' + args.device]
+    result = subprocess.run(command, capture_output=True, text=True)
+    try:
+        info = json.loads(result.stdout).get('nvme_smart_health_information_log', {})
+    except ValueError:
+        info = {}
+    if 'host_reads' not in info or 'host_writes' not in info:
+        print('Reading NVMe SMART counters only. Authorize the system diagnostic in the desktop prompt.', flush=True)
+        result = subprocess.run(['pkexec', *command], capture_output=True, text=True)
+        try:
+            info = json.loads(result.stdout).get('nvme_smart_health_information_log', {})
+        except ValueError:
+            info = {}
+    if 'host_reads' not in info or 'host_writes' not in info:
+        print('SMART command counts are unavailable; no snapshot was changed.')
+        return 1
+    data = {'device': args.device, 'updated_at': time.time(),
+            'read_commands': int(info['host_reads']), 'write_commands': int(info['host_writes'])}
+    path = Path.home() / '.config/omarchy-screensaver/smart-cache.json'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile('w', dir=path.parent, prefix='.smart-', delete=False) as stream:
+        json.dump(data, stream)
+        temporary = stream.name
+    os.replace(temporary, path)
+    print('Saved read/write command totals. No disk contents or identifying SMART fields were saved.')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

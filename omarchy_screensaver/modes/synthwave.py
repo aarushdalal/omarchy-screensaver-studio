@@ -49,7 +49,7 @@ class SynthwaveMode(BaseMode):
         self._init_environment(self.width, self.height)
 
     def _init_environment(self, width: int, height: int):
-        random.seed(88 + self.monitor_index * 999)
+        rng = random.Random(88 + self.monitor_index * 999)
         self.stars = []
         horizon_y = height * 0.54
 
@@ -57,11 +57,11 @@ class SynthwaveMode(BaseMode):
         for _ in range(70):
             self.stars.append(
                 Star(
-                    x=random.uniform(0, width),
-                    y=random.uniform(0, horizon_y - 20),
-                    size=random.uniform(0.8, 1.8),
-                    alpha=random.uniform(0.15, 0.45),
-                    twinkle_speed=random.uniform(1.2, 3.0),
+                    x=rng.uniform(0, width),
+                    y=rng.uniform(0, horizon_y - 20),
+                    size=rng.uniform(0.8, 1.8),
+                    alpha=rng.uniform(0.15, 0.45),
+                    twinkle_speed=rng.uniform(1.2, 3.0),
                 )
             )
 
@@ -99,12 +99,12 @@ class SynthwaveMode(BaseMode):
         # 1. Subtle, dark distant stars
         for s in self.stars:
             twinkle = 0.5 + 0.5 * math.sin(self.time * s.twinkle_speed + s.x)
-            cr.set_source_rgba(1.0, 1.0, 1.0, s.alpha * twinkle * fade)
+            cr.set_source_rgba(*self.theme.foreground_rgb, s.alpha * twinkle * fade)
             cr.arc(s.x, s.y, s.size * scale, 0, math.pi * 2)
             cr.fill()
 
         # 2. Subdued Segmented Retro Sun (Warm dark amber / muted crimson gradient, NOT bright)
-        sun_radius = min(width, height) * 0.16
+        sun_radius = min(width, height) * 0.14
         sun_y = horizon_y - sun_radius * 0.45
 
         # Sun gradient
@@ -138,7 +138,7 @@ class SynthwaveMode(BaseMode):
 
         # 3. Mountain Silhouettes (Dark muted backdrop)
         mr, mg, mb = self.theme.muted_rgb
-        cr.set_source_rgba(mr, mg, mb, 0.28 * fade)
+        cr.set_source_rgba(*((0, 0, 0) if self.config.oled_mode and self.theme.is_dark else self.theme.background[:3]), 1.0)
         cr.set_line_width(1.2 * scale)
         if self.mountains:
             cr.move_to(0, horizon_y)

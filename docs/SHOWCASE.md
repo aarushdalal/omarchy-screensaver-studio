@@ -1,14 +1,15 @@
-# Recorded showcases
+# Recorded showcases — 1.8.0
 
-The gallery contains 15 historical recordings of Screensaver Studio, restored from the local showcase archive. These clips demonstrate the recorded version; they do not establish compatibility with a newer desktop release.
+The gallery contains fresh recordings of all 18 Screensaver Studio modes from 30 October 2026. Eclipse, Ink Flow and Rain on Glass are new. The System Cockpit recording was refreshed again after its seven-gauge layout, larger-text update, startup needle sweep and daily/lifetime SSD fields.
 
-- `assets/showcase/<name>.mp4`: full-length silent H.264 video, 960 pixels wide, 30 FPS, with fast-start playback.
-- `assets/showcase/previews/<name>.gif`: looping 480-pixel, 12 FPS excerpt for GitHub README previews.
-- `assets/showcase/previews/<name>.jpg`: still poster for the optional HTML gallery.
-- `index.html`: video gallery with explicit playback controls and no autoplay.
+- `assets/showcase/<mode>.webm`: silent 1920×1080 VP9 recording for the browser gallery.
+- `assets/showcase/<mode>.mp4`: silent H.264 with fast-start playback (1920×1080 for System Cockpit, 960×540 for other modes).
+- `assets/showcase/previews/<mode>.gif`: looping 480×270, 12 FPS excerpt for GitHub README previews.
+- `assets/showcase/previews/<mode>.jpg`: 960×540 still poster.
+- `index.html` and `docs/index.html`: searchable galleries with explicit video controls, no autoplay and both video formats.
 
-The README uses repository-relative GIF images and links to matching players in the GitHub Pages gallery. The videos are also available as MP4 downloads in the repository. The HTML gallery works when served from the repository root by any static web server.
+Most original clips are about five seconds; the refreshed cockpit clip is eighteen seconds. The README links each GIF to the corresponding GitHub Pages player. Playback starts only after the viewer chooses it, and starting another video pauses the previous one. Both gallery locations work from a static server; the docs page uses the matching relative asset paths.
 
-Audio streams and source metadata are removed. The system identity row and terminal identity header are masked and replaced with demo labels throughout their clips. The original local recordings remain unchanged.
+Audio streams and source metadata are removed from the published copies. Workstation identity is replaced with generic demo labels in the system footer and terminal header throughout their clips. The other telemetry and visuals remain the recorded output; estimates are labelled in the cockpit itself. Original local recordings are retained outside the public repository.
 
-The published MP4, GIF and JPEG files are reviewed outputs recorded by SHA-256 in `tools/approved-preview-media.json`. The release privacy check rejects new or changed media until reviewed. Run `python3 tools/release_privacy_check.py` before publication.
+Published video/GIF/JPEG files are reviewed and recorded by SHA-256 in `tools/approved-preview-media.json`. The release privacy check rejects changed or unreviewed media. `python3 tools/build_showcase.py` rebuilds the HTML pages and README links from the 18-mode catalogue; it does not approve media checksums. Run `python3 tools/release_privacy_check.py` before publication.

@@ -18,7 +18,7 @@ DEFAULT_CONFIG_TOML = """# =====================================================
 
 [general]
 enabled = true
-# Modes: "clock", "matrix", "particles", "warp", "geometry", "singularity", "terminal", "system", "visualizer", "aurora", "auto"
+# Modes: clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit, eclipse, ink_flow, rain, auto
 mode = "clock"
 # When rotation is true, screensaver smoothly cycles through rotation_modes
 rotation = false
@@ -33,7 +33,12 @@ rotation_modes = [
     "system",
     "terminal",
     "aurora",
-    "visualizer"
+    "visualizer",
+    "eclipse",
+    "ink_flow",
+    "rain",
+    "topography",
+    "celestial_orbit"
 ]
 # Theme: "auto" (matches active Omarchy theme) or a theme filename in themes/
 theme = "auto"
@@ -92,7 +97,7 @@ max_log_lines = 12
 
 [system]
 graph_history_points = 50
-update_interval = 0.8
+update_interval = 0.5
 
 [visualizer]
 style = "spectrum"
@@ -153,7 +158,7 @@ class Config:
             "rotation_modes", [
                 "clock", "matrix", "particles", "warp", "geometry",
                 "singularity", "system", "terminal", "aurora", "visualizer",
-                "cyber_nexus", "synthwave", "quantum_helix", "topography", "celestial_orbit"
+                "cyber_nexus", "synthwave", "quantum_helix", "topography", "celestial_orbit", "eclipse", "ink_flow", "rain"
             ]
         )
         self.theme: str = gen.get("theme", "auto")
@@ -212,7 +217,7 @@ class Config:
         # [system]
         sys_sec = self.raw.get("system", {})
         self.system_graph_history_points: int = int(sys_sec.get("graph_history_points", 50))
-        self.system_update_interval: float = float(sys_sec.get("update_interval", 0.8))
+        self.system_update_interval: float = float(sys_sec.get("update_interval", 0.5))
 
         # [visualizer]
         vis = self.raw.get("visualizer", {})

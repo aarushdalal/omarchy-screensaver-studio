@@ -1,3 +1,18 @@
+## 1.8.0 — 2026-10-30
+
+- Added the car-style startup needle check, tracked daily disk read/write totals, NVMe SMART lifetime data/command totals and estimated endurance, plus a documented explicit SMART refresh command.
+
+- Added the larger-text seven-gauge System Cockpit, smooth needles/recent peaks, per-core bars, separate CPU/GPU and network histories, and Linux pressure readings. Modeled electrical values are labelled as estimates.
+- Refreshed all 18 recorded showcases, GIFs and poster images; updated root/docs galleries and README players, including the final cockpit recording.
+
+- Fixed DaemonOS automatic palette lookup and replaced fixed-white effect highlights with desktop palette colours.
+- Fixed selection: all 18 scenes appear in one searchable list and apply directly and close the browser; previews have a separate entry. Running windows now apply mode, palette and rotation changes without restarting. Invalid partial settings edits leave the current display intact.
+
+- Added Eclipse, Ink Flow and Rain on Glass; direct searchable native browsing and separate previews.
+- Rebuilt Cyber Nexus, Topography, Quantum Helix and Celestial Orbit; refined Synthwave terrain.
+- Fixed initial allocation/resize propagation, logical-pixel effect sizing, cockpit overflow and media-title clipping.
+- Preserved current user configuration and ambient/idle integration. Added rendering and integration regressions.
+
 # Changelog
 
 ## [1.7.0] - 2026-10-11

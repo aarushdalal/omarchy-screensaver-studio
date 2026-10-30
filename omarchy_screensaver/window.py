@@ -54,8 +54,8 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
         self._fps_accumulator_time: float = 0.0
         self.live_fps: float = 60.0
         self.current_scale: float = 1.0
-        self.window_width: int = 1920
-        self.window_height: int = 1080
+        self.window_width: int = 0
+        self.window_height: int = 0
 
         self._setup_window()
         self._setup_drawing_area()
@@ -160,6 +160,10 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
         return False
 
     def _on_mouse_motion(self, controller, x, y):
+        # Moving from the selector should not immediately dismiss a timed preview.
+        # Keys and clicks still close it; normal idle screensavers retain motion dismissal.
+        if self.is_preview:
+            return
         if self.is_ambient and not getattr(self.config, "ambient_exit_on_mouse_move", False):
             return
 
@@ -243,9 +247,14 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
         return GLib.SOURCE_CONTINUE
 
     def _on_draw(self, area: Gtk.DrawingArea, cr: cairo.Context, width: int, height: int):
-        self.window_width = width
-        self.window_height = height
-        scale = float(self.get_scale_factor())
+        if width <= 0 or height <= 0:
+            return
+        if (width, height) != (self.window_width, self.window_height):
+            self.window_width, self.window_height = width, height
+            self.active_mode.on_resize(width, height)
+        # Cairo already uses GTK logical pixels. Applying the device scale again
+        # doubles strokes and particles on fractional/high-DPI displays.
+        scale = max(0.5, min(2.0, min(width / 1920.0, height / 1080.0)))
         self.current_scale = scale
 
         # Render active screensaver mode

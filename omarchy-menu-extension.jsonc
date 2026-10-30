@@ -1,14 +1,17 @@
 {
-  // Style Screensaver (Omarchy Screensaver Engine)
   "style.screensaver": {
     "icon": "󱄄",
     "label": "Screensaver",
-    "aliases": ["screensaver", "screensavers", "saver"]
+    "aliases": [
+      "screensaver",
+      "screensavers",
+      "saver"
+    ]
   },
   "style.screensaver.menu": {
     "icon": "󰘔",
-    "label": "Screensaver Menu (Floating HUD)",
-    "detail": "Open interactive screensaver mode selector HUD",
+    "label": "Choose Screensaver",
+    "detail": "All 18 screensavers in one searchable list",
     "action": "omarchy-menu-screensaver"
   },
   "style.screensaver.tui": {
@@ -31,125 +34,151 @@
   },
   "style.screensaver.modes": {
     "icon": "󰄛",
-    "label": "Visual Modes",
-    "aliases": ["screensaver-modes"]
+    "label": "All Screensavers",
+    "aliases": [
+      "screensaver-modes"
+    ],
+    "detail": "Select any of the 18 screensavers directly"
+  },
+  "style.screensaver.modes.eclipse": {
+    "icon": "󰖔",
+    "label": "Eclipse",
+    "detail": "A lunar silhouette with a breathing solar corona",
+    "checked": "omarchy-screensaver-select is-mode eclipse",
+    "action": "omarchy-screensaver-select mode eclipse"
+  },
+  "style.screensaver.modes.ink_flow": {
+    "icon": "󰘔",
+    "label": "Ink Flow",
+    "detail": "Layered silk filaments folding through darkness",
+    "checked": "omarchy-screensaver-select is-mode ink_flow",
+    "action": "omarchy-screensaver-select mode ink_flow"
+  },
+  "style.screensaver.modes.rain": {
+    "icon": "󰖖",
+    "label": "Rain on Glass",
+    "detail": "Quiet droplets, soft night lights and reflections",
+    "checked": "omarchy-screensaver-select is-mode rain",
+    "action": "omarchy-screensaver-select mode rain"
   },
   "style.screensaver.modes.clock": {
     "icon": "󱑂",
-    "label": "Clock (Minimal Typographic)",
-    "detail": "Floating typography with celestial orbital aura & live telemetry",
+    "label": "Floating Clock",
+    "detail": "Clean typography, orbital halo and date",
     "checked": "omarchy-screensaver-select is-mode clock",
     "action": "omarchy-screensaver-select mode clock"
   },
-  "style.screensaver.modes.matrix": {
-    "icon": "󰅟",
-    "label": "Matrix Cyber Rain",
-    "detail": "3D parallax Katakana & hex cascading rain with phosphor decay",
-    "checked": "omarchy-screensaver-select is-mode matrix",
-    "action": "omarchy-screensaver-select mode matrix"
+  "style.screensaver.modes.aurora": {
+    "icon": "󰒲",
+    "label": "Aurora",
+    "detail": "Slow luminous ribbons and drifting stardust",
+    "checked": "omarchy-screensaver-select is-mode aurora",
+    "action": "omarchy-screensaver-select mode aurora"
+  },
+  "style.screensaver.modes.topography": {
+    "icon": "󰮈",
+    "label": "Topography",
+    "detail": "Living islands traced by nested contour lines",
+    "checked": "omarchy-screensaver-select is-mode topography",
+    "action": "omarchy-screensaver-select mode topography"
+  },
+  "style.screensaver.modes.celestial_orbit": {
+    "icon": "󰇯",
+    "label": "Celestial Orbit",
+    "detail": "Elliptical planetary paths and fading trails",
+    "checked": "omarchy-screensaver-select is-mode celestial_orbit",
+    "action": "omarchy-screensaver-select mode celestial_orbit"
+  },
+  "style.screensaver.modes.singularity": {
+    "icon": "󰇯",
+    "label": "Singularity",
+    "detail": "A dark core surrounded by swirling matter",
+    "checked": "omarchy-screensaver-select is-mode singularity",
+    "action": "omarchy-screensaver-select mode singularity"
+  },
+  "style.screensaver.modes.geometry": {
+    "icon": "󰦪",
+    "label": "Tesseract",
+    "detail": "A rotating four-dimensional wireframe",
+    "checked": "omarchy-screensaver-select is-mode geometry",
+    "action": "omarchy-screensaver-select mode geometry"
+  },
+  "style.screensaver.modes.quantum_helix": {
+    "icon": "󰘔",
+    "label": "Quantum Helix",
+    "detail": "Continuous double strands with depth and dust",
+    "checked": "omarchy-screensaver-select is-mode quantum_helix",
+    "action": "omarchy-screensaver-select mode quantum_helix"
   },
   "style.screensaver.modes.particles": {
     "icon": "󰘔",
-    "label": "Generative Particles",
-    "detail": "3D volumetric constellation with wandering gravitational vortex",
+    "label": "Constellation",
+    "detail": "Drifting particles joined by delicate filaments",
     "checked": "omarchy-screensaver-select is-mode particles",
     "action": "omarchy-screensaver-select mode particles"
   },
   "style.screensaver.modes.warp": {
     "icon": "󰐎",
     "label": "Starfield Warp",
-    "detail": "Relativistic 3D perspective hyperspace with speed streaks",
+    "detail": "Perspective stars and flowing light trails",
     "checked": "omarchy-screensaver-select is-mode warp",
     "action": "omarchy-screensaver-select mode warp"
   },
-  "style.screensaver.modes.geometry": {
-    "icon": "󰦪",
-    "label": "4D Tesseract (Geometry)",
-    "detail": "Hypnotic 4D rotating hypercube with depth cueing & glow",
-    "checked": "omarchy-screensaver-select is-mode geometry",
-    "action": "omarchy-screensaver-select mode geometry"
+  "style.screensaver.modes.synthwave": {
+    "icon": "󰾏",
+    "label": "Synthwave Horizon",
+    "detail": "A distant striped sun over a wireframe landscape",
+    "checked": "omarchy-screensaver-select is-mode synthwave",
+    "action": "omarchy-screensaver-select mode synthwave"
   },
-  "style.screensaver.modes.singularity": {
-    "icon": "󰇯",
-    "label": "Gravitational Singularity",
-    "detail": "Kerr black hole with relativistic Doppler-beamed accretion disk",
-    "checked": "omarchy-screensaver-select is-mode singularity",
-    "action": "omarchy-screensaver-select mode singularity"
+  "style.screensaver.modes.cyber_nexus": {
+    "icon": "󰑮",
+    "label": "Cyber Nexus",
+    "detail": "Honeycomb circuitry with travelling signals",
+    "checked": "omarchy-screensaver-select is-mode cyber_nexus",
+    "action": "omarchy-screensaver-select mode cyber_nexus"
+  },
+  "style.screensaver.modes.matrix": {
+    "icon": "󰅟",
+    "label": "Matrix Rain",
+    "detail": "Cascading Katakana and phosphor trails",
+    "checked": "omarchy-screensaver-select is-mode matrix",
+    "action": "omarchy-screensaver-select mode matrix"
+  },
+  "style.screensaver.modes.visualizer": {
+    "icon": "󰎈",
+    "label": "Audio Visualizer",
+    "detail": "Live music spectrum and track information",
+    "checked": "omarchy-screensaver-select is-mode visualizer",
+    "action": "omarchy-screensaver-select mode visualizer"
   },
   "style.screensaver.modes.system": {
     "icon": "󰓅",
-    "label": "System Telemetry HUD",
-    "detail": "Radial arc tachometers, flowing Bezier sparklines & live telemetry",
+    "label": "System Cockpit",
+    "detail": "Live gauges, history and detailed telemetry",
     "checked": "omarchy-screensaver-select is-mode system",
     "action": "omarchy-screensaver-select mode system"
   },
   "style.screensaver.modes.terminal": {
     "icon": "",
     "label": "Diagnostic Stream",
-    "detail": "Borderless holographic Linux kernel & procfs diagnostic waterfall",
+    "detail": "A borderless stream of system activity",
     "checked": "omarchy-screensaver-select is-mode terminal",
     "action": "omarchy-screensaver-select mode terminal"
-  },
-  "style.screensaver.modes.visualizer": {
-    "icon": "󰎈",
-    "label": "Audio Visualizer",
-    "detail": "MPRIS player metadata & floating spectrum equalizer",
-    "checked": "omarchy-screensaver-select is-mode visualizer",
-    "action": "omarchy-screensaver-select mode visualizer"
-  },
-  "style.screensaver.modes.aurora": {
-    "icon": "󰒲",
-    "label": "Aurora Solar Plasma",
-    "detail": "Multi-octave harmonic spline ribbons with stardust motes",
-    "checked": "omarchy-screensaver-select is-mode aurora",
-    "action": "omarchy-screensaver-select mode aurora"
-  },
-  "style.screensaver.modes.cyber_nexus": {
-    "icon": "󱊈",
-    "label": "Cyber Nexus",
-    "detail": "Holographic neural mesh with ambient data pulses",
-    "checked": "omarchy-screensaver-select is-mode cyber_nexus",
-    "action": "omarchy-screensaver-select mode cyber_nexus"
-  },
-  "style.screensaver.modes.synthwave": {
-    "icon": "󰋜",
-    "label": "Synthwave Horizon",
-    "detail": "Infinite 3D perspective retro wireframe grid with neon sun",
-    "checked": "omarchy-screensaver-select is-mode synthwave",
-    "action": "omarchy-screensaver-select mode synthwave"
-  },
-  "style.screensaver.modes.quantum_helix": {
-    "icon": "󰡏",
-    "label": "Quantum Helix",
-    "detail": "Double helix strands with orbital energy particles",
-    "checked": "omarchy-screensaver-select is-mode quantum_helix",
-    "action": "omarchy-screensaver-select mode quantum_helix"
-  },
-  "style.screensaver.modes.topography": {
-    "icon": "󰍹",
-    "label": "Topography Map",
-    "detail": "Subdued contour lines oscillating like a terrain elevation map",
-    "checked": "omarchy-screensaver-select is-mode topography",
-    "action": "omarchy-screensaver-select mode topography"
-  },
-  "style.screensaver.modes.celestial_orbit": {
-    "icon": "󱐋",
-    "label": "Celestial Orbit",
-    "detail": "Central gravitational body with multi-orbital planetary system",
-    "checked": "omarchy-screensaver-select is-mode celestial_orbit",
-    "action": "omarchy-screensaver-select mode celestial_orbit"
   },
   "style.screensaver.rotation": {
     "icon": "󰑖",
     "label": "Auto-Rotation Mode",
-    "detail": "Cycle smoothly through all visual modes every 5 minutes",
+    "detail": "Cycle through your configured screensaver rotation list",
     "checked": "omarchy-screensaver-select is-rotation",
     "action": "omarchy-screensaver-select toggle-rotation"
   },
   "style.screensaver.themes": {
     "icon": "󰏘",
     "label": "Color Themes",
-    "aliases": ["screensaver-themes"]
+    "aliases": [
+      "screensaver-themes"
+    ]
   },
   "style.screensaver.themes.auto": {
     "icon": "󰸌",
@@ -200,4 +229,3 @@
     "action": "omarchy-launch-config-editor \"$HOME/.config/omarchy-screensaver/config.toml\""
   }
 }
-

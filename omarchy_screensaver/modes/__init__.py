@@ -22,6 +22,9 @@ MODE_MODULE_MAP = {
     "quantum_helix": ("quantum_helix", "QuantumHelixMode"),
     "topography": ("topography", "TopographyMode"),
     "celestial_orbit": ("celestial_orbit", "CelestialOrbitMode"),
+    "eclipse": ("eclipse", "EclipseMode"),
+    "ink_flow": ("ink_flow", "InkFlowMode"),
+    "rain": ("rain", "RainMode"),
 }
 
 AVAILABLE_MODES = list(MODE_MODULE_MAP.keys())

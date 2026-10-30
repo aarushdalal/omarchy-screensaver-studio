@@ -4,7 +4,7 @@ Current release files use portable paths. The showcase gallery contains reviewed
 silent recordings with source metadata removed; identity-bearing regions are cropped
 or masked. Only media matching `tools/approved-preview-media.json` is approved for
 release. Unreviewed recordings, logs, Git metadata copies and runtime configuration
-are not release assets. The sample SVG remains a design illustration.
+are not release assets. The old sample SVG has been replaced by current video posters and recordings.
 
 See [showcase details](SHOWCASE.md) for recording formats and review scope.
 

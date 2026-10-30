@@ -111,7 +111,7 @@ class MatrixMode(BaseMode):
         self.clear_background(cr, width, height)
 
         fade = self.fade_in * self.luminance_factor
-        head_color = self.oled_color((1.0, 1.0, 1.0, 1.0), fade)
+        head_color = self.oled_color(self.theme.foreground, fade)
         accent_color = self.theme.accent
         primary_color = self.theme.primary
 

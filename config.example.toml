@@ -6,7 +6,7 @@
 
 [general]
 enabled = true
-# Modes: "clock", "particles", "terminal", "system", "visualizer", "aurora", "matrix", "warp", "geometry", "singularity", "cyber_nexus", "synthwave", "quantum_helix", "topography", "celestial_orbit", "auto"
+# Modes: clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit, eclipse, ink_flow, rain, auto
 mode = "clock"
 # When rotation is true, screensaver smoothly cycles through rotation_modes
 rotation = false
@@ -81,7 +81,7 @@ max_log_lines = 12
 
 [system]
 graph_history_points = 50
-update_interval = 0.8
+update_interval = 0.5
 
 [visualizer]
 style = "spectrum"

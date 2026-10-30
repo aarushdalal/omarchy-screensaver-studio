@@ -244,7 +244,8 @@ class VisualizerMode(BaseMode):
         self.draw_text(
             cr, title, cx, cy_text,
             self.FONT_SANS, 32.0, title_color,
-            align="center", weight=Pango.Weight.BOLD, glow=is_playing
+            align="center", weight=Pango.Weight.BOLD, glow=is_playing,
+            max_width=w * 0.78
         )
 
         # Artist & Album
@@ -252,7 +253,7 @@ class VisualizerMode(BaseMode):
         self.draw_text(
             cr, artist_album, cx, cy_text + 38.0,
             self.FONT_SANS, 15.0, self.oled_color(with_alpha(self.theme.dark_foreground, fade * (0.85 if is_playing else 0.60))),
-            align="center", weight=Pango.Weight.NORMAL
+            align="center", weight=Pango.Weight.NORMAL, max_width=w * 0.78
         )
 
     def _render_aurora_ribbon(

@@ -173,6 +173,7 @@ class ClockMode(BaseMode):
                 self.oled_color(with_alpha(self.theme.foreground, alpha * 0.75)),
                 align="center",
                 weight=Pango.Weight.MEDIUM,
+                max_width=width * 0.86,
             )
 
         # 4. Floating System Telemetry (Minimal holographic row with dot glyphs)
@@ -198,4 +199,5 @@ class ClockMode(BaseMode):
                 self.oled_color(with_alpha(self.theme.muted, alpha * 0.60)),
                 align="center",
                 weight=Pango.Weight.NORMAL,
+                max_width=width * 0.86,
             )
