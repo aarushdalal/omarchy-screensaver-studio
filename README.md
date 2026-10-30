@@ -8,6 +8,10 @@ This project was developed through an AI-assisted workflow. The concept, customi
 
 ---
 
+## Audio and startup refinement (1.8.1)
+
+Aurora Flow now separates larger track information from the live spectrum, with falling peak caps, low/mid/high band-activity meters and quiet theme-coloured ribbons. Live desktop sound responds even without a named player. Audio listeners share capture safely, and all bar counts span the complete frequency range. The cockpit wakes its seven instruments in sequence, then brings activity and detail panels into view. [Audio Visualizer guide](docs/AUDIO-VISUALIZER.md) · [Telemetry guide](docs/SYSTEM-COCKPIT.md).
+
 ## Ambient collection refresh (1.8.0)
 
 The native Screensaver Studio browser lists all 18 modes directly in one searchable menu. Open it with `omarchy-menu-screensaver`, type a name such as Rain or Eclipse, and choose it to apply. The current selection is marked with a check. **Preview Screensavers** opens separate 12-second previews. **Follow Desktop Colours** keeps scenes matched to the active desktop palette. Running screensavers pick up mode, palette and rotation edits within 1.5 seconds without restarting.
@@ -38,7 +42,7 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
   - `singularity`: Kerr rotating black hole with relativistic Doppler-beamed accretion disk.
   - `system`: Digital Cockpit Speedometer Telemetry Cluster — Automotive instrument cluster with precision tachometers (CPU, GPU, RAM), dynamic voltage & amperage badges, dual-trace Bezier 60-second activity sparkline, and an elevated 3-column precision telemetry deck (`ELECTRICAL & POWER` with CPU/GPU/Total SoC/DRAM wattage/volts/amps, `STORAGE & MEMORY I/O` with live NVMe read/write MB/s, IOPS, lifetime transfer totals, and RAM bus bandwidth, and `KERNEL & RUNTIME` with 16-thread queue capacity and load averages).
   - `terminal`: Borderless diagnostic waterfall streaming live Linux kernel and procfs metrics.
-  - `visualizer`: Floating reactive equalizer bars with real-time PipeWire spectrum and MPRIS metadata.
+  - `visualizer`: Aurora ribbons, live spectrum bars with falling peak caps, low/mid/high activity meters and readable MPRIS track information. See [the Audio Visualizer guide](docs/AUDIO-VISUALIZER.md).
   - `aurora`: Multi-octave harmonic spline ribbons with celestial stardust motes.
   - `cyber_nexus`: Subtle glowing neural nodes connected by pulsing data lines in deep OLED black.
   - `synthwave`: 3D perspective retro wireframe horizon with gentle neon gradient sun.
@@ -48,14 +52,14 @@ I did not write Omarchy, Quickshell, Hyprland, GTK4, or PipeWire from scratch. W
 - **OLED Burn-in Protection**: Implemented true `#000000` black subpixel shutoff mode with continuous imperceptible orbital coordinate drift to safeguard OLED/AMOLED displays.
 - **Ambient Study Display Mode**: Created dedicated ambient study display toggle with sleep/lock inhibition and touch immunity (shortcut: `SUPER + I`), plus live audio visualizer toggle (`SUPER + T` / `'t'`).
 - **Dynamic Palette Synchronizer**: Designed `theme.py` to inherit color schemes dynamically from the active Omarchy `colors.toml` or built-in presets (`aurora`, `cyberpunk`, `matrix`, `minimal`, `osaka`) with 100% theme harmony.
-- **Real-Time PipeWire Audio Spectrum Engine**: Native C PipeWire audio monitor (`audio_spectrum.c` compiled into `libomarchy_audio.so`) running at native 48,000 Hz with 36 continuous-frequency Goertzel filters, progressive acoustic tilt equalization for full dynamic response across all 36 bands (40 Hz - 11.5 kHz), sub-10ms latency, and study mode visualizer toggle (`SUPER + T` / keypress `'t'`).
+- **Real-Time PipeWire Audio Spectrum Engine**: Native C PipeWire audio monitor (`audio_spectrum.c` compiled into `libomarchy_audio.so`) running at native 48,000 Hz with 64 continuous-frequency Goertzel filters, progressive acoustic tilt equalization and 8–64 display bars spanning the full spectrum (40 Hz - 11.5 kHz), and study mode visualizer toggle (`SUPER + T` / keypress `'t'`).
 - **Idle Lifecycle Integration**: Wired `Service.qml` (Quickshell) to trigger the screensaver via `omarchy-launch-screensaver` wrapper and `shell.json` configuration. Wake dismissal (key press, mouse motion, click) cancels idle cycles.
 - **Interactive Menu Suite & Extensions**: Designed the floating modal HUD selector (`omarchy-menu-screensaver`), keyboard-driven terminal manager (`omarchy-screensaver-menu` via Gum), CLI state manager (`omarchy-screensaver-select`), and `omarchy-menu-extension.jsonc` for Omarchy application launcher integration.
 - **Bar Widget**: Implemented `BarWidget.qml` showing screensaver mode and controls in the Omarchy top bar.
 - **Theme Definitions**: Authored `themes/` directory with per-mode color palette overrides.
 - **Performance Tuning**: Bounded particle populations, local random generators and mode-specific frame limits; the ambient collection targets 30 FPS. Actual throughput varies with resolution, theme, graphics driver and load.
 - **Installer**: Authored `./install.sh` with timestamped backup manifests.
-- **Testing**: 26 rendering, selection, theme and telemetry regression checks pass locally. All 18 modes redraw under palette changes; native selection and the updated cockpit recording were checked on the local Hyprland desktop.
+- **Testing**: 33 rendering, selection, theme, audio and telemetry regression checks pass locally. All 18 modes redraw under palette changes; native selection and the updated cockpit recording were checked on the local Hyprland desktop.
 
 ---
 
@@ -83,7 +87,7 @@ This repository includes a valid `manifest.json` for the Omarchy plugin system:
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "author": "Daemon0",
   "description": "18-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit, eclipse, ink_flow, rain) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
   "kinds": ["bar-widget"],
@@ -138,7 +142,7 @@ This project contains native Python GTK4 rendering code and optional C extension
 
 ### System Cockpit in 1.8.0
 
-The system display now puts the most useful readings first, with larger text and seven animated gauges. On launch, a labelled car-style instrument check sweeps every needle to 100, back to zero, then hands over to real utilization:
+The system display now puts the most useful readings first, with larger text and seven animated gauges. On launch, a labelled car-style instrument check starts CPU, graphics and memory in sequence, then temperature, storage, load and battery. Each needle sweeps to 100, returns to zero, then hands over to real utilization. Activity and detail panels fade in as later components:
 
 1. **Core load:** CPU, GPU and memory utilization. Smooth needles follow the readings; a separate outer marker holds the recent peak. Per-core activity, VRAM and swap bars sit below the main instruments.
 2. **Capacity and thermals:** CPU temperature, root-storage usage, normalized one-minute load and battery charge. The temperature instrument uses a labelled 0–100°C display scale. Unsupported sensors show N/A.
@@ -155,7 +159,7 @@ Rendering targets 30 FPS with bounded drawing work, while metrics are sampled ab
 
 ## Showcase Gallery
 
-**18 fresh recordings for version 1.8.0.** Click an animated preview or **Watch video** to open its player. The three new scenes appear first.
+**18 recorded previews.** System Cockpit and Audio Visualizer are refreshed for version 1.8.1. Click an animated preview or **Watch video** to open its player. The three new scenes appear first.
 
 | Screensaver | Animated preview | Description |
 |---|---|---|
@@ -174,8 +178,8 @@ Rendering targets 30 FPS with bounded drawing work, while metrics are sampled ab
 | Synthwave Horizon | [![Synthwave Horizon preview](assets/showcase/previews/synthwave.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave) | A distant striped sun over a wireframe landscape |
 | Cyber Nexus | [![Cyber Nexus preview](assets/showcase/previews/cyber_nexus.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus) | Honeycomb circuitry with travelling signals |
 | Matrix Rain | [![Matrix Rain preview](assets/showcase/previews/matrix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix) | Cascading Katakana and phosphor trails |
-| Audio Visualizer | [![Audio Visualizer preview](assets/showcase/previews/visualizer.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer) | Live music spectrum and track information |
-| System Cockpit | [![System Cockpit preview](assets/showcase/previews/system.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#system)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#system) | Seven gauges, startup sweep and daily/lifetime SSD telemetry |
+| Audio Visualizer | [![Audio Visualizer preview](assets/showcase/previews/visualizer.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer) | Live spectrum, falling peaks and low/mid/high activity |
+| System Cockpit | [![System Cockpit preview](assets/showcase/previews/system.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#system)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#system) | Staggered gauge startup and daily/lifetime SSD telemetry |
 | Diagnostic Stream | [![Diagnostic Stream preview](assets/showcase/previews/terminal.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal) | A borderless stream of system activity |
 
 The System Cockpit clip shows the new seven-gauge dashboard, per-core activity, processor/network histories and resource pressure. All videos are silent; workstation identity is replaced with demo labels in the telemetry clips. See [recording details](docs/SHOWCASE.md).

@@ -1,8 +1,7 @@
 """MPRIS media player DBus integration and audio visualization math.
 
 Connects to active media players via DBus org.mpris.MediaPlayer2 to retrieve
-track metadata and playback state. Also simulates dynamic spectrum frequency
-bands with peak hold and gravity decay physics for the audio visualizer.
+track metadata and playback state. Also supplies live desktop spectrum frequency bands for the audio visualizer.
 """
 
 import math
@@ -67,7 +66,7 @@ class MprisClient:
     def poll(self, force: bool = False) -> Optional[MediaInfo]:
         """Poll active media player via DBus."""
         now = time.time()
-        if not force and (now - self._last_poll < 0.15) and self._cached_info is not None:
+        if not force and (now - self._last_poll < 0.15):
             return self._cached_info
 
         self._last_poll = now

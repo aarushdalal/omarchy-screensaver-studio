@@ -2,6 +2,7 @@
 import math
 import os
 import time
+from contextlib import contextmanager
 from gi.repository import Pango
 import cairo
 from .base import BaseMode
@@ -13,6 +14,10 @@ class SystemDashboardMode(BaseMode):
     """Seven instruments with a stable hierarchy and theme-derived colours."""
     target_fps = 30
     CANVAS = (1600, 1000)
+    # Each subsystem gets its own sweep; secondary instruments follow the core.
+    STARTUP_OFFSETS = {'cpu': 0.0, 'gpu': .28, 'mem': .56,
+                       'temp': 1.35, 'disk': 1.65, 'load': 1.95, 'battery': 2.25}
+    SWEEP_DURATION = 3.15
 
     def __init__(self, theme, config, monitor_index=0):
         super().__init__(theme, config, monitor_index)
@@ -58,9 +63,52 @@ class SystemDashboardMode(BaseMode):
             for i, value in enumerate(core_values):
                 self.cores[i] += (value - self.cores[i]) * blend
 
-    def instrument_value(self, actual):
+    @property
+    def startup_complete(self):
+        return self.time >= self.startup_delay + max(self.STARTUP_OFFSETS.values()) + self.SWEEP_DURATION
+
+    def instrument_phase(self, key):
+        elapsed = self.time - self.startup_delay - self.STARTUP_OFFSETS[key]
+        return 'WAITING' if elapsed < 0 else 'CHECK' if elapsed < self.SWEEP_DURATION else 'LIVE'
+
+    def startup_caption(self):
+        elapsed = self.time - self.startup_delay
+        if self.startup_complete:
+            return 'LIVE TELEMETRY  /  MEASURED UTILIZATION'
+        if elapsed < .28:
+            return 'SYSTEM STARTUP  /  PROCESSOR INITIALIZING'
+        if elapsed < .56:
+            return 'SYSTEM STARTUP  /  GRAPHICS INITIALIZING'
+        if elapsed < 1.35:
+            return 'SYSTEM STARTUP  /  MEMORY INITIALIZING'
+        if elapsed < 2.55:
+            return 'SYSTEM STARTUP  /  CAPACITY & THERMAL CHECK'
+        if elapsed < 3.35:
+            return 'SYSTEM STARTUP  /  ACTIVITY STREAMS ONLINE'
+        return 'SYSTEM STARTUP  /  TELEMETRY SYNCHRONIZING'
+
+    @contextmanager
+    def _component(self, cr, delay):
+        """Quietly lift each subsystem into view, then render without a group."""
+        elapsed = max(0, self.time - self.startup_delay - delay)
+        amount = min(1, elapsed / .45)
+        amount = amount * amount * (3 - 2 * amount)
+        cr.save()
+        cr.translate(0, (1 - amount) * 8)
+        grouped = amount < 1
+        if grouped:
+            cr.push_group()
+        try:
+            yield
+        finally:
+            if grouped:
+                cr.pop_group_to_source()
+                cr.paint_with_alpha(.20 + .80 * amount)
+            cr.restore()
+
+    def instrument_value(self, actual, key='cpu'):
         """A clearly labelled startup sweep, then a smooth handover to real data."""
-        t = max(0, self.time - self.startup_delay)
+        t = max(0, self.time - self.startup_delay - self.STARTUP_OFFSETS[key])
         ease = lambda x: x * x * (3 - 2 * x)
         if t < .9:
             return 100 * ease(t / .9)
@@ -208,7 +256,7 @@ class SystemDashboardMode(BaseMode):
             self._clock = time.strftime('%H:%M:%S' if self.config.clock_format_24h else '%I:%M:%S %p')
             self._date = time.strftime('%A · %d %B %Y').upper()
         self._text(cr, 'SYSTEM COCKPIT', 64, 55, 24, 'accent')
-        self._text(cr, 'INSTRUMENT CHECK  /  NEEDLE SWEEP' if self.time < self.startup_delay + 3.15 else 'LIVE TELEMETRY  /  MEASURED UTILIZATION', 64, 92, 10, 'muted')
+        self._text(cr, self.startup_caption(), 64, 92, 10, 'muted')
         self._text(cr, self._clock, 1536, 51, 26, align='right')
         self._text(cr, self._date, 1536, 89, 10, 'muted', 'right')
         m = self.metrics
@@ -223,101 +271,112 @@ class SystemDashboardMode(BaseMode):
             ('mem', 'MEMORY', f'{m.mem_used_gib:.1f} / {m.mem_total_gib:.1f} GB'),
         ]):
             x = 64 + i * 504
-            self._card(cr, x, 158, 464, 245)
-            color = secondary if key == 'gpu' else accent
-            value = self.instrument_value(self.values[key])
-            available = key != 'gpu' or m.has_gpu
-            self._ring(cr, x + 232, 252, 74, value if available or self.time < self.startup_delay + 3.15 else 0, color, self.instrument_value(self.peaks[key][0]))
-            self._text(cr, label, x + 232, 222, 12, 'muted', 'center')
-            self._text(cr, f'{value:.1f}%' if available else 'N/A', x + 232, 257, 30, align='center')
-            self._text(cr, sub, x + 232, 325, 11, 'secondary', 'center', width=300)
-            if key == 'cpu':
-                self._text(cr, f'CORE ACTIVITY  ·  {m.cpu_cores} THREADS', x + 22, 353, 10, 'muted')
-                # Group very large workstations so bars stay inside the instrument.
-                stride = max(1, math.ceil(len(self.cores) / 32))
-                bars = [sum(self.cores[j:j + stride]) / len(self.cores[j:j + stride])
-                        for j in range(0, len(self.cores), stride)]
-                count = len(bars)
-                if count:
-                    gap, total = 3, 420
-                    bar_w = max(.5, (total - gap * (count - 1)) / count)
-                    for c, load in enumerate(bars):
-                        bx = x + 22 + c * (bar_w + gap)
-                        h = max(2, min(100, self.instrument_value(load)) * .22)
-                        cr.rectangle(bx, 383 - h, bar_w, h)
-                        cr.set_source_rgba(*with_alpha(accent, (.25 + min(100, load) * .006) * self.fade_in)); cr.fill()
-            elif key == 'gpu':
-                self._text(cr, f'VRAM  {m.gpu_vram_used_mib:.0f} / {m.gpu_vram_total_mib:.0f} MB', x + 22, 353, 10, 'muted')
-                self._bar(cr, x + 22, 380, 420, self.instrument_value(m.gpu_vram_percent), secondary)
-            else:
-                self._text(cr, f'FREE {m.mem_avail_gib:.1f} GB  ·  SWAP {m.swap_used_gib:.1f} / {m.swap_total_gib:.1f} GB', x + 22, 353, 10, 'muted')
-                self._bar(cr, x + 22, 380, 420, self.instrument_value(m.swap_percent), accent)
+            with self._component(cr, self.STARTUP_OFFSETS[key]):
+                self._card(cr, x, 158, 464, 245)
+                if not self.startup_complete:
+                    self._text(cr, self.instrument_phase(key), x + 442, 179, 8, 'muted', 'right')
+                color = secondary if key == 'gpu' else accent
+                value = self.instrument_value(self.values[key], key)
+                available = key != 'gpu' or m.has_gpu
+                self._ring(cr, x + 232, 252, 74, value if available or self.instrument_phase(key) != 'LIVE' else 0, color, self.instrument_value(self.peaks[key][0], key))
+                self._text(cr, label, x + 232, 222, 12, 'muted', 'center')
+                self._text(cr, ('—' if self.instrument_phase(key) == 'WAITING' else f'{value:.1f}%') if available else 'N/A', x + 232, 257, 30, align='center')
+                self._text(cr, sub, x + 232, 325, 11, 'secondary', 'center', width=300)
+                if key == 'cpu':
+                    self._text(cr, f'CORE ACTIVITY  ·  {m.cpu_cores} THREADS', x + 22, 353, 10, 'muted')
+                    # Group very large workstations so bars stay inside the instrument.
+                    stride = max(1, math.ceil(len(self.cores) / 32))
+                    bars = [sum(self.cores[j:j + stride]) / len(self.cores[j:j + stride])
+                            for j in range(0, len(self.cores), stride)]
+                    count = len(bars)
+                    if count:
+                        gap, total = 3, 420
+                        bar_w = max(.5, (total - gap * (count - 1)) / count)
+                        for c, load in enumerate(bars):
+                            bx = x + 22 + c * (bar_w + gap)
+                            h = max(2, min(100, self.instrument_value(load, 'cpu')) * .22)
+                            cr.rectangle(bx, 383 - h, bar_w, h)
+                            cr.set_source_rgba(*with_alpha(accent, (.25 + min(100, load) * .006) * self.fade_in)); cr.fill()
+                elif key == 'gpu':
+                    self._text(cr, f'VRAM  {m.gpu_vram_used_mib:.0f} / {m.gpu_vram_total_mib:.0f} MB', x + 22, 353, 10, 'muted')
+                    self._bar(cr, x + 22, 380, 420, self.instrument_value(m.gpu_vram_percent, 'gpu'), secondary)
+                else:
+                    self._text(cr, f'FREE {m.mem_avail_gib:.1f} GB  ·  SWAP {m.swap_used_gib:.1f} / {m.swap_total_gib:.1f} GB', x + 22, 353, 10, 'muted')
+                    self._bar(cr, x + 22, 380, 420, self.instrument_value(m.swap_percent, 'mem'), accent)
         self._section(cr, '02', 'CAPACITY & THERMALS', 430)
         temperature_ok = getattr(m, 'cpu_temp_valid', False)
         support = [
-            ('CPU TEMPERATURE', f'{self.instrument_value(self.values["temp"]):.0f}°C' if temperature_ok else 'N/A', '0–100°C display scale' if temperature_ok else 'Sensor unavailable', self.values['temp'] if temperature_ok else 0),
-            ('ROOT STORAGE', f'{self.instrument_value(self.values["disk"]):.0f}%', f'{m.disk_free_gib:.1f} GB available', self.values['disk']),
-            ('LOAD / CAPACITY', f'{self.instrument_value(self.values["load"]):.0f}%', f'1m load / {m.cpu_cores} threads', self.values['load']),
-            ('BATTERY' if m.has_battery else 'POWER SOURCE', f'{self.instrument_value(self.values["battery"]):.0f}%' if m.has_battery else 'AC', m.battery_status if m.has_battery else 'No battery installed', self.values['battery'] if m.has_battery else 0),
+            ('CPU TEMPERATURE', f'{self.instrument_value(self.values["temp"], "temp"):.0f}°C' if temperature_ok else 'N/A', '0–100°C display scale' if temperature_ok else 'Sensor unavailable', self.values['temp'] if temperature_ok else 0),
+            ('ROOT STORAGE', f'{self.instrument_value(self.values["disk"], "disk"):.0f}%', f'{m.disk_free_gib:.1f} GB available', self.values['disk']),
+            ('LOAD / CAPACITY', f'{self.instrument_value(self.values["load"], "load"):.0f}%', f'1m load / {m.cpu_cores} threads', self.values['load']),
+            ('BATTERY' if m.has_battery else 'POWER SOURCE', f'{self.instrument_value(self.values["battery"], "battery"):.0f}%' if m.has_battery else 'AC', m.battery_status if m.has_battery else 'No battery installed', self.values['battery'] if m.has_battery else 0),
         ]
         for i, (label, value, detail, percent) in enumerate(support):
+            key = ('temp', 'disk', 'load', 'battery')[i]
+            if self.instrument_phase(key) == 'WAITING':
+                value = '—'
             x = 64 + i * 378
-            self._card(cr, x, 451, 338, 108)
-            self._ring(cr, x + 61, 505, 30, self.instrument_value(percent), accent, lively=False)
-            self._text(cr, label, x + 113, 474, 10, 'muted')
-            self._text(cr, value, x + 113, 504, 24)
-            self._text(cr, detail, x + 113, 541, 9.5, 'muted', width=210)
-        self._section(cr, '03', 'ACTIVITY', 588, 'SOLID = CPU / RECEIVE  ·  DASHED = GPU / SEND')
-        for x, w, title in [(64, 716, 'PROCESSOR HISTORY'), (820, 716, 'NETWORK THROUGHPUT')]:
-            self._card(cr, x, 609, w, 110)
-            self._text(cr, title, x + 18, 630, 10, 'accent')
-        self._text(cr, f'CPU {self.values["cpu"]:.0f}%   GPU {self.values["gpu"]:.0f}%', 760, 630, 10, 'muted', 'right')
-        self._plot(cr, 84, 652, 676, 47, [(m.cpu_history, accent), (m.gpu_history, secondary)], 100)
-        self._text(cr, f'↓ {self._rate(m.net_rx_rate)}   ↑ {self._rate(m.net_tx_rate)}', 1516, 630, 10, 'muted', 'right')
-        net_max = max([1024, *m.net_rx_history, *m.net_tx_history]) * 1.15
-        self._plot(cr, 840, 652, 676, 47, [(m.net_rx_history, accent), (m.net_tx_history, secondary)], net_max)
-        self._text(cr, 'LAST MINUTE', 84, 708, 8.5, 'muted')
-        self._text(cr, f'AUTO SCALE  {self._rate(net_max)}', 1516, 708, 8.5, 'muted', 'right')
+            with self._component(cr, self.STARTUP_OFFSETS[key]):
+                self._card(cr, x, 451, 338, 108)
+                self._ring(cr, x + 61, 505, 30, self.instrument_value(percent, key), accent, lively=False)
+                if not self.startup_complete:
+                    self._text(cr, self.instrument_phase(key), x + 320, 459, 7, 'muted', 'right')
+                self._text(cr, label, x + 113, 474, 10, 'muted')
+                self._text(cr, value, x + 113, 504, 24)
+                self._text(cr, detail, x + 113, 541, 9.5, 'muted', width=210)
+        with self._component(cr, 2.55):
+            self._section(cr, '03', 'ACTIVITY', 588, 'SOLID = CPU / RECEIVE  ·  DASHED = GPU / SEND')
+            for x, w, title in [(64, 716, 'PROCESSOR HISTORY'), (820, 716, 'NETWORK THROUGHPUT')]:
+                self._card(cr, x, 609, w, 110)
+                self._text(cr, title, x + 18, 630, 10, 'accent')
+            self._text(cr, f'CPU {self.values["cpu"]:.0f}%   GPU {self.values["gpu"]:.0f}%', 760, 630, 10, 'muted', 'right')
+            self._plot(cr, 84, 652, 676, 47, [(m.cpu_history, accent), (m.gpu_history, secondary)], 100)
+            self._text(cr, f'↓ {self._rate(m.net_rx_rate)}   ↑ {self._rate(m.net_tx_rate)}', 1516, 630, 10, 'muted', 'right')
+            net_max = max([1024, *m.net_rx_history, *m.net_tx_history]) * 1.15
+            self._plot(cr, 840, 652, 676, 47, [(m.net_rx_history, accent), (m.net_tx_history, secondary)], net_max)
+            self._text(cr, 'LAST MINUTE', 84, 708, 8.5, 'muted')
+            self._text(cr, f'AUTO SCALE  {self._rate(net_max)}', 1516, 708, 8.5, 'muted', 'right')
         pressure = []
         for key in ('cpu', 'memory', 'io'):
             p = getattr(m, 'pressure_' + key, None)
             pressure.append('—' if p is None else f'{p:.1f}%')
         measured = getattr(m, 'power_sensor_valid', False)
-        self._detail_card(cr, 64, 'POWER & ELECTRICAL', [
-            ('CPU est.', f'{m.cpu_power_w:.1f} W  · {m.cpu_volt_v:.2f} V · {m.cpu_current_a:.1f} A'),
-            ('GPU est.', f'{m.gpu_power_w:.1f} W  · {m.gpu_volt_v:.2f} V · {m.gpu_current_a:.1f} A'),
-            ('POWER SENSOR' if measured else 'TOTAL est.', f'{m.soc_power_w:.1f} W (sensor)' if measured else f'{m.soc_power_w:.1f} W · {m.soc_volt_v:.2f} V · {m.soc_current_a:.1f} A'),
-            ('DRAM est.', f'{m.ram_power_w:.1f} W  · {m.ram_volt_v:.2f} V · {m.ram_current_a:.1f} A'),
-            ('BATTERY', f'{m.bat_volt_v:.1f} V · {m.bat_current_a:.2f} A · {m.bat_power_w:.1f} W' if m.has_battery else 'Not installed'),
-            ('AC INPUT', 'Connected' if m.ac_online else 'Disconnected'),
-        ])
-        smart = getattr(m, 'ssd_smart', {})
-        today_flag = ' *' if getattr(m, 'disk_today_partial', True) else ''
-        commands = smart.get('read_commands')
-        write_commands = smart.get('write_commands')
-        io_count = f'{commands + write_commands:,} (R+W)' + (' · snapshot' if smart.get('updated_at') else '') if commands is not None and write_commands is not None else 'Not exposed · refresh SMART'
-        health = smart.get('health_percent')
-        health_text = f'{health}% endurance · wear {smart.get("wear_used_percent", 0)}%' if health is not None else 'SMART unavailable'
-        self._detail_card(cr, 568, 'STORAGE & MEMORY I/O', [
-            ('ROOT / TEMP', f'{m.disk_used_gib:.0f}/{m.disk_total_gib:.0f} GB · {m.nvme_temp_c:.0f}°C' if getattr(m, 'nvme_temp_valid', False) else f'{m.disk_used_gib:.0f}/{m.disk_total_gib:.0f} GB'),
-            ('TODAY READ', self._bytes(getattr(m, 'disk_today_read_bytes', None)) + today_flag),
-            ('TODAY WRITE', self._bytes(getattr(m, 'disk_today_write_bytes', None)) + today_flag),
-            ('READ NOW', f'{m.disk_read_mb_s:.1f} MB/s · {m.disk_read_iops:.0f} IOPS'),
-            ('WRITE NOW', f'{m.disk_write_mb_s:.1f} MB/s · {m.disk_write_iops:.0f} IOPS'),
-            ('SSD LIFE R', self._bytes(smart.get('read_bytes'))),
-            ('SSD LIFE W', self._bytes(smart.get('write_bytes'))),
-            ('SSD LIFE IOs', io_count),
-            ('SSD HEALTH', health_text),
-            ('MEM / VM', f'{m.mem_avail_gib:.1f}G free · {m.ram_speed_gbs:.2f}G/s pages'),
-        ])
-        self._detail_card(cr, 1072, 'RUNTIME & RESOURCE PRESSURE', [
-            ('KERNEL', m.kernel),
-            ('LOAD 1/5/15m', m.load_avg),
-            ('TASKS', m.procs_str),
-            ('PRESSURE 10s', 'CPU ' + pressure[0] + ' · MEM ' + pressure[1] + ' · IO ' + pressure[2]),
-            ('GOVERNOR', m.cpu_governor),
-            ('UPTIME', m.uptime_str),
-        ])
+        with self._component(cr, 3.35):
+            self._detail_card(cr, 64, 'POWER & ELECTRICAL', [
+                ('CPU est.', f'{m.cpu_power_w:.1f} W  · {m.cpu_volt_v:.2f} V · {m.cpu_current_a:.1f} A'),
+                ('GPU est.', f'{m.gpu_power_w:.1f} W  · {m.gpu_volt_v:.2f} V · {m.gpu_current_a:.1f} A'),
+                ('POWER SENSOR' if measured else 'TOTAL est.', f'{m.soc_power_w:.1f} W (sensor)' if measured else f'{m.soc_power_w:.1f} W · {m.soc_volt_v:.2f} V · {m.soc_current_a:.1f} A'),
+                ('DRAM est.', f'{m.ram_power_w:.1f} W  · {m.ram_volt_v:.2f} V · {m.ram_current_a:.1f} A'),
+                ('BATTERY', f'{m.bat_volt_v:.1f} V · {m.bat_current_a:.2f} A · {m.bat_power_w:.1f} W' if m.has_battery else 'Not installed'),
+                ('AC INPUT', 'Connected' if m.ac_online else 'Disconnected'),
+            ])
+            smart = getattr(m, 'ssd_smart', {})
+            today_flag = ' *' if getattr(m, 'disk_today_partial', True) else ''
+            commands = smart.get('read_commands')
+            write_commands = smart.get('write_commands')
+            io_count = f'{commands + write_commands:,} (R+W)' + (' · snapshot' if smart.get('updated_at') else '') if commands is not None and write_commands is not None else 'Not exposed · refresh SMART'
+            health = smart.get('health_percent')
+            health_text = f'{health}% endurance · wear {smart.get("wear_used_percent", 0)}%' if health is not None else 'SMART unavailable'
+            self._detail_card(cr, 568, 'STORAGE & MEMORY I/O', [
+                ('ROOT / TEMP', f'{m.disk_used_gib:.0f}/{m.disk_total_gib:.0f} GB · {m.nvme_temp_c:.0f}°C' if getattr(m, 'nvme_temp_valid', False) else f'{m.disk_used_gib:.0f}/{m.disk_total_gib:.0f} GB'),
+                ('TODAY READ', self._bytes(getattr(m, 'disk_today_read_bytes', None)) + today_flag),
+                ('TODAY WRITE', self._bytes(getattr(m, 'disk_today_write_bytes', None)) + today_flag),
+                ('READ NOW', f'{m.disk_read_mb_s:.1f} MB/s · {m.disk_read_iops:.0f} IOPS'),
+                ('WRITE NOW', f'{m.disk_write_mb_s:.1f} MB/s · {m.disk_write_iops:.0f} IOPS'),
+                ('SSD LIFE R', self._bytes(smart.get('read_bytes'))),
+                ('SSD LIFE W', self._bytes(smart.get('write_bytes'))),
+                ('SSD LIFE IOs', io_count),
+                ('SSD HEALTH', health_text),
+                ('MEM / VM', f'{m.mem_avail_gib:.1f}G free · {m.ram_speed_gbs:.2f}G/s pages'),
+            ])
+            self._detail_card(cr, 1072, 'RUNTIME & RESOURCE PRESSURE', [
+                ('KERNEL', m.kernel),
+                ('LOAD 1/5/15m', m.load_avg),
+                ('TASKS', m.procs_str),
+                ('PRESSURE 10s', 'CPU ' + pressure[0] + ' · MEM ' + pressure[1] + ' · IO ' + pressure[2]),
+                ('GOVERNOR', m.cpu_governor),
+                ('UPTIME', m.uptime_str),
+            ])
         self._text(cr, 'DAILY * = TRACKED TODAY', 850, 981, 9, 'muted', 'center', width=400)
         self._text(cr, m.cpu_model.replace(' with Radeon Graphics', ''), 64, 981, 9.5, 'muted', width=750)
         self._text(cr, f'{m.user}@{m.hostname}  ·  {m.primary_net_iface}', 1536, 981, 9.5, 'muted', 'right', width=700)

@@ -113,11 +113,16 @@ Settings applied when screensaver is toggled as an **ambient study desk display*
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `style` | `string` | `"spectrum"` | Audio visualization style (`"spectrum"` equalizer). |
-| `bar_count` | `int` | `36` | Number of frequency spectrum equalizer bars. |
+| `bar_count` | `int` | `36` | Number of spectrum bars (clamped to 8–64); every count spans the complete captured frequency range. |
 | `auto_switch_on_play` | `bool` | `true` | Automatically switch to visualizer mode if media playback begins while screensaver is active. |
 | `fallback_mode` | `string` | `"selected"` | Action when audio pauses: `"selected"` (reverts back to user's selected visual mode), `"idle"` (stays on visualizer showing paused track), or any mode name. |
+| `particles` | `bool` | `true` | Subtle background stardust. |
+| `wave_ribbon` | `bool` | `true` | Decorative audio-reactive aurora ribbons behind the spectrum. |
+| `mirrored` | `bool` | `true` | Faint spectrum reflections below the baseline. |
 
 ---
+
+For signal states, peak caps and band activity, see [the Audio Visualizer guide](AUDIO-VISUALIZER.md).
 
 ### `[aurora]`
 

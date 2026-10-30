@@ -1,3 +1,12 @@
+## 1.8.1 — 2026-10-31
+
+- Stagger CPU, graphics and memory startup, followed by temperature, storage, load and battery. Each keeps its own full/zero/live sweep; charts and detail panels fade in as later components.
+- Add explicit waiting/check/live instrument states and startup-stage descriptions.
+- Refine Aurora Flow with a readable track stage, full-range spectrum, falling peak caps, low/mid/high activity meters and theme-derived ribbons/reflections.
+- React to desktop audio without media-player metadata; let measured bars decay to zero on silence.
+- Share native audio capture across listeners and safely resample the full spectrum for 8–64 bars. Cache empty metadata polls.
+- Refresh cockpit/visualizer recordings in MP4 and WebM, README animations and guide documentation. 33 regression checks pass.
+
 ## 1.8.0 — 2026-10-30
 
 - Added the car-style startup needle check, tracked daily disk read/write totals, NVMe SMART lifetime data/command totals and estimated endurance, plus a documented explicit SMART refresh command.

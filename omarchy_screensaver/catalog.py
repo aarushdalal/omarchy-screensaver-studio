@@ -21,8 +21,8 @@ MODES = [
     ('synthwave', 'Synthwave Horizon', '󰾏', 'A distant striped sun over a wireframe landscape', 'space'),
     ('cyber_nexus', 'Cyber Nexus', '󰑮', 'Honeycomb circuitry with travelling signals', 'digital'),
     ('matrix', 'Matrix Rain', '󰅟', 'Cascading Katakana and phosphor trails', 'digital'),
-    ('visualizer', 'Audio Visualizer', '󰎈', 'Live music spectrum and track information', 'digital'),
-    ('system', 'System Cockpit', '󰓅', 'Seven gauges, startup sweep and daily/lifetime SSD telemetry', 'digital'),
+    ('visualizer', 'Audio Visualizer', '󰎈', 'Live spectrum, falling peaks and low/mid/high activity', 'digital'),
+    ('system', 'System Cockpit', '󰓅', 'Staggered gauge startup and daily/lifetime SSD telemetry', 'digital'),
     ('terminal', 'Diagnostic Stream', '', 'A borderless stream of system activity', 'digital'),
 ]
 THEMES = [('auto', 'Follow Desktop', 'Use your current desktop colours'),

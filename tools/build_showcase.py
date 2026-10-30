@@ -41,12 +41,12 @@ def gallery(prefix):
 <div class="cardbody"><p>{esc(detail)}</p><div class="downloads"><a href="{assets}{key}.mp4">MP4 video</a><a href="{assets}{key}.webm">Full HD WebM</a><a href="{assets}previews/{key}.gif">Animated preview</a></div></div></article>''')
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Watch all 18 Screensaver Studio 1.8.0 scenes, including Eclipse, Ink Flow, Rain on Glass and the animated System Cockpit.">
-<title>Screensaver Studio 1.8 · All 18 recorded previews</title><style>{STYLE}</style></head>
-<body><main><header><div class="eyebrow">Omarchy community · Version 1.8.0</div><h1>Motion for a<br>quieter desktop.</h1><p>18 screensavers, matched to your desktop palette. Meet Eclipse, Ink Flow and Rain on Glass, plus a clearer animated system cockpit.</p>
-<nav aria-label="Project links"><a href="{REPO}#readme">Read the guide</a><a href="{REPO}/releases/tag/v1.8.0">Get version 1.8.0</a><a href="{REPO}/blob/main/docs/CONFIGURATION.md">Controls &amp; settings</a></nav></header>
+<meta name="description" content="Watch all 18 Screensaver Studio 1.8.1 scenes, including Eclipse, Ink Flow, Rain on Glass and the animated System Cockpit.">
+<title>Screensaver Studio 1.8.1 · All 18 recorded previews</title><style>{STYLE}</style></head>
+<body><main><header><div class="eyebrow">Omarchy community · Version 1.8.1</div><h1>Motion for a<br>quieter desktop.</h1><p>18 screensavers, matched to your desktop palette. Meet Eclipse, Ink Flow and Rain on Glass, plus a clearer animated system cockpit.</p>
+<nav aria-label="Project links"><a href="{REPO}#readme">Read the guide</a><a href="{REPO}/releases/tag/v1.8.1">Get version 1.8.1</a><a href="{REPO}/blob/main/docs/CONFIGURATION.md">Controls &amp; settings</a></nav></header>
 <section aria-label="Recorded screensavers"><div class="toolbar"><div><label for="scene-search">Find a screensaver</label><input id="scene-search" type="search" placeholder="Search Clock, Eclipse, Rain…" autocomplete="off"></div><span id="count" aria-live="polite">18 scenes · click play to watch</span></div><p id="empty" hidden>No matching scenes. Try another name.</p><div class="gallery">{''.join(cards)}</div></section>
-<footer><p>Fresh recordings from 30 October 2026. Playback is silent and starts only when you choose it. The System Cockpit preview includes the updated seven-gauge layout. Workstation identity is replaced with demo labels in telemetry recordings.</p><p><a href="{REPO}/blob/main/docs/SHOWCASE.md">Recording details</a> · <a href="{REPO}/blob/main/docs/RELEASE-PRIVACY.md">Release privacy</a> · Independent community project; not an official Omarchy product.</p></footer></main><script>{SCRIPT}</script></body></html>'''
+<footer><p>Recordings from 30–31 October 2026. Playback is silent and starts only when you choose it. The refreshed cockpit preview shows its staggered startup; Aurora Flow shows the new spectrum layout. Workstation identity is replaced with demo labels in telemetry recordings.</p><p><a href="{REPO}/blob/main/docs/SHOWCASE.md">Recording details</a> · <a href="{REPO}/blob/main/docs/RELEASE-PRIVACY.md">Release privacy</a> · Independent community project; not an official Omarchy product.</p></footer></main><script>{SCRIPT}</script></body></html>'''
 
 
 def main():
@@ -57,7 +57,7 @@ def main():
     (ROOT / 'index.html').write_text(gallery(''))
     (ROOT / 'docs/index.html').write_text(gallery('../'))
     lines = ['## Showcase Gallery', '',
-             '**18 fresh recordings for version 1.8.0.** Click an animated preview or **Watch video** to open its player. The three new scenes appear first.', '',
+             '**18 recorded previews.** System Cockpit and Audio Visualizer are refreshed for version 1.8.1. Click an animated preview or **Watch video** to open its player. The three new scenes appear first.', '',
              '| Screensaver | Animated preview | Description |', '|---|---|---|']
     for key, name, icon, detail, group in MODES:
         title = name + (' · **New**' if key in NEW else '')

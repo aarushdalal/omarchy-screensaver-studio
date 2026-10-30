@@ -21,16 +21,29 @@ class StorageRegression(unittest.TestCase):
             tracker.return_value.observe.assert_called()
             self.assertEqual(metrics.disk_today_read_bytes, 123)
 
-    def test_all_seven_rings_participate_in_startup_check(self):
+    def test_each_ring_sweeps_at_its_own_scheduled_time(self):
         metrics = SystemMetrics()
         mode = SystemDashboardMode(ThemePalette('test', {}), Config({}))
         mode.update(1, metrics, None)
-        mode.time = mode.startup_delay + 1
         cr = cairo.Context(cairo.ImageSurface(cairo.FORMAT_ARGB32, 1200, 675))
-        with patch.object(mode, '_ring') as ring:
-            mode.render(cr, 1200, 675, 1)
-            self.assertEqual(len(ring.call_args_list), 7)
-            self.assertTrue(all(call.args[4] == 100 for call in ring.call_args_list))
+        for index, (key, delay) in enumerate(mode.STARTUP_OFFSETS.items()):
+            mode.time = mode.startup_delay + delay + 1
+            with self.subTest(instrument=key), patch.object(mode, '_ring') as ring:
+                mode.render(cr, 1200, 675, 1)
+                self.assertEqual(len(ring.call_args_list), 7)
+                self.assertEqual(ring.call_args_list[index].args[4], 100)
+        mode.time = mode.startup_delay + .1
+        self.assertGreater(mode.instrument_value(42, 'cpu'), 0)
+        self.assertEqual(mode.instrument_value(42, 'gpu'), 0)
+        self.assertEqual(mode.instrument_phase('gpu'), 'WAITING')
+        mode.time = mode.startup_delay + 3.2
+        self.assertEqual(mode.instrument_phase('cpu'), 'LIVE')
+        self.assertEqual(mode.instrument_phase('battery'), 'CHECK')
+        self.assertFalse(mode.startup_complete)
+        mode.time = mode.startup_delay + 5.5
+        self.assertTrue(mode.startup_complete)
+        for key in mode.STARTUP_OFFSETS:
+            self.assertAlmostEqual(mode.instrument_value(42, key), 42)
 
     def test_daily_deltas_survive_reopen_and_reboot_without_double_counting(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -6,7 +6,7 @@ The cockpit is arranged from broad system load at the top to detailed storage an
 
 ## Startup: the car-style instrument check
 
-Whenever the system screensaver opens, all seven round instruments sweep from zero to 100, return to zero, then ease into their real readings. The heading says **INSTRUMENT CHECK** while this happens and switches to **LIVE TELEMETRY** afterward. The sweep is an animation, not a temporary hardware reading. It runs in ordinary screensaver and ambient study mode.
+Whenever the system screensaver opens, the instruments wake up in order. CPU starts first, graphics follows after 0.28 seconds, then memory at 0.56 seconds. The support gauges follow: temperature at 1.35 seconds, storage at 1.65 seconds, normalized load at 1.95 seconds and battery at 2.25 seconds. Each gauge performs its own zero → 100 → zero sweep before settling on its real reading. Dimmed cards say **WAITING**, followed by **CHECK** and **LIVE**. Activity charts fade in at 2.55 seconds, followed by detailed telemetry at 3.35 seconds. The heading describes the current startup stage and switches to **LIVE TELEMETRY** after approximately 5.4 seconds. The sweep is an animation, not a temporary hardware reading. It runs in ordinary screensaver and ambient study mode.
 
 ## 1. Core load — three main gauges
 
