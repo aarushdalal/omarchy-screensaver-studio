@@ -32,6 +32,8 @@ theme = "auto"
 fps = 60
 # Multi-monitor mode: "independent", "mirror", "single"
 multi_monitor = "independent"
+# Background only: 1.0 is opaque; 0.74 reveals a compositor-blurred desktop.
+background_opacity = 1.0
 # Input handling: dismiss screensaver on interaction
 exit_on_mouse_move = true
 mouse_move_threshold = 12

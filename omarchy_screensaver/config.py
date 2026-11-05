@@ -48,6 +48,8 @@ theme = "auto"
 fps = 60
 # Multi-monitor mode: "independent", "mirror", "single"
 multi_monitor = "independent"
+# Background only: lower values reveal the compositor-blurred desktop.
+background_opacity = 1.0
 # Input handling: dismiss screensaver on interaction
 exit_on_mouse_move = true
 mouse_move_threshold = 12
@@ -167,6 +169,7 @@ class Config:
         disp = self.raw.get("display", {})
         self.fps: int = int(disp.get("fps", 60))
         self.multi_monitor: str = disp.get("multi_monitor", "independent")
+        self.background_opacity: float = max(0.0, min(1.0, float(disp.get("background_opacity", 1.0))))
         self.exit_on_mouse_move: bool = disp.get("exit_on_mouse_move", True)
         self.mouse_move_threshold: int = int(disp.get("mouse_move_threshold", 12))
         self.exit_on_key_press: bool = disp.get("exit_on_key_press", True)

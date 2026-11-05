@@ -1,21 +1,7 @@
-# Screensaver Studio 1.8.1
+# Screensaver Studio 1.9.0 — Background-only glass
 
-A clearer Aurora Flow audio visualizer and a staged cockpit startup.
+Adds `[display] background_opacity`, bounded to 0–1. The default is 1.0; 0.68 is the current recommended dark glass setting for a configured desktop. GTK window/drawing backgrounds are transparent, while each mode replaces its base paint using Cairo SOURCE. Repeated frames no longer accumulate toward opaque black, and foreground text, cockpit gauges and effects retain their normal opacity.
 
-## Audio Visualizer
+Keep compositor window opacity at 100% and enable its blur. Config changes are picked up by the existing reload path; a newly installed renderer is loaded on the next screensaver launch. No live apps are restarted by these changes.
 
-Track information has its own readable space above the spectrum. Live bars now have falling peak caps, with low/mid/high activity meters and quieter aurora ribbons behind them. All colours follow the desktop palette. Audio without media-player metadata is still visualized; silence releases the measured bars to zero. A short quiet grace period prevents fallback flicker between tracks. Paused track metadata is hidden when another source supplies live sound.
-
-The native audio worker is shared across listeners, so switching modes or closing one display does not interrupt another. Any configured 8–64 bars span the full captured frequency range. Empty player lookups are cached too.
-
-## Staged instrument startup
-
-The cockpit starts CPU first, then graphics and memory. Temperature, storage, load and battery follow with their own delays. Each gauge still revs to full, returns to zero and settles on its real value. Dimmed cards show WAITING, CHECK or LIVE; activity charts and detailed telemetry appear as later components. The complete sequence takes about 5.4 seconds.
-
-The existing half-second telemetry refresh, daily/lifetime SSD readings, theme selection and study-mode controls remain available. Markdown guides explain the visualizer and every cockpit field.
-
-## Refreshed previews and validation
-
-Both updated displays have fresh Full HD MP4 and WebM recordings, animated README previews and posters. Public recordings are silent, with generic workstation identity in the cockpit footer.
-
-33 rendering, telemetry, audio lifecycle, frequency coverage, signal-state and selection checks pass. Both installed modes were checked on the desktop. The cockpit capture checks window ownership and overlays throughout; the visualizer clip records its native renderer using live desktop audio and actual metadata. Live music capture stayed active after releasing one of two listeners. The media is decoded and reviewed before publication.
+All 37 rendering, telemetry, audio and configuration tests pass, including new pixel tests for alpha, retained foreground opacity and repeated-frame replacement. Installed CSS parsed cleanly. Live wallpaper/blur appearance was deferred to avoid opening the screensaver over ongoing work; existing showcase captures describe version 1.8.1 and earlier.

@@ -62,6 +62,7 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
         self._setup_input_controllers()
 
     def _setup_window(self):
+        self.add_css_class("omarchy-screensaver-window")
         self.set_title(f"Omarchy Screensaver (Monitor {self.monitor_index})")
         self.set_decorated(False)
         self.set_resizable(False)
@@ -87,7 +88,8 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
 
         css = Gtk.CssProvider()
         css.load_from_data(
-            b".omarchy-screensaver-surface { background-color: #000000; margin: 0; padding: 0; }"
+            b"window.omarchy-screensaver-window { background: transparent; box-shadow: none; }"
+            b".omarchy-screensaver-surface { background: transparent; margin: 0; padding: 0; }"
         )
         display = self.get_display()
         if display:

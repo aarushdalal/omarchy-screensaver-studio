@@ -1,3 +1,9 @@
+## 1.9.0 — 2026-11-05
+
+- Add native background opacity independent of text, gauges and effects; keep the stock opaque default and document a 68% glass setting.
+- Remove opaque GTK window/drawing backings and replace background frames without alpha buildup.
+- Add pixel regressions; all 37 tests pass. Preserve palette, audio, startup and telemetry behavior.
+
 ## 1.8.1 — 2026-10-31
 
 - Stagger CPU, graphics and memory startup, followed by temperature, storage, load and battery. Each keeps its own full/zero/live sweep; charts and detail panels fade in as later components.

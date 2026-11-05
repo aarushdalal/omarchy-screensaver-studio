@@ -8,6 +8,10 @@ This project was developed through an AI-assisted workflow. The concept, customi
 
 ---
 
+## Background-only glass (1.9.0)
+
+Set `background_opacity = 0.68` under `[display]` to reveal the compositor-blurred desktop while keeping text, gauges and scene effects at their normal opacity. The default remains `1.0` for an opaque background. Transparent GTK surfaces and replacement background painting prevent black backing layers and opacity buildup across frames. Whole-window opacity should stay at 100%; blur comes from the compositor. Existing previews predate this feature. Live glass appearance still needs checking on the target desktop.
+
 ## Audio and startup refinement (1.8.1)
 
 Aurora Flow now separates larger track information from the live spectrum, with falling peak caps, low/mid/high band-activity meters and quiet theme-coloured ribbons. Live desktop sound responds even without a named player. Audio listeners share capture safely, and all bar counts span the complete frequency range. The cockpit wakes its seven instruments in sequence, then brings activity and detail panels into view. [Audio Visualizer guide](docs/AUDIO-VISUALIZER.md) · [Telemetry guide](docs/SYSTEM-COCKPIT.md).
@@ -87,7 +91,7 @@ This repository includes a valid `manifest.json` for the Omarchy plugin system:
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "author": "Daemon0",
   "description": "18-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit, eclipse, ink_flow, rain) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
   "kinds": ["bar-widget"],

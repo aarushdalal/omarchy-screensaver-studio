@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "author": "Daemon0",
   "description": "18-mode screensaver studio with three collections, dark ambient scenes, live telemetry, audio spectrum and native preview controls",
   "kinds": [

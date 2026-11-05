@@ -107,18 +107,24 @@ class BaseMode:
     def clear_background(self, cr: cairo.Context, width: int, height: int, custom_bg=None):
         """Fill background with pure OLED black or theme background.
 
-        When OLED mode is active AND the theme is dark, guarantees pure rgba(0, 0, 0, 1.0)
-        so OLED subpixels are completely turned off (0 nits, 0 watts, zero burn-in).
+        OLED mode uses black RGB. Background opacity controls only this paint;
+        text, gauges and effects retain their existing foreground alpha.
         In light mode, renders the active theme's background palette so light mode
         displays correctly without pitch-black void or blinding raw white.
         """
+        cr.save()
+        # Replace the previous frame; OVER would accumulate alpha toward opaque
+        # black and retain old animation pixels on a reused backing surface.
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        opacity = getattr(self.config, "background_opacity", 1.0)
         is_dark = getattr(self.theme, "is_dark", True)
         if getattr(self.config, "oled_mode", True) and custom_bg is None and is_dark:
-            cr.set_source_rgba(0.0, 0.0, 0.0, 1.0)
+            cr.set_source_rgba(0.0, 0.0, 0.0, opacity)
         else:
             bg = custom_bg or self.theme.background
-            cr.set_source_rgba(*bg)
+            cr.set_source_rgba(*bg[:3], bg[3] * opacity)
         cr.paint()
+        cr.restore()
 
     def oled_color(self, rgba: Tuple[float, float, float, float], alpha_mult: float = 1.0) -> Tuple[float, float, float, float]:
         """Apply luminance breathing factor to RGBA color for OLED phosphor relief in dark mode."""
