@@ -5,6 +5,7 @@
   "version": "1.9.0",
   "author": "Daemon0",
   "description": "18-mode screensaver studio with three collections, dark ambient scenes, live telemetry, audio spectrum and native preview controls",
+  "icon": "assets/screensaver-studio.svg",
   "kinds": [
     "bar-widget"
   ],
