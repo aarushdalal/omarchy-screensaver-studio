@@ -1,7 +1,7 @@
 {
   "name": "omarchy-screensaver-studio",
   "id": "daemon0.screensaver-studio",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "42-mode theme-aware screensaver studio (18 classic scenes and 24 DAEMON Satisfying procedural GPU prototypes) with direct selection, system telemetry and native previews",
   "author": "Daemon0",
   "license": "MIT",

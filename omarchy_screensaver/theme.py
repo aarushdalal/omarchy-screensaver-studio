@@ -100,19 +100,23 @@ class ThemePalette:
         self.hex_accent = data.get("accent") or data.get("primary") or "#9434b5"
         self.hex_primary = self.hex_accent
 
-        # Secondary color: strictly derived from the active theme palette (never ANSI magenta/cyan)
+        # Secondary color: strictly derived from the active theme palette
         cand_sec = data.get("secondary")
         if cand_sec:
             self.hex_secondary = cand_sec
         elif self.is_dark:
             self.hex_secondary = (
-                data.get("dark_foreground")
+                data.get("magenta")
+                or data.get("red")
+                or data.get("dark_foreground")
                 or data.get("light_foreground")
                 or self.hex_accent
             )
         else:
             self.hex_secondary = (
-                data.get("light_foreground")
+                data.get("magenta")
+                or data.get("red")
+                or data.get("light_foreground")
                 or data.get("dark_foreground")
                 or self.hex_accent
             )
@@ -122,11 +126,11 @@ class ThemePalette:
         if cand_dark_acc:
             self.hex_dark_accent = cand_dark_acc
         else:
-            self.hex_dark_accent = (
-                data.get("selection")
-                or data.get("muted")
-                or self.hex_surface
-            )
+            acc_rgba = hex_to_rgba(self.hex_accent)
+            dark_r = int(acc_rgba[0] * 0.40 * 255)
+            dark_g = int(acc_rgba[1] * 0.40 * 255)
+            dark_b = int(acc_rgba[2] * 0.40 * 255)
+            self.hex_dark_accent = f"#{dark_r:02x}{dark_g:02x}{dark_b:02x}"
 
         # Chromatic accents directly from data
         self.hex_red = data.get("red", "#ff554a")

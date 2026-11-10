@@ -61,9 +61,8 @@ class SatisfyingMode(BaseMode):
         super().update_theme(theme)
         if self.surface:
             self.surface.theme = theme
-            palette = getattr(theme, "palette", theme)
-            if self.surface.engine and hasattr(palette, "accent"):
-                self.surface.engine.accent = palette.accent[:3]
+            if self.surface.engine and hasattr(self.surface.engine, "update_theme"):
+                self.surface.engine.update_theme(theme)
 
     def update(self, dt: float, metrics: Any, media_info: Optional[Any]) -> None:
         """Advance time; GPU engine handles internal physics inside render loop."""

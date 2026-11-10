@@ -10,9 +10,10 @@ p=vec3(p.x*cos(y)+p.z*sin(y),p.y,-p.x*sin(y)+p.z*cos(y));return vec3(p.x,p.y*cos
 void main(){vec3 p=camera(pos);n=camera(normal);c=rgb;p.xy*=3.5/(3.5-p.z);gl_Position=vec4(p.x*resolution.y/resolution.x,p.y,-p.z*.23,1);}
 '''
 FRAG='''#version 300 es
-precision highp float;in vec3 n;in vec3 c;out vec4 color;uniform float intensity;uniform vec3 accent;
-void main(){vec3 nn=normalize(n);float l=max(0.,dot(nn,normalize(vec3(-.4,.7,1.))));float s=pow(max(0.,dot(nn,normalize(vec3(-.1,.3,1.)))),30.);
-color=vec4(clamp(c*(.30+.70*l+.35*s)*(vec3(.87)+accent*.13)*intensity,0.,.62),1);}
+precision highp float;in vec3 n;in vec3 c;out vec4 color;uniform float intensity;uniform vec3 accent;uniform vec3 secondary;
+void main(){vec3 nn=normalize(n);float l=max(0.,dot(nn,normalize(vec3(-.4,.7,1.))));float s=pow(max(0.,dot(nn,normalize(vec3(-.1,.3,1.)))),25.);
+vec3 matCol=mix(c,c*accent*2.4+accent*0.15,0.72);vec3 specCol=mix(vec3(1.),secondary*1.6,0.65);
+vec3 lit=matCol*(0.28+0.72*l)+specCol*(s*0.50);color=vec4(clamp(lit*intensity,0.,0.88),1);}
 '''
 class World:
  def __init__(self):self.faces=[];self.colors=[]
@@ -36,11 +37,12 @@ class WorldGPU:
  def __init__(self,g,w,h):
   self.g=g;self.w=w;self.h=h;self.program,self.compile_ms=g.program(VERT,FRAG)
   self.vao=g.gen('VertexArrays');self.vbo=g.gen('Buffers');self.aa=AATarget(g,w,h,4,depth=True);self.tex=self.aa.tex;self.fb=self.aa.fb
- def render(self,world,time,intensity,accent):
+ def render(self,world,time,intensity,accent,secondary=None):
+  sec=secondary or accent
   g=self.g;data=world.arrays();g.BindFramebuffer(0x8D40,self.fb);g.Viewport(0,0,self.w,self.h);g.Enable(0x0B71);g.ClearColor(0,0,0,1);g.Clear(0x4000|0x100)
   g.UseProgram(self.program);g.BindVertexArray(self.vao);g.BindBuffer(0x8892,self.vbo);g.BufferData(0x8892,data.nbytes,data.ctypes.data_as(P),0x88E0)
   for i in range(3):g.EnableVertexAttribArray(i);g.VertexAttribPointer(i,3,0x1406,0,36,P(i*12))
-  for k,v in {'time':(float(time),),'resolution':(self.w,self.h),'intensity':(float(intensity),),'accent':accent}.items():g.uniform(self.program,k,*v)
+  for k,v in {'time':(float(time),),'resolution':(self.w,self.h),'intensity':(float(intensity),),'accent':accent,'secondary':sec}.items():g.uniform(self.program,k,*v)
   g.DrawArrays(4,0,len(data));g.Disable(0x0B71);return self.aa.resolve()
  def close(self):
   g=self.g;g.DeleteProgram(self.program);g.delete('Buffers',self.vbo);g.delete('VertexArrays',self.vao);self.aa.close()

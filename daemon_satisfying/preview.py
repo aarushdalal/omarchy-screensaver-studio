@@ -48,12 +48,11 @@ class Surface(Gtk.GLArea):
   gl=GL();fn=gl.lib.glGetIntegerv;fn.argtypes=[U,C.POINTER(I)];fb=I();fn(0x8CA6,C.byref(fb))
   if not self.engine or (self.engine.w,self.engine.h)!=(w,h):
    if self.engine:self.engine.close()
-   self.engine=Engine(self.effect,w,h,self.quality,self.seed,self.params)
+   self.engine=Engine(self.effect,w,h,self.quality,self.seed,self.params,theme=self.theme)
    self.engine.gl.GetIntegerv=self.engine.gl.lib.glGetIntegerv;self.engine.gl.GetIntegerv.argtypes=[U,C.POINTER(I)]
 
-  if self.theme:
-   palette=getattr(self.theme,'palette',self.theme)
-   self.engine.accent=palette.accent[:3]
+  if self.theme and hasattr(self.engine,'update_theme'):
+   self.engine.update_theme(self.theme)
   start=time.perf_counter();self.engine.render(self.pending,fb.value,(w,h));self.pending=0.
   self.durations.append((time.perf_counter()-start)*1000);self.frames+=1
   return True

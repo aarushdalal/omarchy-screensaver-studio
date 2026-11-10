@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "author": "Daemon0",
   "description": "42-mode screensaver studio (18 classic scenes and 24 DAEMON Satisfying procedural GPU prototypes) with live telemetry, audio spectrum and native preview controls",
   "icon": "assets/screensaver-studio.svg",

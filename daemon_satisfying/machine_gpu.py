@@ -30,8 +30,9 @@ precision highp float;
 in vec3 n;in vec3 c;out vec4 color;uniform float intensity;uniform float time;uniform vec3 accent;uniform float finish;
 void main(){vec3 nn=normalize(n);float light=max(0.,dot(nn,normalize(vec3(-.35,.65,1.))));
  float spec=pow(max(0.,dot(nn,normalize(vec3(-.15,.30,.942)))),mix(10.,64.,finish));
- vec3 col=c*(.30+.68*light+.55*spec)*(vec3(.88)+accent*.12);
- color=vec4(clamp(col*intensity*smoothstep(0.,3.,mod(time,190.))*(1.-smoothstep(184.,190.,mod(time,190.))),0.,.64),1.);}
+ vec3 matCol=mix(c,c*accent*2.4+accent*0.18,0.68);vec3 specCol=mix(vec3(1.),accent*1.6,0.60);
+ vec3 col=matCol*(0.28+0.72*light)+specCol*(spec*0.55);
+ color=vec4(clamp(col*intensity*smoothstep(0.,3.,mod(time,190.))*(1.-smoothstep(184.,190.,mod(time,190.))),0.,.88),1.);}
 '''
 class MachineGPU:
  def __init__(self,gl,w,h,seed=1):

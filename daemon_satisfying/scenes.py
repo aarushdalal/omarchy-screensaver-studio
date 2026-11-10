@@ -119,10 +119,12 @@ class Machine:
 
 class InkFilaments:
  """Connected material lines transported together through the velocity field."""
- def __init__(self,seed=1,density=4):
-  self.seed=seed;self.n=int(np.clip(density,2,6))*5;self.length=220
+ def __init__(self,seed=1,density=4,palette=None):
+  self.seed=seed;self.palette=palette or {};self.n=int(np.clip(density,2,6))*5;self.length=220
   self.angles=np.repeat(np.arange(self.n//5)*TAU/(self.n//5),5)+np.tile(np.linspace(-.025,.025,5),self.n//5)
   self.points=np.zeros((self.n,self.length,2));self.valid=0;self.emit=0.;self.last_cycle=0
+ def update_theme(self,palette):
+  self.palette=palette or {}
  def sources(self,time,converge):
   a=self.angles+math.sin(time*.07)*.3+self.seed*.31
   radius=.27-.16*converge+np.tile(np.linspace(-.006,.006,5),self.n//5)
@@ -142,9 +144,11 @@ class InkFilaments:
  def geometry(self,time,intensity=.65):
   g=Geometry();phase=time%120/120;fade=float(smooth(time/3)*(1-smooth((phase-.79)/.19)))
   if self.valid<2:return g
+  accent=np.array(self.palette.get('accent',(.59,.45,.48)))
+  secondary=np.array(self.palette.get('secondary',(.79,.61,.61)))
   for i,points in enumerate(self.points[:,:self.valid]):
    # Restrained individual filaments; density buffer underneath supplies the soft body.
-   c=np.array([.35,.39,.44])*(.6+.4*math.sin(i*2.1)**2)*intensity*fade
+   c=(accent if i%2==0 else secondary)*(.85+.35*math.sin(i*2.1)**2)*intensity*fade
    g.line(points*2,c,.85)
   return g
 

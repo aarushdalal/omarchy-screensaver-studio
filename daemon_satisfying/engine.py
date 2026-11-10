@@ -42,7 +42,7 @@ IMPLEMENTED = {
 
 
 class Engine:
-    def __init__(self, effect, w, h, quality='balanced', seed=1, params=None):
+    def __init__(self, effect, w, h, quality='balanced', seed=1, params=None, theme=None):
         if effect not in IMPLEMENTED:
             raise ValueError('Effect not implemented: ' + effect)
         self.gl = GL()
@@ -58,7 +58,14 @@ class Engine:
         self.accum = 0.
         self.last_draw = 0.
         self.index = 0
-        self.accent = (.22, .31, .40)
+        self.theme = theme
+        self.accent, self.secondary, self.dark_accent, self.foreground = self._extract_theme_colors(theme)
+        self.palette_dict = {
+            'accent': self.accent,
+            'secondary': self.secondary,
+            'dark_accent': self.dark_accent,
+            'foreground': self.foreground,
+        }
         self.intensity = float(np.clip(self.params.get('brightness', .65), .03, 1.))
         self.speed = float(np.clip(self.params.get('speed', 1.), .1, 3.))
         if self.params.get('reduced_motion', False):
@@ -86,12 +93,12 @@ class Engine:
             self.compile('sandview', S.QUAD, S.SAND_VIEW)
             self.targets = [g.target(self.sw, self.sh, True) for _ in range(2)]
         elif effect == 'ink_singularity':
-            self.ink = InkFilaments(seed, self.params.get('density', 4))
+            self.ink = InkFilaments(seed, self.params.get('density', 4), palette=self.palette_dict)
             self.compile('step', S.QUAD, S.INK)
             self.targets = [g.target(self.sw, self.sh, True) for _ in range(2)]
             self.aa_target = AATarget(g, w, h, samples=4)
         elif effect == 'ink_choreography':
-            self.ink = Choreography(seed, self.params.get('density', 4))
+            self.ink = Choreography(seed, self.params.get('density', 4), palette=self.palette_dict)
             self.compile('step', S.QUAD, S.INK_CHOREOGRAPHY)
             self.targets = [g.target(self.sw, self.sh, True) for _ in range(2)]
             self.aa_target = AATarget(g, w, h, samples=4)
@@ -116,17 +123,47 @@ class Engine:
         elif effect == 'event_horizon':
             self.compile('cosmic', S.QUAD, S.COSMIC)
         elif effect == 'midnight_rain':
-            self.rain = Rain(seed, self.params)
+            self.rain = Rain(seed, self.params, palette=self.palette_dict)
             self.aa_target = AATarget(g, w, h, samples=4)
         elif effect in GENERATIVE_EFFECTS:
-            self.generative = Generative(effect, seed, self.params)
+            self.generative = Generative(effect, seed, self.params, palette=self.palette_dict)
             self.aa_target = AATarget(g, w, h, samples=4)
         elif effect in PHYSICAL_EFFECTS:
-            self.physical = Physical(effect, seed, self.params)
+            self.physical = Physical(effect, seed, self.params, palette=self.palette_dict)
             self.world_gpu = WorldGPU(g, int(w * self.profile['scale']), int(h * self.profile['scale']))
             self.compile_ms += self.world_gpu.compile_ms
 
         g.BindFramebuffer(0x8D40, 0)
+
+    def _extract_theme_colors(self, theme):
+        if theme is not None:
+            palette = getattr(theme, 'palette', theme)
+            accent = getattr(palette, 'accent', None)
+            if accent:
+                acc = tuple(accent[:3])
+                sec = tuple(getattr(palette, 'secondary', accent)[:3])
+                dark_acc = tuple(getattr(palette, 'dark_accent', (acc[0] * 0.4, acc[1] * 0.4, acc[2] * 0.4))[:3])
+                fg = tuple(getattr(palette, 'foreground', (0.8, 0.8, 0.8))[:3])
+                return acc, sec, dark_acc, fg
+        return (.59, .45, .48), (.79, .61, .61), (.24, .18, .19), (.76, .62, .55)
+
+    def update_theme(self, theme):
+        self.theme = theme
+        self.accent, self.secondary, self.dark_accent, self.foreground = self._extract_theme_colors(theme)
+        self.palette_dict = {
+            'accent': self.accent,
+            'secondary': self.secondary,
+            'dark_accent': self.dark_accent,
+            'foreground': self.foreground,
+        }
+        if hasattr(self, 'generative'):
+            self.generative.update_theme(self.palette_dict)
+        if hasattr(self, 'physical'):
+            self.physical.update_theme(self.palette_dict)
+        if hasattr(self, 'rain'):
+            self.rain.update_theme(self.palette_dict)
+        if hasattr(self, 'ink'):
+            self.ink.update_theme(self.palette_dict)
 
     def compile(self, key, vert, frag):
         pr, ms = self.gl.program(vert, frag)
@@ -157,6 +194,8 @@ class Engine:
             'seed': (float(self.seed),),
             'intensity': (self.intensity,),
             'accent': self.palette(),
+            'secondary': self.secondary,
+            'dark_accent': self.dark_accent,
             'wave_speed': (float(p.get('wave_speed', 1.)),),
             'reflectivity': (float(p.get('reflectivity', .7)),),
             'p1': (float(np.clip(p1, .1, 6)),),
@@ -279,7 +318,7 @@ class Engine:
             b = int(min(p / 112, 1) * 36000)
             geo = Geometry()
             if b > a:
-                geo.line(self.path[a:b + 1], (.49, .53, .58), float(np.clip(self.params.get('line_width', 1.15), .2, 2.)))
+                geo.line(self.path[a:b + 1], self.palette(), float(np.clip(self.params.get('line_width', 1.15), .2, 2.)))
             self.geometry(geo, self.w, self.h)
             tex = self.aa_target.resolve()
             g.BindFramebuffer(0x8D40, target)
@@ -291,7 +330,7 @@ class Engine:
             if p < 112 and b > 0:
                 pen = Geometry()
                 x, y = self.path[b]
-                pen.disk(x, y, .0045, (.47 * brightness, .51 * brightness, .56 * brightness), 16)
+                pen.disk(x, y, .0045, (self.secondary[0] * brightness, self.secondary[1] * brightness, self.secondary[2] * brightness), 16)
                 self.geometry(pen, ow, oh)
 
         elif self.effect == 'the_perfect_machine':
@@ -348,7 +387,7 @@ class Engine:
 
         elif self.effect in PHYSICAL_EFFECTS:
             world = self.physical.world(self.time)
-            tex = self.world_gpu.render(world, self.time, self.intensity, self.palette())
+            tex = self.world_gpu.render(world, self.time, self.intensity, self.palette(), self.secondary)
             g.BindFramebuffer(0x8D40, target)
             g.Viewport(0, 0, ow, oh)
             intensity = self.intensity

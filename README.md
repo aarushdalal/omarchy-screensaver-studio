@@ -8,7 +8,7 @@ This project was developed through an AI-assisted workflow. The concept, customi
 
 ---
 
-## DAEMON Satisfying Procedural Collection (2.0.0-beta.1 Preview)
+## DAEMON Satisfying Procedural Collection (2.0.0-beta.2 Preview)
 
 The studio now includes 42 visual modes across four collections, adding 24 procedural GPU-accelerated mathematical prototypes (`daemon_satisfying`) built on OpenGL ES 3.0 and native GTK4 `GLArea`.
 

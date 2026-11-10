@@ -7,7 +7,7 @@ HEADER='''#version 300 es
 precision highp float;
 in vec2 uv;out vec4 color;
 uniform vec2 resolution;uniform float time;uniform float dt;uniform float seed;
-uniform float intensity;uniform vec3 accent;uniform sampler2D state;
+uniform float intensity;uniform vec3 accent;uniform vec3 secondary;uniform vec3 dark_accent;uniform sampler2D state;
 uniform float wave_speed;uniform float reflectivity;
 uniform float p1;uniform float p2;uniform float p3;uniform float cycle;
 float hash(float n){return fract(sin(n*127.1+seed*311.7)*43758.5453);}
@@ -45,7 +45,10 @@ void main(){vec2 d=1./resolution;
  vec2 q=(uv-.5)*vec2(resolution.x/resolution.y,1.);
  float vignette=1.-smoothstep(.60,1.04,length(q));
  float edge=smoothstep(0.,.17,min(min(uv.x,1.-uv.x),min(uv.y,1.-uv.y)));
- color=vec4((vec3(.45,.49,.54)+accent*.10)*light*vignette*edge*intensity*(.4+.8*reflectivity),1);
+ vec3 waterCol=mix(vec3(.08,.09,.11),accent*1.6,0.72);
+ vec3 specCol=mix(vec3(1.),secondary*1.5,0.55);
+ vec3 litCol=waterCol*diffuse+specCol*spec+abs(h)*.12*secondary;
+ color=vec4(litCol*vignette*edge*intensity*(.4+.8*reflectivity),1);
 }
 '''
 INK=HEADER+'''
@@ -67,12 +70,13 @@ void main(){
   source+=exp(-dist*dist/0.000045)*dt*28.*(1.-smoothstep(.77,.95,phase));
  }
  // Semi-Lagrangian density transport through a coherent analytic velocity field.
- color=vec4(clamp(dye+source*vec3(.62,.70,.79),0.,.85),1);
+ vec3 inkCol=mix(vec3(.7,.7,.75),accent*1.6,0.82);
+ color=vec4(clamp(dye+source*inkCol,0.,.90),1);
 }
 '''
 COMPOSITE=HEADER+'''
 void main(){vec3 c=texture(state,uv).rgb;float fade=smoothstep(0.,2.,time);
- color=vec4(clamp(c*(vec3(.85)+accent*.15)*intensity*fade,vec3(0),vec3(.68)),1);}
+ color=vec4(clamp(mix(c,c*accent*1.8,0.22)*intensity*fade,vec3(0),vec3(1.0)),1);}
 '''
 GEOM_VERT='''#version 300 es
 precision highp float;
@@ -103,8 +107,12 @@ void main(){vec2 q=(uv-.5)*vec2(resolution.x/resolution.y,1.);vec3 ro=vec3(0,.55
  vec3 col=vec3(0);
  if(hit){float e=.002;vec3 n=normalize(vec3(field(p+vec3(e,0,0))-field(p-vec3(e,0,0)),field(p+vec3(0,e,0))-field(p-vec3(0,e,0)),field(p+vec3(0,0,e))-field(p-vec3(0,0,e))));
  vec3 l=normalize(vec3(-.6,1.,1.));float diff=max(0.,dot(n,l));float spec=pow(max(0.,dot(reflect(rd,n),l)),mix(75.,14.,roughness));
- float rim=pow(1.-max(0.,dot(n,-rd)),3.);col=(vec3(.06,.07,.085)*diff+vec3(.32,.36,.41)*spec+vec3(.10,.12,.15)*rim)*(vec3(.85)+accent*.15);}
- color=vec4(clamp(col*intensity*smoothstep(0.,3.,time),0.,.62),1);}
+ float rim=pow(1.-max(0.,dot(n,-rd)),3.);
+ vec3 specTint=mix(vec3(.32,.36,.41),accent*1.8,0.70);
+ vec3 rimTint=mix(secondary,accent*1.5,0.55);
+ col=(vec3(.03,.035,.04)*diff+specTint*spec+rimTint*rim*0.8);
+ }
+ color=vec4(clamp(col*intensity*smoothstep(0.,3.,time),0.,.85),1);}
 '''
 COSMIC=HEADER+'''
 uniform float star_density;uniform float lensing;
@@ -134,10 +142,10 @@ void main(){
  float haloDensity=lensedRing*(.4+.3*plasma)*(1.-smoothstep(0.,rs*.4,abs(p.x)))*.8;
  float photonRing=exp(-pow((r-rs*1.12)/.007,2.))*1.8+exp(-pow((r-rs*1.05)/.0035,2.))*1.2;
  vec3 plasmaColor=mix(vec3(1.,.65,.32),vec3(1.,.92,.78),plasma*.7+photonRing*.3);
- plasmaColor=mix(plasmaColor,accent*1.4,.35);
- col+=plasmaColor*(diskDensity*1.4+haloDensity*.9)+mix(vec3(.9,.95,1.),accent*1.5,.25)*photonRing*doppler;
- float glow=exp(-r*3.8)*.35+exp(-r*8.5)*.45;
- col+=mix(vec3(.8,.45,.2),accent,.4)*glow*(1.-smoothstep(rs,rs+.02,r));
+ plasmaColor=mix(plasmaColor,accent*1.8,0.65);
+ col+=plasmaColor*(diskDensity*1.5+haloDensity*1.0)+mix(vec3(1.,.85,.85),secondary*1.6,0.60)*photonRing*doppler;
+ float glow=exp(-r*3.8)*.40+exp(-r*8.5)*.55;
+ col+=mix(vec3(.6,.1,.1),accent*1.5,0.65)*glow*(1.-smoothstep(rs,rs+.02,r));
  col*=smoothstep(rs*.96,rs*1.02,r)*(1.-smoothstep(.8,1.4,r))*intensity*smoothstep(0.,2.5,time);
  color=vec4(clamp(col,0.,1.),1.);
 }
@@ -159,7 +167,10 @@ SAND_VIEW=HEADER+'''
 void main(){vec2 d=1./resolution;float h=texture(state,uv).r;vec2 n=vec2(texture(state,uv+vec2(d.x,0)).r-texture(state,uv-vec2(d.x,0)).r,texture(state,uv+vec2(0,d.y)).r-texture(state,uv-vec2(0,d.y)).r);
  vec3 normal=normalize(vec3(n*38.,1.));float lit=max(0.,dot(normal,normalize(vec3(-.5,.7,1.)))-.55);
  float grain=fract(sin(dot(floor(uv*resolution*2.),vec2(127.1,311.7)))*43758.5453);
- float vignette=1.-smoothstep(.35,.65,length(uv-.5));vec3 col=(vec3(.020,.022,.026)*(grain*.3+.7)+vec3(.26,.29,.33)*lit)*vignette;
+ float vignette=1.-smoothstep(.35,.65,length(uv-.5));
+ vec3 sandBase=vec3(.018,.020,.024)*(grain*.3+.7);
+ vec3 sandLit=mix(vec3(.26,.29,.33),accent*1.5,0.65)*lit;
+ vec3 col=(sandBase+sandLit)*vignette;
  color=vec4(col*intensity*smoothstep(0.,3.,time),1);}
 '''
 INK_CHOREOGRAPHY=INK.replace('vec2 v=vec2(-q.y,q.x)*(.025+p2*.055)/(r+.18);','float align=smoothstep(.16,.64,phase);\n vec2 v=vec2(-q.y*sign(q.x),abs(q.x))*(.12+p2*.05);').replace('v+=vec2(sin(q.y*9.+time*.13),cos(q.x*8.-time*.11))*.021;','v+=vec2(sin(q.y*9.+time*.13+seed),cos(q.x*8.-time*.11))*.021*(1.-align);').replace('v-=q*converge*.22;','v-=q*.08;').replace('float a=float(i)*6.2831853/max(p1,1.)+sin(time*.07)*.3+seed*.31;\n  vec2 pt=vec2(cos(a),sin(a))*(.27-.16*converge);','float side=mod(float(i),2.)<.5?-1.:1.;\n  vec2 pt=vec2(side*(.22+.015*floor(float(i)/2.)),-.19+.025*sin(time*.05));')

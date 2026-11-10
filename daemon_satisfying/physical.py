@@ -21,8 +21,10 @@ def tube(path,r,color):
  return f,np.broadcast_to(color,(len(f),3)).copy()
 
 class Physical:
- def __init__(self,key,seed,params):
-  self.key=key;self.seed=seed;self.p=params;self.cycle=-1;self.build(seed)
+ def __init__(self,key,seed,params,palette=None):
+  self.key=key;self.seed=seed;self.p=params;self.palette=palette or {};self.cycle=-1;self.build(seed)
+ def update_theme(self,palette):
+  self.palette=palette or {}
  def build(self,seed):
   self.seed=seed;rng=np.random.default_rng(seed)
   if self.key=='monolithic_construction':

@@ -1,3 +1,14 @@
+## 2.0.0-beta.2 (Preview / Beta) — 2026-11-10
+
+- Complete System Theme & Blood Effects Palette Integration:
+  - Dynamically propagates active desktop palette (`accent`, `secondary`, `dark_accent`, `foreground`) from `ThemeManager` into all 24 `daemon_satisfying` GPU procedural shaders and simulation engines.
+  - Upgraded shaders (`wave_view`, `sand_view`, `ink`, `material`, `cosmic`, `composite`, `world`, `machine_gpu`) to illuminate with dynamic theme accent specular reflections, rich secondary rims, and dark shadow tints.
+  - Fixed `fractal_bloom` growth curve polynomial bug where branches remained invisible (< 1px) for the first 20 seconds.
+  - Enhanced `midnight_rain` droplet condensation rims and trail persistence.
+  - Generated full-fidelity blood effects theme (`momo-psychic-halo`) preview screenshots (`.jpg`) for all 42 screensavers in `assets/showcase/previews/`.
+  - Rebuilt `docs/index.html` and `index.html` with valid HTML5 cards, `poster` previews, and responsive video players for all 42 screensavers.
+  - Updated `tools/approved-preview-media.json` with verified SHA256 checksums across all 120 showcase media files; verified 0 release privacy findings.
+
 ## 2.0.0-beta.1 (Preview / Beta) — 2026-11-10
 
 - Added DAEMON Satisfying collection: 24 procedural GPU screensaver prototypes (`daemon_satisfying`) built on OpenGL ES 3.0 and native GTK4 `GLArea`.
