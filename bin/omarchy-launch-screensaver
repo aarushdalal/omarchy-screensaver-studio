@@ -2,9 +2,12 @@
 # ==============================================================================
 # omarchy-launch-screensaver: Omarchy idle daemon and menu integration launcher
 # ==============================================================================
+set -euo pipefail
+
+export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
 
 # Exit early if screensaver is already running
-pgrep -f '[o]rg.omarchy.screensaver' >/dev/null 2>&1 && exit 0
+pgrep -f '[o]marchy_screensaver/main.py' >/dev/null 2>&1 && exit 0
 
 is_force=false
 clean_args=()
@@ -32,4 +35,6 @@ if command -v omarchy-shell >/dev/null 2>&1 && [[ "$(omarchy-shell lock isLocked
 fi
 
 # Launch screensaver with cleaned arguments
-exec omarchy-screensaver "${clean_args[@]}"
+bin="$HOME/.local/bin/omarchy-screensaver"
+[[ ! -x "$bin" ]] && bin="omarchy-screensaver"
+exec "$bin" "${clean_args[@]}"

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 # omarchy-screensaver-start: Start the Omarchy screensaver
+set -euo pipefail
 
-exec omarchy-screensaver "$@"
+export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
+
+bin="$HOME/.local/bin/omarchy-screensaver"
+[[ ! -x "$bin" ]] && bin="omarchy-screensaver"
+exec "$bin" "$@"

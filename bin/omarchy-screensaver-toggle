@@ -13,6 +13,8 @@
 
 set -euo pipefail
 
+export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
+
 LOCKFILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-screensaver-toggle.lock"
 COOLDOWN_FILE="${XDG_RUNTIME_DIR:-/tmp}/omarchy-screensaver-toggle.last"
 STATE_DIR="$HOME/.local/state/omarchy/indicators"
@@ -49,10 +51,12 @@ is_running() {
     local pid
     pid=$(cat "$PID_FILE" 2>/dev/null || true)
     if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
-      return 0
+      if grep -qa "screensaver" "/proc/$pid/cmdline" 2>/dev/null; then
+        return 0
+      fi
     fi
   fi
-  pgrep -f '[o]rg.omarchy.screensaver' >/dev/null 2>&1
+  pgrep -f '[o]marchy_screensaver/main.py' >/dev/null 2>&1
 }
 
 stop_screensaver() {
@@ -68,7 +72,7 @@ stop_screensaver() {
     fi
     rm -f "$PID_FILE"
   fi
-  pkill -TERM -f '[o]rg.omarchy.screensaver' 2>/dev/null || true
+  pkill -TERM -f '[o]marchy_screensaver/main.py' 2>/dev/null || true
 
   # Clean up stay-awake indicator if set by ambient screensaver mode
   if [[ -f "$MARKER_FILE" ]]; then
@@ -89,12 +93,17 @@ start_screensaver() {
     touch "$MARKER_FILE"
   fi
 
+  local bin="$HOME/.local/bin/omarchy-screensaver"
+  if [[ ! -x "$bin" ]]; then
+    bin="omarchy-screensaver"
+  fi
+
   # Close FD 9 (9>&-) so child background processes do NOT inherit or hold the lock!
   if command -v systemd-inhibit >/dev/null 2>&1; then
     nohup systemd-inhibit --what=idle --who="Omarchy Screensaver" --why="Ambient Study Display" \
-      omarchy-screensaver --ambient --class org.omarchy.screensaver "$@" >/dev/null 2>&1 9>&- &
+      "$bin" --ambient "$@" >/dev/null 2>&1 9>&- &
   else
-    nohup omarchy-screensaver --ambient --class org.omarchy.screensaver "$@" >/dev/null 2>&1 9>&- &
+    nohup "$bin" --ambient "$@" >/dev/null 2>&1 9>&- &
   fi
 
   if command -v omarchy-notification-send >/dev/null 2>&1; then

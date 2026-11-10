@@ -5,6 +5,8 @@
 # ==============================================================================
 set -euo pipefail
 
+export PATH="$HOME/.local/bin:$HOME/.local/share/omarchy/bin:$PATH"
+
 mode=""
 duration=""
 
@@ -16,7 +18,9 @@ for arg in "$@"; do
   fi
 done
 
-cmd=(omarchy-screensaver --preview)
+bin="$HOME/.local/bin/omarchy-screensaver"
+[[ ! -x "$bin" ]] && bin="omarchy-screensaver"
+cmd=("$bin" --preview)
 [[ -n "$mode" ]] && cmd+=(--mode "$mode")
 
 if [[ -n "$duration" ]]; then
