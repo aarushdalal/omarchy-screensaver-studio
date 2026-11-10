@@ -57,6 +57,20 @@ check_deps() {
     missing=1
   fi
 
+  if python3 -c "import numpy" >/dev/null 2>&1; then
+    echo "  [OK] Python numpy is installed"
+  else
+    echo "  [FAIL] Python numpy is required for DAEMON Satisfying procedural modes."
+    missing=1
+  fi
+
+  if python3 -c "import ctypes; ctypes.CDLL('libGLESv2.so.2'); ctypes.CDLL('libEGL.so.1')" >/dev/null 2>&1; then
+    echo "  [OK] EGL/GLES runtime libraries are available"
+  else
+    echo "  [FAIL] EGL and GLES shared libraries are required."
+    missing=1
+  fi
+
   if (( missing )); then
     echo "Error: Required dependencies are missing. Please install them before proceeding." >&2
     return 1
@@ -90,7 +104,7 @@ do_install() {
   for item in "$SCRIPT_DIR"/*; do
     local base="$(basename "$item")"
     case "$base" in
-      install.sh|README.md|LICENSE|CHANGELOG.md|project-manifest.json|docs|assets|.git|.gitignore|bin|hooks|systemd|examples)
+      install.sh|README.md|LICENSE|CHANGELOG.md|project-manifest.json|docs|assets|.git|.gitignore|bin|hooks|systemd|examples|tests|tools|daemon_satisfying|omarchy_screensaver)
         ;;
       *)
         run_cmd cp -r "$item" "$TARGET_PLUGIN_DIR/"
@@ -111,10 +125,11 @@ do_install() {
   fi
 
   
-  # Install package to ~/.local/share/omarchy-screensaver
+  # Install packages to ~/.local/share/omarchy-screensaver
   local share_target="${XDG_DATA_HOME:-$HOME/.local/share}/omarchy-screensaver"
   run_cmd mkdir -p "$share_target"
   run_cmd cp -r "$SCRIPT_DIR/omarchy_screensaver" "$share_target/"
+  run_cmd cp -r "$SCRIPT_DIR/daemon_satisfying" "$share_target/"
 
   # Optional compilation of native audio spectrum library for screensaver
   if [[ -f "$SCRIPT_DIR/omarchy_screensaver/audio_spectrum.c" ]]; then
@@ -177,6 +192,12 @@ do_uninstall() {
         run_cmd rm -f "$BIN_DIR/$bname"
       fi
     done
+  fi
+
+  local share_target="${XDG_DATA_HOME:-$HOME/.local/share}/omarchy-screensaver"
+  if [[ -d "$share_target/daemon_satisfying" ]]; then
+    echo "Removing $share_target/daemon_satisfying"
+    run_cmd rm -rf "$share_target/daemon_satisfying"
   fi
 
   echo "Screensaver Studio uninstalled cleanly. Reversible backups preserved under $BACKUP_BASE."

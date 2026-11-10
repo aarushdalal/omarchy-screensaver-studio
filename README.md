@@ -2,11 +2,26 @@
 
 > **Unofficial / Community Plugin**: An independent multi-mode screensaver suite for Omarchy.
 
-A native Wayland screensaver engine with 18 generative visual modes, OLED burn-in prevention, dynamic Omarchy theme synchronization, real-time PipeWire audio spectrum visualization, and full integration with Quickshell's idle monitor and Omarchy launcher menus — running under application ID `org.omarchy.screensaver`.
+A native Wayland screensaver engine with 42 visual modes (18 signature ambient scenes and 24 DAEMON Satisfying procedural GPU prototypes), OLED burn-in prevention, dynamic Omarchy theme synchronization, real-time PipeWire audio spectrum visualization, and full integration with Quickshell's idle monitor and Omarchy launcher menus — running under application ID `org.omarchy.screensaver`.
 
 This project was developed through an AI-assisted workflow. The concept, customization, configuration, testing, integration, and final iteration were directed and carried out by me.
 
 ---
+
+## DAEMON Satisfying Procedural Collection (2.0.0-beta.1 Preview)
+
+The studio now includes 42 visual modes across four collections, adding 24 procedural GPU-accelerated mathematical prototypes (`daemon_satisfying`) built on OpenGL ES 3.0 and native GTK4 `GLArea`.
+
+- **Harmonic & Rosettes**: `harmonograph`, `zen_geometry`, `harmonic_sculpture`
+- **Fluid & Advection**: `infinite_ripples`, `ink_singularity`, `midnight_rain`, `ink_choreography`
+- **Kinematic & Mechanical**: `the_perfect_machine`, `mechanical_eternity`, `domino_architect`, `wave_field`, `infinite_origami`*, `infinite_marble_machine`*
+- **Generative Growth & Graph Routing**: `fractal_bloom`, `particle_architect`, `circuit_genesis`, `circuit_weaver`, `silk_continuum`, `orbital_synchronization`, `monolithic_construction`, `infinite_zen_garden`
+- **Raymarched Distance Fields**: `liquid_obsidian`, `mercury_garden`, `event_horizon`
+
+Detailed prototype descriptions, test evidence, and known limitations are documented in [the DAEMON Satisfying guide](docs/DAEMON-SATISFYING.md).
+
+> [!NOTE]
+> *`infinite_origami` and `infinite_marble_machine` are early kinematic approximations under active development. This release is an authorized preview and does not claim final commercial completeness or verified multi-hour temporal comfort.
 
 ## Background-only glass (1.9.0)
 

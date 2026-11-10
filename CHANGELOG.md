@@ -1,3 +1,13 @@
+## 2.0.0-beta.1 (Preview / Beta) — 2026-11-10
+
+- Added DAEMON Satisfying collection: 24 procedural GPU screensaver prototypes (`daemon_satisfying`) built on OpenGL ES 3.0 and native GTK4 `GLArea`.
+- Integrated 42 total visual modes across four collections (18 classic scenes + 24 procedural prototypes) with seamless desktop palette synchronization.
+- Decoupled preview lifecycle and surface allocation: `GLArea` owns viewport reallocation on render; `surface.make_current()` precedes engine GL teardown.
+- Added `omarchy-satisfying-settings` CLI tool for quality profile adjustments (`eco`, `balanced`, `quality`), custom playlists, and parameter configuration backed by `~/.config/omarchy-screensaver/satisfying.json`.
+- Extended `omarchy-screensaver-select` and `omarchy-screensaver-preview` to validate and launch all 42 modes.
+- Fixed preview PID and ambient stay-awake sentinel ownership so previews never overwrite active idle process markers.
+- Added comprehensive technical documentation, verification report, and known limitations in `docs/DAEMON-SATISFYING.md`.
+
 ## 1.9.0 — 2026-11-05
 
 - Add native background opacity independent of text, gauges and effects; keep the stock opaque default and document a 68% glass setting.

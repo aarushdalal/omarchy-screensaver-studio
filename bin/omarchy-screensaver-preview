@@ -11,7 +11,7 @@ duration=""
 for arg in "$@"; do
   if [[ "$arg" =~ ^[0-9]+$ ]]; then
     duration="$arg"
-  elif [[ "$arg" =~ ^(clock|matrix|particles|warp|geometry|singularity|terminal|system|visualizer|aurora|cyber_nexus|synthwave|quantum_helix|topography|celestial_orbit|eclipse|ink_flow|rain)$ ]]; then
+  elif [[ "$arg" =~ ^(clock|matrix|particles|warp|geometry|singularity|terminal|system|visualizer|aurora|cyber_nexus|synthwave|quantum_helix|topography|celestial_orbit|eclipse|ink_flow|rain|harmonograph|infinite_ripples|the_perfect_machine|ink_singularity|zen_geometry|fractal_bloom|particle_architect|harmonic_sculpture|circuit_genesis|circuit_weaver|mechanical_eternity|silk_continuum|infinite_marble_machine|domino_architect|wave_field|orbital_synchronization|infinite_origami|monolithic_construction|midnight_rain|liquid_obsidian|mercury_garden|event_horizon|infinite_zen_garden|ink_choreography)$ ]]; then
     mode="$arg"
   fi
 done

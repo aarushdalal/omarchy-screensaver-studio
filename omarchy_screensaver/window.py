@@ -83,8 +83,26 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
         self.drawing_area.set_vexpand(True)
         self.drawing_area.set_css_classes(["omarchy-screensaver-surface"])
         self.drawing_area.set_draw_func(self._on_draw)
-        self.drawing_area.add_tick_callback(self._on_tick)
+        self._cairo_tick_id = self.drawing_area.add_tick_callback(self._on_tick)
         self.set_child(self.drawing_area)
+        self._update_surface_for_mode()
+
+    def _update_surface_for_mode(self):
+        if getattr(self.active_mode, "is_gpu", False):
+            if getattr(self, "_cairo_tick_id", 0):
+                try:
+                    self.drawing_area.remove_tick_callback(self._cairo_tick_id)
+                except Exception:
+                    pass
+                self._cairo_tick_id = 0
+            widget = self.active_mode.get_widget(self)
+            self.set_child(widget)
+        else:
+            child = self.get_child()
+            if child != self.drawing_area:
+                self.set_child(self.drawing_area)
+            if getattr(self, "_cairo_tick_id", 0) == 0:
+                self._cairo_tick_id = self.drawing_area.add_tick_callback(self._on_tick)
 
         css = Gtk.CssProvider()
         css.load_from_data(
@@ -198,8 +216,30 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
         """Switch visual mode."""
         if mode_name != self.mode_name:
             self.mode_name = mode_name
+            self._last_tick_time = 0.0
+            old_mode = getattr(self, "active_mode", None)
+            if old_mode and hasattr(old_mode, "close"):
+                try:
+                    old_mode.close()
+                except Exception:
+                    pass
             self.active_mode = create_mode(mode_name, self.theme, self.config, self.monitor_index)
+            self._update_surface_for_mode()
             self.active_mode.on_resize(self.window_width, self.window_height)
+
+    def close(self):
+        if getattr(self, "_cairo_tick_id", 0):
+            try:
+                self.drawing_area.remove_tick_callback(self._cairo_tick_id)
+            except Exception:
+                pass
+            self._cairo_tick_id = 0
+        if hasattr(self, "active_mode") and hasattr(self.active_mode, "close"):
+            try:
+                self.active_mode.close()
+            except Exception:
+                pass
+        super().close()
 
     def set_theme(self, theme: ThemePalette):
         """Update active theme palette."""

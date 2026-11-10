@@ -55,7 +55,7 @@ def cleanup_stay_awake():
             pass
 
 
-atexit.register(cleanup_stay_awake)
+# atexit registration deferred to main() for ambient sessions only
 
 
 def cmd_stop():
@@ -162,6 +162,9 @@ def main():
     if args.config:
         cmd_show_config()
         return
+
+    if args.ambient and not args.preview:
+        atexit.register(cleanup_stay_awake)
 
     # Check if already running unless in preview mode
     running_pid = get_running_pid()

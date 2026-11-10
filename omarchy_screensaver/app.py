@@ -85,7 +85,8 @@ class ScreensaverApp(Gtk.Application):
             pass
 
     def _on_activate(self, app):
-        self._write_pid()
+        if not self.is_preview:
+            self._write_pid()
         self._setup_signals()
 
         display = Gdk.Display.get_default()
@@ -368,21 +369,23 @@ class ScreensaverApp(Gtk.Application):
             except Exception:
                 pass
 
-        # Clean up ambient stay-awake indicator if set by screensaver
-        marker = os.path.expanduser("~/.local/state/omarchy/indicators/stay-awake-screensaver")
-        stay_awake = os.path.expanduser("~/.local/state/omarchy/indicators/stay-awake")
-        if os.path.exists(marker):
-            try:
-                os.remove(marker)
-            except Exception:
-                pass
-            try:
-                if os.path.exists(stay_awake):
-                    os.remove(stay_awake)
-            except Exception:
-                pass
+        # Clean up ambient stay-awake indicator ONLY if ambient mode and not preview
+        if self.is_ambient and not self.is_preview:
+            marker = os.path.expanduser("~/.local/state/omarchy/indicators/stay-awake-screensaver")
+            stay_awake = os.path.expanduser("~/.local/state/omarchy/indicators/stay-awake")
+            if os.path.exists(marker):
+                try:
+                    os.remove(marker)
+                except Exception:
+                    pass
+                try:
+                    if os.path.exists(stay_awake):
+                        os.remove(stay_awake)
+                except Exception:
+                    pass
 
-        self._remove_pid()
+        if not self.is_preview:
+            self._remove_pid()
         self.quit()
 
     def _setup_signals(self):

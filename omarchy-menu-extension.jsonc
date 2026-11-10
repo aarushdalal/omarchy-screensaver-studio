@@ -38,7 +38,7 @@
     "aliases": [
       "screensaver-modes"
     ],
-    "detail": "Select any of the 18 screensavers directly"
+    "detail": "Select any screensaver directly (18 classic + 24 DAEMON Satisfying prototypes)"
   },
   "style.screensaver.modes.eclipse": {
     "icon": "󰖔",
@@ -165,6 +165,189 @@
     "detail": "A borderless stream of system activity",
     "checked": "omarchy-screensaver-select is-mode terminal",
     "action": "omarchy-screensaver-select mode terminal"
+  },
+  "style.screensaver.modes.harmonograph": {
+    "icon": "󰘔",
+    "label": "Harmonograph",
+    "detail": "Rotary-table coupled pendulum rosettes",
+    "checked": "omarchy-screensaver-select is-mode harmonograph",
+    "action": "omarchy-screensaver-select mode harmonograph"
+  },
+  "style.screensaver.modes.infinite_ripples": {
+    "icon": "󰖖",
+    "label": "Infinite Ripples",
+    "detail": "Fluid surface wave propagation and interference",
+    "checked": "omarchy-screensaver-select is-mode infinite_ripples",
+    "action": "omarchy-screensaver-select mode infinite_ripples"
+  },
+  "style.screensaver.modes.the_perfect_machine": {
+    "icon": "󰦪",
+    "label": "The Perfect Machine",
+    "detail": "Interlocking precision gear train kinematics",
+    "checked": "omarchy-screensaver-select is-mode the_perfect_machine",
+    "action": "omarchy-screensaver-select mode the_perfect_machine"
+  },
+  "style.screensaver.modes.ink_singularity": {
+    "icon": "󰘔",
+    "label": "Ink Singularity",
+    "detail": "Vortex dye advection and filament transport",
+    "checked": "omarchy-screensaver-select is-mode ink_singularity",
+    "action": "omarchy-screensaver-select mode ink_singularity"
+  },
+  "style.screensaver.modes.zen_geometry": {
+    "icon": "󰒲",
+    "label": "Zen Geometry",
+    "detail": "Concentric multi-pass geometric rosette drawing",
+    "checked": "omarchy-screensaver-select is-mode zen_geometry",
+    "action": "omarchy-screensaver-select mode zen_geometry"
+  },
+  "style.screensaver.modes.fractal_bloom": {
+    "icon": "󰘔",
+    "label": "Fractal Bloom",
+    "detail": "Recursive blooming branch growth and breath",
+    "checked": "omarchy-screensaver-select is-mode fractal_bloom",
+    "action": "omarchy-screensaver-select mode fractal_bloom"
+  },
+  "style.screensaver.modes.particle_architect": {
+    "icon": "󰘔",
+    "label": "Particle Architect",
+    "detail": "Smooth coordinate-arcing geometric formations",
+    "checked": "omarchy-screensaver-select is-mode particle_architect",
+    "action": "omarchy-screensaver-select mode particle_architect"
+  },
+  "style.screensaver.modes.harmonic_sculpture": {
+    "icon": "󰦪",
+    "label": "Harmonic Sculpture",
+    "detail": "Projected 3D Lissajous ribbon sculpture",
+    "checked": "omarchy-screensaver-select is-mode harmonic_sculpture",
+    "action": "omarchy-screensaver-select mode harmonic_sculpture"
+  },
+  "style.screensaver.modes.circuit_genesis": {
+    "icon": "󰑮",
+    "label": "Circuit Genesis",
+    "detail": "Growing orthogonal conductor traces and bus lines",
+    "checked": "omarchy-screensaver-select is-mode circuit_genesis",
+    "action": "omarchy-screensaver-select mode circuit_genesis"
+  },
+  "style.screensaver.modes.circuit_weaver": {
+    "icon": "󰑮",
+    "label": "Circuit Weaver",
+    "detail": "Deterministic A* routing with obstacle clearance",
+    "checked": "omarchy-screensaver-select is-mode circuit_weaver",
+    "action": "omarchy-screensaver-select mode circuit_weaver"
+  },
+  "style.screensaver.modes.mechanical_eternity": {
+    "icon": "󰓅",
+    "label": "Mechanical Eternity",
+    "detail": "Planetary clockwork stage and balance mechanism",
+    "checked": "omarchy-screensaver-select is-mode mechanical_eternity",
+    "action": "omarchy-screensaver-select mode mechanical_eternity"
+  },
+  "style.screensaver.modes.silk_continuum": {
+    "icon": "󰒲",
+    "label": "Silk Continuum",
+    "detail": "Braided spatial ribbons with stiffness physics",
+    "checked": "omarchy-screensaver-select is-mode silk_continuum",
+    "action": "omarchy-screensaver-select mode silk_continuum"
+  },
+  "style.screensaver.modes.infinite_marble_machine": {
+    "icon": "󰇯",
+    "label": "Infinite Marble Machine",
+    "detail": "Arc-length integrated velocity roller track",
+    "checked": "omarchy-screensaver-select is-mode infinite_marble_machine",
+    "action": "omarchy-screensaver-select mode infinite_marble_machine"
+  },
+  "style.screensaver.modes.domino_architect": {
+    "icon": "󰦪",
+    "label": "Domino Architect",
+    "detail": "Assembled branching domino chain cascade",
+    "checked": "omarchy-screensaver-select is-mode domino_architect",
+    "action": "omarchy-screensaver-select mode domino_architect"
+  },
+  "style.screensaver.modes.wave_field": {
+    "icon": "󰖖",
+    "label": "Wave Field",
+    "detail": "Spatial oscillating matrix of height pins",
+    "checked": "omarchy-screensaver-select is-mode wave_field",
+    "action": "omarchy-screensaver-select mode wave_field"
+  },
+  "style.screensaver.modes.orbital_synchronization": {
+    "icon": "󰇯",
+    "label": "Orbital Synchronization",
+    "detail": "Multi-ring resonance returning to coplanar phase",
+    "checked": "omarchy-screensaver-select is-mode orbital_synchronization",
+    "action": "omarchy-screensaver-select mode orbital_synchronization"
+  },
+  "style.screensaver.modes.infinite_origami": {
+    "icon": "󰦪",
+    "label": "Infinite Origami",
+    "detail": "Continuous spatial panel folding kinematics",
+    "checked": "omarchy-screensaver-select is-mode infinite_origami",
+    "action": "omarchy-screensaver-select mode infinite_origami"
+  },
+  "style.screensaver.modes.monolithic_construction": {
+    "icon": "󰓅",
+    "label": "Monolithic Construction",
+    "detail": "Spatial arch block assembly and placement",
+    "checked": "omarchy-screensaver-select is-mode monolithic_construction",
+    "action": "omarchy-screensaver-select mode monolithic_construction"
+  },
+  "style.screensaver.modes.midnight_rain": {
+    "icon": "󰖖",
+    "label": "Midnight Rain",
+    "detail": "Glass-plane droplet kinematics and volume merge",
+    "checked": "omarchy-screensaver-select is-mode midnight_rain",
+    "action": "omarchy-screensaver-select mode midnight_rain"
+  },
+  "style.screensaver.modes.liquid_obsidian": {
+    "icon": "󰘔",
+    "label": "Liquid Obsidian",
+    "detail": "Smooth minimum distance-field raymarching",
+    "checked": "omarchy-screensaver-select is-mode liquid_obsidian",
+    "action": "omarchy-screensaver-select mode liquid_obsidian"
+  },
+  "style.screensaver.modes.mercury_garden": {
+    "icon": "󰘔",
+    "label": "Mercury Garden",
+    "detail": "Attracted liquid metal droplets with high specularity",
+    "checked": "omarchy-screensaver-select is-mode mercury_garden",
+    "action": "omarchy-screensaver-select mode mercury_garden"
+  },
+  "style.screensaver.modes.event_horizon": {
+    "icon": "󰐎",
+    "label": "Event Horizon",
+    "detail": "Gravitational lensing starfield deflection",
+    "checked": "omarchy-screensaver-select is-mode event_horizon",
+    "action": "omarchy-screensaver-select mode event_horizon"
+  },
+  "style.screensaver.modes.infinite_zen_garden": {
+    "icon": "󰒲",
+    "label": "Infinite Zen Garden",
+    "detail": "Procedural multi-tine sand rake grooves",
+    "checked": "omarchy-screensaver-select is-mode infinite_zen_garden",
+    "action": "omarchy-screensaver-select mode infinite_zen_garden"
+  },
+  "style.screensaver.modes.ink_choreography": {
+    "icon": "󰘔",
+    "label": "Ink Choreography",
+    "detail": "Symmetric dual-emitter fluid choreography",
+    "checked": "omarchy-screensaver-select is-mode ink_choreography",
+    "action": "omarchy-screensaver-select mode ink_choreography"
+  },
+  "style.screensaver.satisfying": {
+    "icon": "󰐎",
+    "label": "DAEMON Satisfying Collection",
+    "aliases": [
+      "satisfying",
+      "daemon-satisfying"
+    ],
+    "detail": "24 procedural GPU modes with mathematical kinematics and fluid advection"
+  },
+  "style.screensaver.satisfying.settings": {
+    "icon": "",
+    "label": "Settings Commands",
+    "detail": "Open the advanced collection settings command reference",
+    "action": "omarchy-launch-floating-terminal-with-presentation omarchy-satisfying-settings --help"
   },
   "style.screensaver.rotation": {
     "icon": "󰑖",

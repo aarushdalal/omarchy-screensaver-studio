@@ -1,8 +1,8 @@
 {
   "name": "omarchy-screensaver-studio",
   "id": "daemon0.screensaver-studio",
-  "version": "1.8.1",
-  "description": "18-mode theme-aware screensaver studio with direct selection, an animated seven-gauge system cockpit, audio spectrum and native previews",
+  "version": "2.0.0-beta.1",
+  "description": "42-mode theme-aware screensaver studio (18 classic scenes and 24 DAEMON Satisfying procedural GPU prototypes) with direct selection, system telemetry and native previews",
   "author": "Daemon0",
   "license": "MIT",
   "repository": "https://github.com/aarushdalal/omarchy-screensaver-studio",
@@ -21,7 +21,9 @@
       "python3",
       "gtk4",
       "python-gobject",
-      "cairo"
+      "cairo",
+      "python-numpy",
+      "mesa"
     ],
     "optional": [
       "pipewire",
