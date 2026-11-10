@@ -141,8 +141,89 @@ class ScreensaverApp(Gtk.Application):
                 self.windows.append(win)
                 win.present()
 
+        if os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
+            self._schedule_hyprland_reanchor()
+
         # Deferred background subsystems initialization (zero startup blocking)
         GLib.idle_add(self._deferred_setup)
+
+    def _schedule_hyprland_reanchor(self):
+        """Ensure screensaver windows map over active workspaces rather than hidden special workspace."""
+        import json
+        import subprocess
+
+        def _check_and_move(attempt=0):
+            if self._is_dismissed:
+                return GLib.SOURCE_REMOVE
+            try:
+                monitors_out = subprocess.check_output(
+                    ["hyprctl", "monitors", "-j"],
+                    stderr=subprocess.DEVNULL,
+                    timeout=0.2,
+                )
+                monitors_data = json.loads(monitors_out)
+                # Map monitor ID to its active workspace ID
+                monitor_workspaces = {}
+                for m in monitors_data:
+                    m_id = m.get("id", 0)
+                    ws_id = m.get("activeWorkspace", {}).get("id")
+                    if ws_id is not None:
+                        monitor_workspaces[m_id] = str(ws_id)
+
+                clients_out = subprocess.check_output(
+                    ["hyprctl", "clients", "-j"],
+                    stderr=subprocess.DEVNULL,
+                    timeout=0.2,
+                )
+                clients = json.loads(clients_out)
+                my_pid = os.getpid()
+                found = False
+                for c in clients:
+                    if c.get("pid") == my_pid:
+                        found = True
+                        ws_info = c.get("workspace", {})
+                        ws_name = str(ws_info.get("name", ""))
+                        m_id = c.get("monitor", 0)
+                        target_ws = monitor_workspaces.get(m_id, "1")
+                        addr = c.get("address", "")
+                        target = f"address:{addr}" if addr else "class:org.omarchy.screensaver"
+                        # If trapped in special workspace, reanchor to monitor's active workspace
+                        if "special" in ws_name or ws_name != target_ws:
+                            subprocess.run(
+                                [
+                                    "hyprctl", "dispatch",
+                                    f"hl.dsp.window.move({{ workspace = '{target_ws}', window = '{target}' }})",
+                                ],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                                timeout=0.2,
+                            )
+                            self.log(f"Hyprland reanchor: moved window {target} from {ws_name} to workspace {target_ws}")
+                            for win in self.windows:
+                                try:
+                                    win.fullscreen_on_monitor(win.monitor)
+                                except Exception:
+                                    pass
+                            def _apply_fullscreen_once(t=target):
+                                subprocess.run(
+                                    [
+                                        "hyprctl", "dispatch",
+                                        f"hl.dsp.window.fullscreen({{ mode = 'fullscreen', window = '{t}' }})",
+                                    ],
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL,
+                                    timeout=0.2,
+                                )
+                                return GLib.SOURCE_REMOVE
+
+                            GLib.timeout_add(50, _apply_fullscreen_once)
+                if not found and attempt < 5:
+                    GLib.timeout_add(40, lambda: _check_and_move(attempt + 1))
+            except Exception as e:
+                self.log(f"Hyprland reanchor notice: {e}")
+            return GLib.SOURCE_REMOVE
+
+        GLib.timeout_add(30, _check_and_move)
 
     def _deferred_setup(self) -> bool:
         if self._is_dismissed:

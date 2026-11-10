@@ -98,12 +98,15 @@ start_screensaver() {
     bin="omarchy-screensaver"
   fi
 
+  local err_log="$HOME/.config/omarchy-screensaver/logs/screensaver_stderr.log"
+  mkdir -p "$(dirname "$err_log")"
+
   # Close FD 9 (9>&-) so child background processes do NOT inherit or hold the lock!
   if command -v systemd-inhibit >/dev/null 2>&1; then
     nohup systemd-inhibit --what=idle --who="Omarchy Screensaver" --why="Ambient Study Display" \
-      "$bin" --ambient "$@" >/dev/null 2>&1 9>&- &
+      "$bin" --ambient "$@" >> "$err_log" 2>&1 9>&- &
   else
-    nohup "$bin" --ambient "$@" >/dev/null 2>&1 9>&- &
+    nohup "$bin" --ambient "$@" >> "$err_log" 2>&1 9>&- &
   fi
 
   if command -v omarchy-notification-send >/dev/null 2>&1; then

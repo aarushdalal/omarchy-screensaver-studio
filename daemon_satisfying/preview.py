@@ -35,7 +35,7 @@ class Surface(Gtk.GLArea):
    fps=min(fps,float(config.fps))
    metrics=getattr(app,'metrics',None)
    if metrics and not metrics.ac_online and config.battery_reduce_fps:fps=min(fps,float(config.battery_fps))
-   if getattr(app,'is_ambient',False):fps=min(fps,40.)
+   if getattr(app,'is_ambient',False) and config and getattr(config,'ambient_reduce_fps',False):fps=min(fps,float(getattr(config,'ambient_fps',40.)))
   interval=1/max(1.,fps)
   if now+1e-6>=self.next_due:
    self.queue_render()
