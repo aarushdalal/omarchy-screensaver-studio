@@ -58,7 +58,7 @@ class MachineGPU:
   cyc=int(time/190)
   if cyc!=self.cycle:self.cycle=cyc;self.build(self.seed+cyc)
   g=self.g;g.BindFramebuffer(0x8D40,self.fb);g.Viewport(0,0,self.w,self.h);g.Enable(0x0B71)
-  g.ClearColor(0,0,0,1);g.Clear(0x4000|0x0100);g.UseProgram(self.program);g.BindVertexArray(self.vao)
+  g.ClearColor(0,0,0,0);g.Clear(0x4000|0x0100);g.UseProgram(self.program);g.BindVertexArray(self.vao)
   g.ActiveTexture(0x84C0);g.BindTexture(0x0DE1,self.texture)
   for k,v in {'parts':(0,),'time':(float(time),),'resolution':(self.w,self.h),'intensity':(float(intensity),),'accent':accent,'finish':(float(params.get('finish',.7)),),'camera_angle':(float(params.get('camera_angle',.28)),)}.items():g.uniform(self.program,k,*v)
   g.DrawArrays(4,0,self.count);g.Disable(0x0B71)

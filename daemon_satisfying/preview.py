@@ -7,8 +7,9 @@ from gi.repository import Gtk,Gdk,Gio,GLib
 from .engine import Engine,IMPLEMENTED,PROFILES
 
 class Surface(Gtk.GLArea):
- def __init__(self,effect,quality,seed,params,theme=None):
-  super().__init__();self.effect=effect;self.quality=quality;self.seed=seed;self.params=params;self.theme=theme
+ def __init__(self,effect,quality,seed,params,theme=None,config=None):
+  super().__init__();self.effect=effect;self.quality=quality;self.seed=seed;self.params=params;self.theme=theme;self.config=config
+  self.set_css_classes(["omarchy-screensaver-surface"])
   self.engine=None;self.previous=0.;self.pending=0.;self.next_due=0.;self.durations=[];self.frames=0;self.last_render=0.
   self.set_use_es(True);self.set_required_version(3,0);self.set_has_depth_buffer(False);self.set_auto_render(False)
   self.set_hexpand(True);self.set_vexpand(True)
@@ -48,7 +49,7 @@ class Surface(Gtk.GLArea):
   gl=GL();fn=gl.lib.glGetIntegerv;fn.argtypes=[U,C.POINTER(I)];fb=I();fn(0x8CA6,C.byref(fb))
   if not self.engine or (self.engine.w,self.engine.h)!=(w,h):
    if self.engine:self.engine.close()
-   self.engine=Engine(self.effect,w,h,self.quality,self.seed,self.params,theme=self.theme)
+   self.engine=Engine(self.effect,w,h,self.quality,self.seed,self.params,theme=self.theme,config=self.config)
    self.engine.gl.GetIntegerv=self.engine.gl.lib.glGetIntegerv;self.engine.gl.GetIntegerv.argtypes=[U,C.POINTER(I)]
 
   if self.theme and hasattr(self.engine,'update_theme'):

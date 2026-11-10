@@ -42,7 +42,7 @@ IMPLEMENTED = {
 
 
 class Engine:
-    def __init__(self, effect, w, h, quality='balanced', seed=1, params=None, theme=None):
+    def __init__(self, effect, w, h, quality='balanced', seed=1, params=None, theme=None, config=None):
         if effect not in IMPLEMENTED:
             raise ValueError('Effect not implemented: ' + effect)
         self.gl = GL()
@@ -58,6 +58,8 @@ class Engine:
         self.accum = 0.
         self.last_draw = 0.
         self.index = 0
+        self.config = config
+        self.bg_opacity = self._resolve_bg_opacity(config)
         self.theme = theme
         self.accent, self.secondary, self.dark_accent, self.foreground = self._extract_theme_colors(theme)
         self.palette_dict = {
@@ -165,6 +167,19 @@ class Engine:
         if hasattr(self, 'ink'):
             self.ink.update_theme(self.palette_dict)
 
+    def _resolve_bg_opacity(self, config):
+        if config is not None and hasattr(config, 'background_opacity'):
+            return max(0.0, min(1.0, float(config.background_opacity)))
+        try:
+            from omarchy_screensaver.config import Config
+            return max(0.0, min(1.0, float(Config.load().background_opacity)))
+        except Exception:
+            return 0.68
+
+    def update_config(self, config):
+        self.config = config
+        self.bg_opacity = self._resolve_bg_opacity(config)
+
     def compile(self, key, vert, frag):
         pr, ms = self.gl.program(vert, frag)
         self.programs[key] = pr
@@ -193,6 +208,7 @@ class Engine:
             'dt': (float(dt),),
             'seed': (float(self.seed),),
             'intensity': (self.intensity,),
+            'bg_opacity': (float(self.bg_opacity),),
             'accent': self.palette(),
             'secondary': self.secondary,
             'dark_accent': self.dark_accent,
@@ -295,7 +311,7 @@ class Engine:
             g.BindFramebuffer(0x8D40, target)
             g.Viewport(0, 0, ow, oh)
             g.Enable(0x0BE2)
-            g.BlendFunc(1, 1)
+            g.BlendFuncSeparate(1, 1, 0, 1)
             self.quad('view', tex, self.time, dt, self.w, self.h)
             g.Disable(0x0BE2)
 

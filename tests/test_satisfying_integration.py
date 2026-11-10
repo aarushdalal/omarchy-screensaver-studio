@@ -171,6 +171,27 @@ class TestSatisfyingPublicIntegration(unittest.TestCase):
         finally:
             headless.close()
 
+    def test_satisfying_background_opacity_glass_translucency(self):
+        """Satisfying GPU modes must honor config.background_opacity for compositor blur."""
+        from daemon_satisfying.gpu import Headless
+        from daemon_satisfying.engine import Engine
+        from omarchy_screensaver.config import Config
+
+        mock_config = Config({"display": {"background_opacity": 0.68}})
+        headless = Headless(64, 64, allow_software=True)
+        try:
+            for effect in ["infinite_ripples", "infinite_zen_garden", "harmonograph", "event_horizon"]:
+                engine = Engine(effect=effect, w=64, h=64, quality="balanced", seed=1, params={}, config=mock_config)
+                try:
+                    engine.render(0.2)
+                    pixels = headless.gl.pixels(64, 64)
+                    alphas = sorted(list(set(pixels[:, :, 3].flatten())))
+                    self.assertTrue(170 <= alphas[0] <= 176, f"{effect} background alpha {alphas[0]} not ~173 (0.68)")
+                finally:
+                    engine.close()
+        finally:
+            headless.close()
+
 
 if __name__ == "__main__":
     unittest.main()

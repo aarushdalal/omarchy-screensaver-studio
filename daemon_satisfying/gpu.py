@@ -30,7 +30,7 @@ class GL:
             'FramebufferTexture2D':(None,[U,U,U,U,I]),'CheckFramebufferStatus':(U,[U]),
             'DeleteFramebuffers':(None,[I,C.POINTER(U)]),'Viewport':(None,[I,I,I,I]),
             'ClearColor':(None,[F,F,F,F]),'Clear':(None,[U]),
-            'Enable':(None,[U]),'Disable':(None,[U]),'BlendFunc':(None,[U,U]),
+            'Enable':(None,[U]),'Disable':(None,[U]),'BlendFunc':(None,[U,U]),'BlendFuncSeparate':(None,[U,U,U,U]),
             'ReadPixels':(None,[I,I,I,I,U,U,P]),'Finish':(None,[]),
             'RenderbufferStorageMultisample':(None,[U,I,U,I,I]),
             'BlitFramebuffer':(None,[I,I,I,I,I,I,I,I,U,U]),
@@ -101,7 +101,7 @@ class AATarget:
             gl.FramebufferRenderbuffer(0x8D40,0x8D00,0x8D41,self.depth)
         if gl.CheckFramebufferStatus(0x8D40)!=0x8CD5:
             self.close();raise RuntimeError('Multisample geometry target incomplete')
-        gl.Viewport(0,0,w,h);gl.ClearColor(0,0,0,1);gl.Clear(0x4000)
+        gl.Viewport(0,0,w,h);gl.ClearColor(0,0,0,0);gl.Clear(0x4000)
     def resolve(self):
         g=self.g;g.BindFramebuffer(0x8CA8,self.fb)
         g.BindFramebuffer(0x8CA9,self.resolve_fb)
@@ -129,7 +129,7 @@ class Headless:
         major=I();minor=I()
         if not self.Initialize(self.display,C.byref(major),C.byref(minor)):raise RuntimeError('EGL initialization failed')
         self.BindAPI(0x30A0);config=P(); count=I()
-        self.ChooseConfig(self.display,attrs(0x3033,1,0x3040,0x40,0x3024,8,0x3023,8,0x3022,8,0x3038),C.byref(config),1,C.byref(count))
+        self.ChooseConfig(self.display,attrs(0x3033,1,0x3040,0x40,0x3024,8,0x3023,8,0x3022,8,0x3021,8,0x3038),C.byref(config),1,C.byref(count))
         if not count.value:raise RuntimeError('No GLES3 EGL config')
         self.surface=self.CreatePbufferSurface(self.display,config,attrs(0x3057,w,0x3056,h,0x3038))
         self.context=self.CreateContext(self.display,config,None,attrs(0x3098,3,0x3038))

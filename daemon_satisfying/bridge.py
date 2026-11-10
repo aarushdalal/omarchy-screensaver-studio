@@ -64,6 +64,14 @@ class SatisfyingMode(BaseMode):
             if self.surface.engine and hasattr(self.surface.engine, "update_theme"):
                 self.surface.engine.update_theme(theme)
 
+    def update_config(self, config: Any) -> None:
+        """Propagate live config and background opacity updates to active GPU engine."""
+        self.config = config
+        if self.surface:
+            self.surface.config = config
+            if self.surface.engine and hasattr(self.surface.engine, "update_config"):
+                self.surface.engine.update_config(config)
+
     def update(self, dt: float, metrics: Any, media_info: Optional[Any]) -> None:
         """Advance time; GPU engine handles internal physics inside render loop."""
         self.time += dt
@@ -85,6 +93,7 @@ class SatisfyingMode(BaseMode):
                 seed=self.seed,
                 params=self.params,
                 theme=self.theme,
+                config=self.config,
             )
         return self.surface
 

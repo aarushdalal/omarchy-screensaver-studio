@@ -96,6 +96,7 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
                     pass
                 self._cairo_tick_id = 0
             widget = self.active_mode.get_widget(self)
+            widget.add_css_class("omarchy-screensaver-surface")
             self.set_child(widget)
         else:
             child = self.get_child()

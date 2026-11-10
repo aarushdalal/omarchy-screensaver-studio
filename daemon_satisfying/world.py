@@ -39,7 +39,7 @@ class WorldGPU:
   self.vao=g.gen('VertexArrays');self.vbo=g.gen('Buffers');self.aa=AATarget(g,w,h,4,depth=True);self.tex=self.aa.tex;self.fb=self.aa.fb
  def render(self,world,time,intensity,accent,secondary=None):
   sec=secondary or accent
-  g=self.g;data=world.arrays();g.BindFramebuffer(0x8D40,self.fb);g.Viewport(0,0,self.w,self.h);g.Enable(0x0B71);g.ClearColor(0,0,0,1);g.Clear(0x4000|0x100)
+  g=self.g;data=world.arrays();g.BindFramebuffer(0x8D40,self.fb);g.Viewport(0,0,self.w,self.h);g.Enable(0x0B71);g.ClearColor(0,0,0,0);g.Clear(0x4000|0x100)
   g.UseProgram(self.program);g.BindVertexArray(self.vao);g.BindBuffer(0x8892,self.vbo);g.BufferData(0x8892,data.nbytes,data.ctypes.data_as(P),0x88E0)
   for i in range(3):g.EnableVertexAttribArray(i);g.VertexAttribPointer(i,3,0x1406,0,36,P(i*12))
   for k,v in {'time':(float(time),),'resolution':(self.w,self.h),'intensity':(float(intensity),),'accent':accent,'secondary':sec}.items():g.uniform(self.program,k,*v)

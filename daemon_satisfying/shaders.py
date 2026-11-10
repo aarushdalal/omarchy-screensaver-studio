@@ -10,6 +10,7 @@ uniform vec2 resolution;uniform float time;uniform float dt;uniform float seed;
 uniform float intensity;uniform vec3 accent;uniform vec3 secondary;uniform vec3 dark_accent;uniform sampler2D state;
 uniform float wave_speed;uniform float reflectivity;
 uniform float p1;uniform float p2;uniform float p3;uniform float cycle;
+uniform float bg_opacity;
 float hash(float n){return fract(sin(n*127.1+seed*311.7)*43758.5453);}
 '''
 WAVE=HEADER+'''
@@ -48,7 +49,10 @@ void main(){vec2 d=1./resolution;
  vec3 waterCol=mix(vec3(.08,.09,.11),accent*1.6,0.72);
  vec3 specCol=mix(vec3(1.),secondary*1.5,0.55);
  vec3 litCol=waterCol*diffuse+specCol*spec+abs(h)*.12*secondary;
- color=vec4(litCol*vignette*edge*intensity*(.4+.8*reflectivity),1);
+ vec3 rgb=litCol*vignette*edge*intensity*(.4+.8*reflectivity);
+ float fg=clamp((diffuse*1.8+spec*2.5+abs(h)*2.0)*vignette*edge,0.,1.);
+ float a=mix(bg_opacity,1.0,fg);
+ color=vec4(rgb,a);
 }
 '''
 INK=HEADER+'''
@@ -71,12 +75,17 @@ void main(){
  }
  // Semi-Lagrangian density transport through a coherent analytic velocity field.
  vec3 inkCol=mix(vec3(.7,.7,.75),accent*1.6,0.82);
- color=vec4(clamp(dye+source*inkCol,0.,.90),1);
+ vec3 outRgb=clamp(dye+source*inkCol,0.,.90);
+ float alpha=clamp(max(outRgb.r,max(outRgb.g,outRgb.b))*3.0,0.,1.);
+ color=vec4(outRgb,alpha);
 }
 '''
 COMPOSITE=HEADER+'''
-void main(){vec3 c=texture(state,uv).rgb;float fade=smoothstep(0.,2.,time);
- color=vec4(clamp(mix(c,c*accent*1.8,0.22)*intensity*fade,vec3(0),vec3(1.0)),1);}
+void main(){vec4 samp=texture(state,uv);vec3 c=samp.rgb;float fade=smoothstep(0.,2.,time);
+ vec3 rgb=clamp(mix(c,c*accent*1.8,0.22)*intensity*fade,vec3(0),vec3(1.0));
+ float fg=clamp(max(samp.a,max(c.r,max(c.g,c.b))*2.0),0.,1.);
+ float a=mix(bg_opacity,1.0,fg);
+ color=vec4(rgb,a);}
 '''
 GEOM_VERT='''#version 300 es
 precision highp float;
@@ -112,7 +121,8 @@ void main(){vec2 q=(uv-.5)*vec2(resolution.x/resolution.y,1.);vec3 ro=vec3(0,.55
  vec3 rimTint=mix(secondary,accent*1.5,0.55);
  col=(vec3(.03,.035,.04)*diff+specTint*spec+rimTint*rim*0.8);
  }
- color=vec4(clamp(col*intensity*smoothstep(0.,3.,time),0.,.85),1);}
+ float fg=hit?1.0:0.0;
+ color=vec4(clamp(col*intensity*smoothstep(0.,3.,time),0.,.85),fg);}
 '''
 COSMIC=HEADER+'''
 uniform float star_density;uniform float lensing;
@@ -145,9 +155,12 @@ void main(){
  plasmaColor=mix(plasmaColor,accent*1.8,0.65);
  col+=plasmaColor*(diskDensity*1.5+haloDensity*1.0)+mix(vec3(1.,.85,.85),secondary*1.6,0.60)*photonRing*doppler;
  float glow=exp(-r*3.8)*.40+exp(-r*8.5)*.55;
- col+=mix(vec3(.6,.1,.1),accent*1.5,0.65)*glow*(1.-smoothstep(rs,rs+.02,r));
+ float innerGlow=glow*(1.-smoothstep(rs,rs+.02,r));
+ col+=mix(vec3(.6,.1,.1),accent*1.5,0.65)*innerGlow;
  col*=smoothstep(rs*.96,rs*1.02,r)*(1.-smoothstep(.8,1.4,r))*intensity*smoothstep(0.,2.5,time);
- color=vec4(clamp(col,0.,1.),1.);
+ float fg=clamp((diskDensity*1.4+haloDensity+photonRing+innerGlow*1.5)*1.8,0.,1.);
+ float a=mix(bg_opacity,1.0,fg);
+ color=vec4(clamp(col,0.,1.),a);
 }
 '''
 SAND_STEP=HEADER+'''
@@ -171,6 +184,9 @@ void main(){vec2 d=1./resolution;float h=texture(state,uv).r;vec2 n=vec2(texture
  vec3 sandBase=vec3(.018,.020,.024)*(grain*.3+.7);
  vec3 sandLit=mix(vec3(.26,.29,.33),accent*1.5,0.65)*lit;
  vec3 col=(sandBase+sandLit)*vignette;
- color=vec4(col*intensity*smoothstep(0.,3.,time),1);}
+ vec3 rgb=col*intensity*smoothstep(0.,3.,time);
+ float fg=clamp(lit*3.0,0.,1.);
+ float a=mix(bg_opacity,1.0,fg*vignette);
+ color=vec4(rgb,a);}
 '''
 INK_CHOREOGRAPHY=INK.replace('vec2 v=vec2(-q.y,q.x)*(.025+p2*.055)/(r+.18);','float align=smoothstep(.16,.64,phase);\n vec2 v=vec2(-q.y*sign(q.x),abs(q.x))*(.12+p2*.05);').replace('v+=vec2(sin(q.y*9.+time*.13),cos(q.x*8.-time*.11))*.021;','v+=vec2(sin(q.y*9.+time*.13+seed),cos(q.x*8.-time*.11))*.021*(1.-align);').replace('v-=q*converge*.22;','v-=q*.08;').replace('float a=float(i)*6.2831853/max(p1,1.)+sin(time*.07)*.3+seed*.31;\n  vec2 pt=vec2(cos(a),sin(a))*(.27-.16*converge);','float side=mod(float(i),2.)<.5?-1.:1.;\n  vec2 pt=vec2(side*(.22+.015*floor(float(i)/2.)),-.19+.025*sin(time*.05));')
