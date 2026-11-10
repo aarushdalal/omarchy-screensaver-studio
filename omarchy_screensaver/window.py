@@ -107,7 +107,7 @@ class ScreensaverWindow(Gtk.ApplicationWindow):
 
         css = Gtk.CssProvider()
         css.load_from_data(
-            b"window.omarchy-screensaver-window { background: transparent; box-shadow: none; }"
+            b"window.omarchy-screensaver-window { background: #000000; box-shadow: none; }"
             b".omarchy-screensaver-surface { background: transparent; margin: 0; padding: 0; }"
         )
         display = self.get_display()

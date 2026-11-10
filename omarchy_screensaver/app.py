@@ -199,26 +199,36 @@ class ScreensaverApp(Gtk.Application):
                                 timeout=0.2,
                             )
                             self.log(f"Hyprland reanchor: moved window {target} from {ws_name} to workspace {target_ws}")
-                            for win in self.windows:
-                                try:
-                                    win.fullscreen_on_monitor(win.monitor)
-                                except Exception:
-                                    pass
-                            def _apply_fullscreen_once(t=target):
+
+                        # Ensure fullscreen mode covers layer-shell surfaces (bar/dock)
+                        for win in self.windows:
+                            try:
+                                win.fullscreen_on_monitor(win.monitor)
+                            except Exception:
+                                pass
+
+                        if c.get("fullscreenClient") != 2 or c.get("fullscreen") != 2:
+                            if addr:
                                 subprocess.run(
                                     [
                                         "hyprctl", "dispatch",
-                                        f"hl.dsp.window.fullscreen({{ mode = 'fullscreen', window = '{t}' }})",
+                                        f"hl.dsp.focus({{ window = 'address:{addr}' }})",
                                     ],
                                     stdout=subprocess.DEVNULL,
                                     stderr=subprocess.DEVNULL,
                                     timeout=0.2,
                                 )
-                                return GLib.SOURCE_REMOVE
-
-                            GLib.timeout_add(50, _apply_fullscreen_once)
-                if not found and attempt < 5:
-                    GLib.timeout_add(40, lambda: _check_and_move(attempt + 1))
+                            subprocess.run(
+                                [
+                                    "hyprctl", "dispatch",
+                                    "hl.dsp.window.fullscreen({ mode = 'fullscreen', action = 'set' })",
+                                ],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                                timeout=0.2,
+                            )
+                if not found and attempt < 8:
+                    GLib.timeout_add(35, lambda: _check_and_move(attempt + 1))
             except Exception as e:
                 self.log(f"Hyprland reanchor notice: {e}")
             return GLib.SOURCE_REMOVE

@@ -76,6 +76,7 @@ class Engine:
         self.compile_ms = 0.
         self.targets = []
         self.aa_target = None
+        self.bg_tex = self._init_bg_texture(w, h)
 
         g = self.gl
         self.vao = g.gen('VertexArrays')
@@ -167,6 +168,30 @@ class Engine:
         if hasattr(self, 'ink'):
             self.ink.update_theme(self.palette_dict)
 
+    def _init_bg_texture(self, w, h):
+        g = self.gl
+        tex = g.gen('Textures')
+        g.BindTexture(0x0DE1, tex)
+        g.TexParameteri(0x0DE1, 0x2801, 0x2601)  # GL_LINEAR
+        g.TexParameteri(0x0DE1, 0x2800, 0x2601)  # GL_LINEAR
+        g.TexParameteri(0x0DE1, 0x2802, 0x812F)  # GL_CLAMP_TO_EDGE
+        g.TexParameteri(0x0DE1, 0x2803, 0x812F)  # GL_CLAMP_TO_EDGE
+
+        raw_bytes = None
+        try:
+            from omarchy_screensaver.wallpaper import wallpaper_manager
+            raw_bytes = wallpaper_manager.get_rgba_bytes(w, h)
+        except Exception:
+            pass
+
+        if raw_bytes is not None and len(raw_bytes) == w * h * 4:
+            data = (C.c_char * len(raw_bytes)).from_buffer_copy(raw_bytes)
+            g.TexImage2D(0x0DE1, 0, 0x1908, w, h, 0, 0x1908, 0x1401, C.cast(data, P))
+        else:
+            black = (C.c_ubyte * 4)(0, 0, 0, 255)
+            g.TexImage2D(0x0DE1, 0, 0x1908, 1, 1, 0, 0x1908, 0x1401, C.cast(black, P))
+        return tex
+
     def _resolve_bg_opacity(self, config):
         if config is not None and hasattr(config, 'background_opacity'):
             return max(0.0, min(1.0, float(config.background_opacity)))
@@ -192,6 +217,9 @@ class Engine:
         g.BindVertexArray(self.vao)
         g.ActiveTexture(0x84C0)
         g.BindTexture(0x0DE1, tex)
+        if getattr(self, 'bg_tex', None):
+            g.ActiveTexture(0x84C1)
+            g.BindTexture(0x0DE1, self.bg_tex)
         p = self.params
         if self.effect == 'infinite_ripples':
             p1 = p.get('frequency', 1.)
@@ -203,6 +231,7 @@ class Engine:
             p3 = p.get('trail_persistence', .6)
         uniforms = {
             'state': (0,),
+            'bg_state': (1,),
             'resolution': (w, h),
             'time': (float(time),),
             'dt': (float(dt),),
@@ -464,6 +493,9 @@ class Engine:
         if hasattr(self, 'aa_target') and self.aa_target:
             self.aa_target.close()
             self.aa_target = None
+        if getattr(self, 'bg_tex', None):
+            g.delete('Textures', self.bg_tex)
+            self.bg_tex = None
         for tex, fb in self.targets:
             g.delete('Textures', tex)
             g.delete('Framebuffers', fb)

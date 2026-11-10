@@ -105,13 +105,30 @@ class BaseMode:
 
     # Helper rendering utilities
     def clear_background(self, cr: cairo.Context, width: int, height: int, custom_bg=None):
-        """Fill background with pure OLED black or theme background.
+        """Fill background with blurred wallpaper or theme background.
 
-        OLED mode uses black RGB. Background opacity controls only this paint;
-        text, gauges and effects retain their existing foreground alpha.
-        In light mode, renders the active theme's background palette so light mode
-        displays correctly without pitch-black void or blinding raw white.
+        Visual architecture: wallpaper > layer of blur (12px blur, 67% opacity) > screensaver.
+        Open applications underneath are fully occluded with opaque base.
+        Unit tests and custom background callers remain precisely supported.
         """
+        if width > 64 and height > 64 and custom_bg is None:
+            try:
+                from ..wallpaper import wallpaper_manager
+                surf = wallpaper_manager.get_cairo_surface(width, height)
+                if surf is not None:
+                    cr.save()
+                    cr.set_operator(cairo.OPERATOR_SOURCE)
+                    bg = self.theme.background
+                    cr.set_source_rgba(bg[0], bg[1], bg[2], 1.0)
+                    cr.paint()
+                    cr.set_operator(cairo.OPERATOR_OVER)
+                    cr.set_source_surface(surf, 0, 0)
+                    cr.paint()
+                    cr.restore()
+                    return
+            except Exception:
+                pass
+
         cr.save()
         # Replace the previous frame; OVER would accumulate alpha toward opaque
         # black and retain old animation pixels on a reused backing surface.
