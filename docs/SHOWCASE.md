@@ -1,15 +1,18 @@
-# Recorded showcases — 1.8.1
+# Screensaver Studio showcase
 
-The gallery contains fresh recordings of all 18 Screensaver Studio modes from 30–31 October 2026. Eclipse, Ink Flow and Rain on Glass are new. The System Cockpit recording was refreshed again after its seven-gauge layout, larger-text update, staggered instrument startup and daily/lifetime SSD fields. Aurora Flow was captured directly from the native Cairo renderer using live desktop audio and real player metadata, with its separated track information, peak caps and band-activity meters. The recording uses the supported idle fallback setting to stay on the visualizer during quiet moments; the saved user configuration is unchanged.
+Watch all 42 modes in the [searchable browser gallery](https://aarushdalal.github.io/omarchy-screensaver-studio/) or download one silent 1920×1080 VP9 WebM per mode from [v2.0.0-beta.7](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/tag/v2.0.0-beta.7). The [README catalogue](../README.md#showcase-gallery) lists every mode ID and links to its player and download.
 
-- `assets/showcase/<mode>.webm`: silent 1920×1080 VP9 recording for the browser gallery.
-- `assets/showcase/<mode>.mp4`: silent H.264 with fast-start playback (1920×1080 for System Cockpit and Audio Visualizer, 960×540 for other modes).
-- `assets/showcase/previews/<mode>.gif`: looping 480×270, 12 FPS excerpt for GitHub README previews.
-- `assets/showcase/previews/<mode>.jpg`: 960×540 still poster.
-- `index.html` and `docs/index.html`: searchable galleries with explicit video controls, no autoplay and both video formats.
+Each WebM is a video preview. To run the live screensavers, install the [tagged source](../README.md#installation) and open the mode browser or run a timed preview.
 
-Most original clips are about five seconds; the refreshed cockpit clip is sixteen seconds and the visualizer is twelve seconds. The README links each GIF to the corresponding GitHub Pages player. Playback starts only after the viewer chooses it, and starting another video pauses the previous one. Both gallery locations work from a static server; the docs page uses the matching relative asset paths.
+```sh
+omarchy-menu-screensaver
+omarchy-screensaver-preview fractal_bloom 10
+```
 
-Audio streams and source metadata are removed from the published copies. Workstation identity is replaced with generic demo labels in the system footer and terminal header throughout their clips. The other telemetry and visuals remain the recorded output; estimates are labelled in the cockpit itself. Original local recordings are retained outside the public repository.
+## Recording details
 
-Published video/GIF/JPEG files are reviewed and recorded by SHA-256 in `tools/approved-preview-media.json`. The release privacy check rejects changed or unreviewed media. `python3 tools/build_showcase.py` rebuilds the HTML pages and README links from the 18-mode catalogue; it does not approve media checksums. Run `python3 tools/release_privacy_check.py` before publication.
+Most WebMs are about five seconds long and show the theme and settings used for the November showcase. System Cockpit and Diagnostic Stream use copies with generic labels in place of workstation identity. Fractal Bloom uses a nine-second offscreen capture of the released GPU renderer after the branches start growing. Its capture uses an opaque black backdrop. The 24 DAEMON Satisfying scenes are still [procedural prototypes](DAEMON-SATISFYING.md).
+
+Both gallery pages, `index.html` and `docs/index.html`, have explicit playback controls and pause the previous video when another one starts. The 18 classic modes also have alternate MP4 recordings and animated GIF excerpts. Some of these older captures show a different palette or build. The earlier 1.8.1 System Cockpit demo shows its seven-gauge layout and staggered startup, and the Audio Visualizer demo shows spectrum peaks and band activity. Both are available from the [v1.8.1 release](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/tag/v1.8.1).
+
+Repository showcase media is checked against `tools/approved-preview-media.json`. Run `python3 tools/build_showcase.py` to regenerate both HTML pages and the README catalogue from the application registry. Run `python3 tools/release_privacy_check.py` before publishing repository changes.

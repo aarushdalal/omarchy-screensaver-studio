@@ -106,6 +106,11 @@ style = "spectrum"
 bar_count = 36
 auto_switch_on_play = true
 fallback_mode = "clock"
+smoothing = "cava"
+monstercat = 1.0
+gravity = 120.0
+noise_reduction = 85.0
+waves = false
 
 [aurora]
 speed = 0.25
@@ -228,6 +233,11 @@ class Config:
         self.visualizer_bar_count: int = int(vis.get("bar_count", 40))
         self.visualizer_auto_switch_on_play: bool = vis.get("auto_switch_on_play", True)
         self.visualizer_fallback_mode: str = vis.get("fallback_mode", "selected")
+        self.visualizer_smoothing: str = str(vis.get("smoothing", "cava")).lower()
+        self.visualizer_monstercat: float = float(vis.get("monstercat", 1.0))
+        self.visualizer_gravity: float = float(vis.get("gravity", 120.0))
+        self.visualizer_noise_reduction: float = float(vis.get("noise_reduction", 85.0))
+        self.visualizer_waves: bool = bool(vis.get("waves", False))
         self.visualizer_particles: bool = vis.get("particles", True)
         self.visualizer_shockwaves: bool = vis.get("shockwaves", True)
         self.visualizer_wave_ribbon: bool = vis.get("wave_ribbon", True)

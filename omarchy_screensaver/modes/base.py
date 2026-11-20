@@ -107,7 +107,7 @@ class BaseMode:
     def clear_background(self, cr: cairo.Context, width: int, height: int, custom_bg=None):
         """Fill background with blurred wallpaper or theme background.
 
-        Visual architecture: wallpaper > layer of blur (12px blur, 67% opacity) > screensaver.
+        Visual architecture: wallpaper > layer of blur (12px blur matching lock screen) > screensaver.
         Open applications underneath are fully occluded with opaque base.
         Unit tests and custom background callers remain precisely supported.
         """

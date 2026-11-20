@@ -1,6 +1,6 @@
-# DAEMON Satisfying — 2.0.0-beta.1
+# DAEMON Satisfying
 
-This preview adds 24 procedural modes alongside the original 18. Select **DAEMON Satisfying** in the existing Screensaver Studio menu, or run a timed preview:
+The 2.0 beta includes 24 procedural modes alongside the original 18. See [all 24 mode IDs and preview videos](../README.md#daemon-satisfying). Select **DAEMON Satisfying** in the existing Screensaver Studio menu, or run a timed preview:
 
 ```sh
 omarchy-screensaver-preview harmonograph 10

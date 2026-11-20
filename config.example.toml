@@ -91,6 +91,12 @@ bar_count = 36
 auto_switch_on_play = true
 # When audio pauses: "selected" (reverts to general.mode), "idle" (stays on visualizer), or specific mode
 fallback_mode = "selected"
+# CAVA-inspired smoothing physics
+smoothing = "cava"          # "cava" (smooth organic wave) or "legacy"
+monstercat = 1.0            # Monstercat-style spatial blending factor across adjacent bars
+gravity = 120.0             # Gravity falloff acceleration (matches ~/.config/cava/config)
+noise_reduction = 85.0      # Temporal noise stabilization factor
+waves = false               # Optional wave ripple propagation effect
 
 [aurora]
 speed = 0.25

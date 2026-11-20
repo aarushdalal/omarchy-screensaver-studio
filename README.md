@@ -8,7 +8,7 @@ This project was developed through an AI-assisted workflow. The concept, customi
 
 ---
 
-## DAEMON Satisfying Procedural Collection (2.0.0-beta.2 Preview)
+## DAEMON Satisfying Procedural Collection
 
 The studio now includes 42 visual modes across four collections, adding 24 procedural GPU-accelerated mathematical prototypes (`daemon_satisfying`) built on OpenGL ES 3.0 and native GTK4 `GLArea`.
 
@@ -18,7 +18,7 @@ The studio now includes 42 visual modes across four collections, adding 24 proce
 - **Generative Growth & Graph Routing**: `fractal_bloom`, `particle_architect`, `circuit_genesis`, `circuit_weaver`, `silk_continuum`, `orbital_synchronization`, `monolithic_construction`, `infinite_zen_garden`
 - **Raymarched Distance Fields**: `liquid_obsidian`, `mercury_garden`, `event_horizon`
 
-Detailed prototype descriptions, test evidence, and known limitations are documented in [the DAEMON Satisfying guide](docs/DAEMON-SATISFYING.md).
+Find every mode, its launch ID and a video in the [showcase catalogue](#showcase-gallery). The [DAEMON Satisfying guide](docs/DAEMON-SATISFYING.md) covers settings and prototype limitations.
 
 > [!NOTE]
 > *`infinite_origami` and `infinite_marble_machine` are early kinematic approximations under active development. This release is an authorized preview and does not claim final commercial completeness or verified multi-hour temporal comfort.
@@ -33,7 +33,7 @@ Aurora Flow now separates larger track information from the live spectrum, with 
 
 ## Ambient collection refresh (1.8.0)
 
-The native Screensaver Studio browser lists all 18 modes directly in one searchable menu. Open it with `omarchy-menu-screensaver`, type a name such as Rain or Eclipse, and choose it to apply. The current selection is marked with a check. **Preview Screensavers** opens separate 12-second previews. **Follow Desktop Colours** keeps scenes matched to the active desktop palette. Running screensavers pick up mode, palette and rotation edits within 1.5 seconds without restarting.
+The 1.8.0 refresh brought the original 18 modes into one searchable menu. Open it with `omarchy-menu-screensaver`, type a name such as Rain or Eclipse, and choose it to apply. The current selection is marked with a check. **Preview Screensavers** opens separate 12-second previews. **Follow Desktop Colours** keeps scenes matched to the active desktop palette. Running screensavers pick up mode, palette and rotation edits within 1.5 seconds without restarting.
 
 New scenes: **Eclipse** (lunar silhouette and solar corona), **Ink Flow** (slow silk filaments), and **Rain on Glass** (night lights and drifting droplets). These inherit the active desktop palette.
 
@@ -106,9 +106,9 @@ This repository includes a valid `manifest.json` for the Omarchy plugin system:
   "schemaVersion": 1,
   "id": "daemon0.screensaver-studio",
   "name": "Screensaver Studio",
-  "version": "1.9.0",
+  "version": "2.0.0-beta.7",
   "author": "Daemon0",
-  "description": "18-mode screensaver suite (clock, matrix, particles, warp, geometry, singularity, terminal, system, visualizer, aurora, cyber_nexus, synthwave, quantum_helix, topography, celestial_orbit, eclipse, ink_flow, rain) with sub-second startup, low resource overhead, Quickshell, audio spectrum, and menu integration",
+  "description": "42-mode screensaver studio (18 classic scenes and 24 DAEMON Satisfying procedural GPU prototypes) with live telemetry, audio spectrum and native preview controls",
   "kinds": ["bar-widget"],
   "entryPoints": { "barWidget": "BarWidget.qml" },
   "barWidget": {
@@ -178,30 +178,73 @@ Rendering targets 30 FPS with bounded drawing work, while metrics are sampled ab
 
 ## Showcase Gallery
 
-**18 recorded previews.** System Cockpit and Audio Visualizer are refreshed for version 1.8.1. Click an animated preview or **Watch video** to open its player. The three new scenes appear first.
+**42 screensavers across four collections.** Choose a name to watch it in the [browser gallery](https://aarushdalal.github.io/omarchy-screensaver-studio/) or download its silent WebM from [v2.0.0-beta.7](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/tag/v2.0.0-beta.7).
 
-| Screensaver | Animated preview | Description |
-|---|---|---|
-| Eclipse · **New** | [![Eclipse preview](assets/showcase/previews/eclipse.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#eclipse)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#eclipse) | A lunar silhouette with a breathing solar corona |
-| Ink Flow · **New** | [![Ink Flow preview](assets/showcase/previews/ink_flow.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_flow)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_flow) | Layered silk filaments folding through darkness |
-| Rain on Glass · **New** | [![Rain on Glass preview](assets/showcase/previews/rain.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#rain)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#rain) | Quiet droplets, soft night lights and reflections |
-| Floating Clock | [![Floating Clock preview](assets/showcase/previews/clock.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock) | Clean typography, orbital halo and date |
-| Aurora | [![Aurora preview](assets/showcase/previews/aurora.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora) | Slow luminous ribbons and drifting stardust |
-| Topography | [![Topography preview](assets/showcase/previews/topography.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography) | Living islands traced by nested contour lines |
-| Celestial Orbit | [![Celestial Orbit preview](assets/showcase/previews/celestial_orbit.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit) | Elliptical planetary paths and fading trails |
-| Singularity | [![Singularity preview](assets/showcase/previews/singularity.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity) | A dark core surrounded by swirling matter |
-| Tesseract | [![Tesseract preview](assets/showcase/previews/geometry.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry) | A rotating four-dimensional wireframe |
-| Quantum Helix | [![Quantum Helix preview](assets/showcase/previews/quantum_helix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix) | Continuous double strands with depth and dust |
-| Constellation | [![Constellation preview](assets/showcase/previews/particles.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles) | Drifting particles joined by delicate filaments |
-| Starfield Warp | [![Starfield Warp preview](assets/showcase/previews/warp.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp) | Perspective stars and flowing light trails |
-| Synthwave Horizon | [![Synthwave Horizon preview](assets/showcase/previews/synthwave.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave) | A distant striped sun over a wireframe landscape |
-| Cyber Nexus | [![Cyber Nexus preview](assets/showcase/previews/cyber_nexus.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus) | Honeycomb circuitry with travelling signals |
-| Matrix Rain | [![Matrix Rain preview](assets/showcase/previews/matrix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix) | Cascading Katakana and phosphor trails |
-| Audio Visualizer | [![Audio Visualizer preview](assets/showcase/previews/visualizer.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer) | Live spectrum, falling peaks and low/mid/high activity |
-| System Cockpit | [![System Cockpit preview](assets/showcase/previews/system.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#system)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#system) | Staggered gauge startup and daily/lifetime SSD telemetry |
-| Diagnostic Stream | [![Diagnostic Stream preview](assets/showcase/previews/terminal.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal)<br>[Watch video](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal) | A borderless stream of system activity |
+To run the live screensavers, follow [Installation](#installation). After installing, run `omarchy-menu-screensaver` to browse the collection or `omarchy-screensaver-preview <mode-id> 10` to play a timed preview.
 
-The System Cockpit clip shows the new seven-gauge dashboard, per-core activity, processor/network histories and resource pressure. All videos are silent; workstation identity is replaced with demo labels in the telemetry clips. See [recording details](docs/SHOWCASE.md).
+### Quiet Focus
+
+| Screensaver | Mode ID | Preview | Description |
+|---|---|---|---|
+| [Eclipse](https://aarushdalal.github.io/omarchy-screensaver-studio/#eclipse)<br>[![Eclipse preview](assets/showcase/previews/eclipse.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#eclipse) | `eclipse` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/eclipse.webm) | A lunar silhouette with a breathing solar corona |
+| [Ink Flow](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_flow)<br>[![Ink Flow preview](assets/showcase/previews/ink_flow.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_flow) | `ink_flow` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/ink_flow.webm) | Layered silk filaments folding through darkness |
+| [Rain on Glass](https://aarushdalal.github.io/omarchy-screensaver-studio/#rain)<br>[![Rain on Glass preview](assets/showcase/previews/rain.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#rain) | `rain` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/rain.webm) | Quiet droplets, soft night lights and reflections |
+| [Floating Clock](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock)<br>[![Floating Clock preview](assets/showcase/previews/clock.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#clock) | `clock` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/clock.webm) | Clean typography, orbital halo and date |
+| [Aurora](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora)<br>[![Aurora preview](assets/showcase/previews/aurora.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#aurora) | `aurora` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/aurora.webm) | Slow luminous ribbons and drifting stardust |
+| [Topography](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography)<br>[![Topography preview](assets/showcase/previews/topography.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#topography) | `topography` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/topography.webm) | Living islands traced by nested contour lines |
+
+### Space & Motion
+
+| Screensaver | Mode ID | Preview | Description |
+|---|---|---|---|
+| [Celestial Orbit](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit)<br>[![Celestial Orbit preview](assets/showcase/previews/celestial_orbit.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#celestial_orbit) | `celestial_orbit` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/celestial_orbit.webm) | Elliptical planetary paths and fading trails |
+| [Singularity](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity)<br>[![Singularity preview](assets/showcase/previews/singularity.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#singularity) | `singularity` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/singularity.webm) | A dark core surrounded by swirling matter |
+| [Tesseract](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry)<br>[![Tesseract preview](assets/showcase/previews/geometry.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#geometry) | `geometry` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/geometry.webm) | A rotating four-dimensional wireframe |
+| [Quantum Helix](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix)<br>[![Quantum Helix preview](assets/showcase/previews/quantum_helix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#quantum_helix) | `quantum_helix` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/quantum_helix.webm) | Continuous double strands with depth and dust |
+| [Constellation](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles)<br>[![Constellation preview](assets/showcase/previews/particles.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#particles) | `particles` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/particles.webm) | Drifting particles joined by delicate filaments |
+| [Starfield Warp](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp)<br>[![Starfield Warp preview](assets/showcase/previews/warp.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#warp) | `warp` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/warp.webm) | Perspective stars and flowing light trails |
+| [Synthwave Horizon](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave)<br>[![Synthwave Horizon preview](assets/showcase/previews/synthwave.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#synthwave) | `synthwave` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/synthwave.webm) | A distant striped sun over a wireframe landscape |
+
+### Digital & Live
+
+| Screensaver | Mode ID | Preview | Description |
+|---|---|---|---|
+| [Cyber Nexus](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus)<br>[![Cyber Nexus preview](assets/showcase/previews/cyber_nexus.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#cyber_nexus) | `cyber_nexus` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/cyber_nexus.webm) | Honeycomb circuitry with travelling signals |
+| [Matrix Rain](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix)<br>[![Matrix Rain preview](assets/showcase/previews/matrix.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#matrix) | `matrix` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/matrix.webm) | Cascading Katakana and phosphor trails |
+| [Audio Visualizer](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer)<br>[![Audio Visualizer preview](assets/showcase/previews/visualizer.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#visualizer) | `visualizer` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/visualizer.webm) | Live spectrum, falling peaks and low/mid/high activity |
+| [System Cockpit](https://aarushdalal.github.io/omarchy-screensaver-studio/#system)<br>[![System Cockpit preview](assets/showcase/previews/system.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#system) | `system` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/system.webm) | Staggered gauge startup and daily/lifetime SSD telemetry |
+| [Diagnostic Stream](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal)<br>[![Diagnostic Stream preview](assets/showcase/previews/terminal.gif)](https://aarushdalal.github.io/omarchy-screensaver-studio/#terminal) | `terminal` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/terminal.webm) | A borderless stream of system activity |
+
+### DAEMON Satisfying
+
+| Screensaver | Mode ID | Preview | Description |
+|---|---|---|---|
+| [Harmonograph](https://aarushdalal.github.io/omarchy-screensaver-studio/#harmonograph) | `harmonograph` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/harmonograph.webm) | Rotary-table coupled pendulum rosettes |
+| [Infinite Ripples](https://aarushdalal.github.io/omarchy-screensaver-studio/#infinite_ripples) | `infinite_ripples` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/infinite_ripples.webm) | Fluid surface wave propagation and interference |
+| [The Perfect Machine](https://aarushdalal.github.io/omarchy-screensaver-studio/#the_perfect_machine) | `the_perfect_machine` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/the_perfect_machine.webm) | Interlocking precision gear train kinematics |
+| [Ink Singularity](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_singularity) | `ink_singularity` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/ink_singularity.webm) | Vortex dye advection and filament transport |
+| [Zen Geometry](https://aarushdalal.github.io/omarchy-screensaver-studio/#zen_geometry) | `zen_geometry` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/zen_geometry.webm) | Concentric multi-pass geometric rosette drawing |
+| [Fractal Bloom](https://aarushdalal.github.io/omarchy-screensaver-studio/#fractal_bloom) | `fractal_bloom` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/fractal_bloom.webm) | Recursive blooming branch growth and breath |
+| [Particle Architect](https://aarushdalal.github.io/omarchy-screensaver-studio/#particle_architect) | `particle_architect` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/particle_architect.webm) | Smooth coordinate-arcing geometric formations |
+| [Harmonic Sculpture](https://aarushdalal.github.io/omarchy-screensaver-studio/#harmonic_sculpture) | `harmonic_sculpture` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/harmonic_sculpture.webm) | Projected 3D Lissajous ribbon sculpture |
+| [Circuit Genesis](https://aarushdalal.github.io/omarchy-screensaver-studio/#circuit_genesis) | `circuit_genesis` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/circuit_genesis.webm) | Growing orthogonal conductor traces and bus lines |
+| [Circuit Weaver](https://aarushdalal.github.io/omarchy-screensaver-studio/#circuit_weaver) | `circuit_weaver` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/circuit_weaver.webm) | Deterministic A* routing with obstacle clearance |
+| [Mechanical Eternity](https://aarushdalal.github.io/omarchy-screensaver-studio/#mechanical_eternity) | `mechanical_eternity` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/mechanical_eternity.webm) | Planetary clockwork stage and balance mechanism |
+| [Silk Continuum](https://aarushdalal.github.io/omarchy-screensaver-studio/#silk_continuum) | `silk_continuum` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/silk_continuum.webm) | Braided spatial ribbons with stiffness physics |
+| [Infinite Marble Machine](https://aarushdalal.github.io/omarchy-screensaver-studio/#infinite_marble_machine) | `infinite_marble_machine` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/infinite_marble_machine.webm) | Arc-length integrated velocity roller track |
+| [Domino Architect](https://aarushdalal.github.io/omarchy-screensaver-studio/#domino_architect) | `domino_architect` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/domino_architect.webm) | Assembled branching domino chain cascade |
+| [Wave Field](https://aarushdalal.github.io/omarchy-screensaver-studio/#wave_field) | `wave_field` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/wave_field.webm) | Spatial oscillating matrix of height pins |
+| [Orbital Synchronization](https://aarushdalal.github.io/omarchy-screensaver-studio/#orbital_synchronization) | `orbital_synchronization` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/orbital_synchronization.webm) | Multi-ring resonance returning to coplanar phase |
+| [Infinite Origami](https://aarushdalal.github.io/omarchy-screensaver-studio/#infinite_origami) | `infinite_origami` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/infinite_origami.webm) | Continuous spatial panel folding kinematics |
+| [Monolithic Construction](https://aarushdalal.github.io/omarchy-screensaver-studio/#monolithic_construction) | `monolithic_construction` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/monolithic_construction.webm) | Spatial arch block assembly and placement |
+| [Midnight Rain](https://aarushdalal.github.io/omarchy-screensaver-studio/#midnight_rain) | `midnight_rain` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/midnight_rain.webm) | Glass-plane droplet kinematics and volume merge |
+| [Liquid Obsidian](https://aarushdalal.github.io/omarchy-screensaver-studio/#liquid_obsidian) | `liquid_obsidian` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/liquid_obsidian.webm) | Smooth minimum distance-field raymarching |
+| [Mercury Garden](https://aarushdalal.github.io/omarchy-screensaver-studio/#mercury_garden) | `mercury_garden` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/mercury_garden.webm) | Attracted liquid metal droplets with high specularity |
+| [Event Horizon](https://aarushdalal.github.io/omarchy-screensaver-studio/#event_horizon) | `event_horizon` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/event_horizon.webm) | Gravitational lensing starfield deflection |
+| [Infinite Zen Garden](https://aarushdalal.github.io/omarchy-screensaver-studio/#infinite_zen_garden) | `infinite_zen_garden` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/infinite_zen_garden.webm) | Procedural multi-tine sand rake grooves |
+| [Ink Choreography](https://aarushdalal.github.io/omarchy-screensaver-studio/#ink_choreography) | `ink_choreography` | [WebM](https://github.com/aarushdalal/omarchy-screensaver-studio/releases/download/v2.0.0-beta.7/ink_choreography.webm) | Symmetric dual-emitter fluid choreography |
+
+See [recording details](docs/SHOWCASE.md) for capture provenance and formats.
 
 ---
 
@@ -210,7 +253,7 @@ The System Cockpit clip shows the new seven-gauge dashboard, per-core activity, 
 - **Operating System**: Arch Linux (rolling release, x86_64)
 - **Desktop Shell**: Omarchy (`dev (13f18b2c) / 4.0.2`) with Quickshell (`0.3.1`)
 - **Compositor**: Hyprland (`0.56.2`)
-- **Runtime Dependencies**: `python3`, `gtk4`, `python-gobject`, `cairo`, `jq`
+- **Runtime Dependencies**: `python3`, `gtk4`, `python-gobject`, `cairo`, `jq`, `python-numpy`, and EGL/OpenGL ES 3.0 drivers (`mesa` on supported Intel/AMD hardware)
 - **Optional (for Audio Spectrum)**: `pipewire-pulse`, `libpulse`, `gcc`
 - **Optional (for Terminal TUI)**: `gum`
 
@@ -238,7 +281,7 @@ omarchy plugin add https://github.com/aarushdalal/omarchy-screensaver-studio.git
 ### Method 2: Using the Safe User Installer
 
 ```bash
-git clone https://github.com/aarushdalal/omarchy-screensaver-studio.git
+git clone --branch v2.0.0-beta.7 https://github.com/aarushdalal/omarchy-screensaver-studio.git
 cd omarchy-screensaver-studio
 
 ./install.sh check
@@ -252,7 +295,7 @@ cd omarchy-screensaver-studio
 
 1. Install GTK4 PyGObject dependencies:
    ```bash
-   sudo pacman -S gtk4 python-gobject cairo jq
+   sudo pacman -S gtk4 python-gobject cairo jq python-numpy mesa
    ```
 2. Optional — audio development headers for the spectrum visualizer:
    ```bash
@@ -279,6 +322,7 @@ See [**docs/CONFIGURATION.md**](docs/CONFIGURATION.md) for detailed per-mode TOM
   omarchy-screensaver-preview warp 5
   omarchy-screensaver-preview geometry 5
   omarchy-screensaver-preview singularity 5
+  omarchy-screensaver-preview harmonograph 10
   ```
 - **Open Interactive Mode HUD**:
   ```bash

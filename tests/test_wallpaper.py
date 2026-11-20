@@ -39,6 +39,33 @@ class TestWallpaperManager(unittest.TestCase):
             if raw is not None:
                 self.assertEqual(len(raw), 64 * 64 * 4)
 
+    def test_blur_generation_matches_lockscreen_without_black_blend(self):
+        """Generated blur must not be dimmed by black blend, preserving image brightness."""
+        from PIL import Image, ImageStat
+        import tempfile
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
+            test_img_path = f.name
+        try:
+            im = Image.new('RGB', (100, 100), (200, 200, 200))
+            im.save(test_img_path)
+            orig_get = self.wm.get_wallpaper_path
+            orig_lock = self.wm.LOCKSCREEN_BLUR_PATH
+            # Disable lockscreen path reuse for isolated generator test
+            self.wm.LOCKSCREEN_BLUR_PATH = "/nonexistent/lockscreen/path.png"
+            self.wm.get_wallpaper_path = lambda: test_img_path
+            cache_file = self.wm.ensure_blurred_wallpaper(100, 100)
+            self.assertIsNotNone(cache_file)
+            self.assertTrue(os.path.exists(cache_file))
+            with Image.open(cache_file) as res:
+                stat = ImageStat.Stat(res)
+                # Mean should remain close to 200, NOT dimmed by 33% black blend (~134)
+                self.assertGreater(stat.mean[0], 180)
+        finally:
+            self.wm.get_wallpaper_path = orig_get
+            self.wm.LOCKSCREEN_BLUR_PATH = orig_lock
+            if os.path.exists(test_img_path):
+                os.unlink(test_img_path)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,16 @@
+## 2.0.0-beta.7 (Preview / Beta) — 2026-11-20
+
+- Align screensaver wallpaper backdrop with lock screen method:
+  - Match the lock screen's fast half-resolution draft downsampling, 12px Gaussian blur, and bilinear upscale rendering pipeline.
+  - Directly reuse the lock screen's pre-rendered background blur (`~/.cache/omarchy/lockscreen/background-blur.png`) when available, eliminating redundant generation.
+  - Remove artificial 33% black blend (`Image.blend(black, ...)`), eliminating the murky black backdrop in favor of the lock screen's vibrant, clean blur.
+- High-fidelity CAVA audio spectrum smoothing:
+  - Sub-10ms instantaneous beat attack and natural exponential falloff with Hann windowing.
+  - Monstercat audio wave propagation and customizable gravity/smoothing profiles via config.
+- List all 42 screensavers by collection in the README, with browser previews, WebM downloads and IDs for the timed preview command.
+- Attach one silent Full HD WebM per mode to the GitHub prerelease. Refresh the Fractal Bloom recording from the procedural renderer and mask workstation labels in the System Cockpit and Diagnostic Stream recordings.
+- Update both showcase pages, the setup and configuration guides, and the version reported by the plugin and Python package. This release packages the same 42 live modes as beta.6.
+
 ## 2.0.0-beta.2 (Preview / Beta) — 2026-11-10
 
 - Complete System Theme & Blood Effects Palette Integration:

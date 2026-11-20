@@ -11,7 +11,7 @@ The configuration file is located at `~/.config/omarchy-screensaver/config.toml`
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `enabled` | `bool` | `true` | Enables or disables the screensaver globally. |
-| `mode` | `string` | `"clock"` | Active mode when launching without `--mode`. Options: `clock`, `matrix`, `particles`, `warp`, `geometry`, `singularity`, `system`, `terminal`, `visualizer`, `aurora`, `cyber_nexus`, `synthwave`, `quantum_helix`, `topography`, `celestial_orbit`, `eclipse`, `ink_flow`, `rain`, or `auto`. |
+| `mode` | `string` | `"clock"` | Active mode when launching without `--mode`. Use any of the [42 mode IDs](../README.md#showcase-gallery) or `auto`. |
 | `rotation` | `bool` | `false` | When true, automatically cycles between visual modes during screensaver operation. |
 | `rotation_interval` | `int` | `300` | Seconds between each mode change during automatic rotation. |
 | `rotation_modes` | `array` | `["clock", "particles", ...]` | Ordered list of modes to cycle through when rotation is active. |

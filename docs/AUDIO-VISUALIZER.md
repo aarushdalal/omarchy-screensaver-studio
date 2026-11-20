@@ -20,7 +20,16 @@ Your existing automatic visualizer switching and ambient-study toggle are retain
 
 ## Settings
 
-Use `[visualizer]` in `~/.config/omarchy-screensaver/config.toml`: `bar_count` controls density; `particles`, `wave_ribbon` and `mirrored` control the corresponding decorations. Existing `style`, `auto_switch_on_play` and `fallback_mode` settings are retained. Older effect keys such as `shockwaves`, `light_beams`, `bass_bounce` and `radial_core` are accepted for compatibility but do not enable effects in this composition.
+Use `[visualizer]` in `~/.config/omarchy-screensaver/config.toml`: `bar_count` controls density; `particles`, `wave_ribbon` and `mirrored` control the corresponding decorations. Existing `style`, `auto_switch_on_play` and `fallback_mode` settings are retained.
+
+### CAVA Smoothing & Physics
+- `smoothing`: `"cava"` (default, buttery smooth wave dynamics) or `"legacy"` (exponential decay).
+- `monstercat`: float (default `1.0`), controls the Monstercat-style spatial blending factor across neighboring bars so peaks create cohesive rolling waves rather than jagged isolated spikes.
+- `gravity`: float (default `120.0`, matches `~/.config/cava/config`), controls downward gravitational acceleration. Bars hang briefly at transient crests before smoothly accelerating down.
+- `noise_reduction`: float (default `85.0`, matches `~/.config/cava/config`), controls temporal attack stabilization.
+- `waves`: boolean (default `false`), toggles CAVA's wave-propagation ripple across the spectrum.
+
+Older effect keys such as `shockwaves`, `light_beams`, `bass_bounce` and `radial_core` are accepted for compatibility but do not enable effects in this composition.
 
 ## Audio continuity
 

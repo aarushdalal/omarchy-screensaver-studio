@@ -24,9 +24,22 @@ class VisualizerMode(BaseMode):
         self.media_info: Optional[MediaInfo] = None
         self.target_fps = 30
         self.fade_in = 0.0
+
+        # CAVA smoothing parameters from config
+        self.smoothing_mode = str(getattr(config, 'visualizer_smoothing', 'cava')).lower()
+        self.monstercat = float(getattr(config, 'visualizer_monstercat', 1.0))
+        self.gravity = float(getattr(config, 'visualizer_gravity', 120.0))
+        self.noise_reduction = float(getattr(config, 'visualizer_noise_reduction', 85.0))
+        self.waves = bool(getattr(config, 'visualizer_waves', False))
+
+        # Envelopes and CAVA physics tracking
         self.smooth_bands = [0.0] * self.bar_count
         self.peak_bands = [0.0] * self.bar_count
-        self._peak_holds = [0.0] * self.bar_count
+        self._cava_peak = [0.0] * self.bar_count
+        self._cava_fall = [0.0] * self.bar_count
+        self._cava_peak_cap = [0.0] * self.bar_count
+        self._peak_cap_fall = [0.0] * self.bar_count
+        self._peak_holds = [0.15] * self.bar_count
         self.bass_energy = self.mid_energy = self.treble_energy = 0.0
         self.signal_active = False
         self._idle_time = 0.0
@@ -59,6 +72,38 @@ class VisualizerMode(BaseMode):
             return 0.0
         return min(1.0, max(0.0, value)) if math.isfinite(value) else 0.0
 
+    @staticmethod
+    def _apply_monstercat(targets, factor=1.0, waves=False):
+        """Applies high-performance O(N) CAVA Monstercat-style spatial filtering."""
+        n = len(targets)
+        if n <= 1 or factor <= 0.0:
+            return list(targets)
+        out = list(targets)
+        if waves:
+            for z in range(n):
+                val = out[z] / 1.25
+                out[z] = val
+                for m in range(z - 1, -1, -1):
+                    de = z - m
+                    out[m] = max(out[m], val - 0.04 * (de * de))
+                for m in range(z + 1, n):
+                    de = m - z
+                    out[m] = max(out[m], val - 0.04 * (de * de))
+        else:
+            base = max(1.1, factor * 1.5)
+            decay = 1.0 / base
+            # Pass 1: left-to-right propagation
+            for i in range(1, n):
+                spread = out[i - 1] * decay
+                if spread > out[i]:
+                    out[i] = spread
+            # Pass 2: right-to-left propagation
+            for i in range(n - 2, -1, -1):
+                spread = out[i + 1] * decay
+                if spread > out[i]:
+                    out[i] = spread
+        return out
+
     def update(self, dt, metrics, media_info):
         dt = max(0.0, dt)
         super().update(dt, metrics, media_info)
@@ -70,20 +115,65 @@ class VisualizerMode(BaseMode):
         self.target_fps = 55 if self.signal_active or playing else 30
         self.fade_in = min(1, self.fade_in + dt * 1.8)
         raw = self.mpris.bands
+
+        raw_targets = [0.0] * self.bar_count
+        if self.signal_active and raw:
+            for i in range(min(self.bar_count, len(raw))):
+                sample = self._level(raw[i])
+                raw_targets[i] = sample ** 0.90
+
+        if self.smoothing_mode == "cava":
+            if len(raw) >= self.bar_count and self.monstercat > 0.0:
+                targets = self._apply_monstercat(raw_targets, self.monstercat, self.waves)
+            else:
+                targets = raw_targets
+            g_mod = (self.gravity / 100.0) * 5.2
+        else:
+            targets = raw_targets
+            g_mod = None
+
         # Time-based envelopes stay consistent across frame rates and suspend.
         for i in range(self.bar_count):
-            sample = self._level(raw[i]) if self.signal_active and i < len(raw) else 0.0
-            target = sample ** .90
-            rate = 36 if target > self.smooth_bands[i] else 7
-            self.smooth_bands[i] += (target - self.smooth_bands[i]) * (1 - math.exp(-dt * rate))
-            value = self.smooth_bands[i]
-            if value >= self.peak_bands[i]:
-                self.peak_bands[i] = value
-                self._peak_holds[i] = .22
+            target = targets[i]
+            current = self.smooth_bands[i]
+
+            if self.smoothing_mode == "cava":
+                if target >= current:
+                    # Instant zero-latency attack: locks perfectly with the audio beat
+                    self.smooth_bands[i] = target
+                    self._cava_peak[i] = target
+                    self._cava_fall[i] = 0.0
+                else:
+                    self._cava_fall[i] += dt
+                    t_fall = self._cava_fall[i]
+                    falloff = self._cava_peak[i] * max(0.0, 1.0 - g_mod * (t_fall ** 2))
+                    self.smooth_bands[i] = max(target, falloff)
+
+                value = self.smooth_bands[i]
+                if value >= self.peak_bands[i]:
+                    self.peak_bands[i] = value
+                    self._cava_peak_cap[i] = value
+                    self._peak_cap_fall[i] = 0.0
+                    self._peak_holds[i] = 0.12
+                else:
+                    self._peak_cap_fall[i] += dt
+                    hang = self._peak_holds[i]
+                    if self._peak_cap_fall[i] > hang:
+                        t_cap = self._peak_cap_fall[i] - hang
+                        cap_falloff = self._cava_peak_cap[i] * max(0.0, 1.0 - (g_mod * 0.55) * (t_cap ** 2))
+                        self.peak_bands[i] = max(value, cap_falloff)
             else:
-                falling = max(0.0, dt - self._peak_holds[i])
-                self._peak_holds[i] = max(0.0, self._peak_holds[i] - dt)
-                self.peak_bands[i] = max(value, self.peak_bands[i] - falling * .55)
+                rate = 36 if target > current else 7
+                self.smooth_bands[i] += (target - current) * (1.0 - math.exp(-dt * rate))
+                value = self.smooth_bands[i]
+                if value >= self.peak_bands[i]:
+                    self.peak_bands[i] = value
+                    self._peak_holds[i] = .22
+                else:
+                    falling = max(0.0, dt - self._peak_holds[i])
+                    self._peak_holds[i] = max(0.0, self._peak_holds[i] - dt)
+                    self.peak_bands[i] = max(value, self.peak_bands[i] - falling * .55)
+
         # Three equal regions of the logarithmic spectrum, not calibrated VU/dB.
         edges = (0, self.bar_count // 3, 2 * self.bar_count // 3, self.bar_count)
         energies = [sum(self.smooth_bands[a:b]) / (b - a) for a, b in zip(edges, edges[1:])]

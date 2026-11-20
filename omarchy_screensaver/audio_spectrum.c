@@ -28,6 +28,7 @@ typedef struct {
 
 static int g_num_bands = 36;
 static Filter g_filters[MAX_BANDS];
+static double g_hann[CHUNK_SIZE];
 static float g_smooth[MAX_BANDS];
 static float g_peaks[MAX_BANDS];
 static float g_peak_speeds[MAX_BANDS];
@@ -68,6 +69,10 @@ static void init_filters(int num_bands) {
         g_peak_speeds[b] = 0.0f;
         g_latest_bands[b] = 0.0f;
         g_latest_peaks[b] = 0.0f;
+    }
+
+    for (int i = 0; i < CHUNK_SIZE; i++) {
+        g_hann[i] = 0.5 * (1.0 - cos((2.0 * M_PI * i) / (CHUNK_SIZE - 1)));
     }
 }
 
@@ -179,13 +184,14 @@ static void *audio_worker(void *arg) {
             double q0 = 0.0, q1 = 0.0, q2 = 0.0;
             double coeff = g_filters[b].coeff;
             for (int i = 0; i < CHUNK_SIZE; i++) {
-                q0 = coeff * q1 - q2 + samples[i];
+                double sample_val = (double)samples[i] * g_hann[i];
+                q0 = coeff * q1 - q2 + sample_val;
                 q2 = q1;
                 q1 = q0;
             }
             double real = q1 - q2 * g_filters[b].cos_w;
             double imag = q2 * g_filters[b].sin_w;
-            double mag = (sqrt(real * real + imag * imag) / CHUNK_SIZE) * g_filters[b].eq_boost;
+            double mag = (sqrt(real * real + imag * imag) / (CHUNK_SIZE * 0.5)) * g_filters[b].eq_boost;
             mags[b] = mag;
             if (mag > frame_max) frame_max = mag;
         }
@@ -203,11 +209,11 @@ static void *audio_worker(void *arg) {
             double ratio = fmin(1.0, fmax(0.0, (mags[b] * 1.45) / fmax(6.0, g_rolling_max)));
             float val = (float)pow(ratio, 0.55);
 
-            // Instant attack on beat spikes, natural exponential release
+            // Sub-10ms instantaneous beat attack; natural exponential falloff
             if (val > g_smooth[b]) {
                 g_smooth[b] = val;
             } else {
-                g_smooth[b] = g_smooth[b] * 0.65f + val * 0.35f;
+                g_smooth[b] = g_smooth[b] * 0.75f + val * 0.25f;
             }
             g_latest_bands[b] = g_smooth[b];
 

@@ -137,3 +137,49 @@ class VisualizerRegression(unittest.TestCase):
         with patch('omarchy_screensaver.mpris.time.time', return_value=100):
             self.assertIsNone(client.poll())
         client._bus.list_names.assert_not_called()
+
+    def test_cava_monstercat_smoothing_propagates_wave_to_adjacent_bars(self):
+        bands = [0.0] * 36
+        bands[10] = 0.95
+        mode = self.mode(bands=bands, signal=True)
+        # Update for a few frames to let attack engage
+        for _ in range(5):
+            mode.update(1 / 60, None, None)
+        # Verify bar 10 is highest
+        self.assertGreater(mode.smooth_bands[10], 0.5)
+        # Verify neighbors are smoothly elevated
+        self.assertGreater(mode.smooth_bands[9], 0.2)
+        self.assertGreater(mode.smooth_bands[11], 0.2)
+        self.assertGreater(mode.smooth_bands[9], mode.smooth_bands[8])
+        self.assertGreater(mode.smooth_bands[11], mode.smooth_bands[12])
+
+    def test_cava_gravity_falloff_and_crest_hang_physics(self):
+        mode = self.mode(bands=[0.9] * 36, signal=True)
+        for _ in range(30):
+            mode.update(1 / 60, None, None)
+        initial_peak = mode.smooth_bands[0]
+        # Silence starts
+        mode.mpris.has_signal = False
+        # After 1 frame (16.6ms), gravity delta should be near zero (crest hang)
+        mode.update(1 / 60, None, None)
+        drop_1 = initial_peak - mode.smooth_bands[0]
+        # After 10 more frames (~180ms), gravity has accelerated
+        for _ in range(10):
+            mode.update(1 / 60, None, None)
+        drop_10 = initial_peak - mode.smooth_bands[0]
+        self.assertLess(drop_1, 0.01) # Crest hang: less than 1% drop in first 16ms
+        self.assertGreater(drop_10, 0.08) # Accelerated downward movement
+
+    def test_cava_framerate_independence_across_30_60_144_fps(self):
+        modes = [self.mode(), self.mode(), self.mode()]
+        fps_list = (30, 60, 144)
+        for mode, fps in zip(modes, fps_list):
+            for _ in range(fps):
+                mode.update(1 / fps, None, None)
+            mode.mpris.has_signal = False
+            for _ in range(fps // 2):
+                mode.update(1 / fps, None, None)
+        # Compare 30, 60, and 144 FPS
+        for m in modes[1:]:
+            self.assertAlmostEqual(modes[0].smooth_bands[0], m.smooth_bands[0], places=5)
+            self.assertAlmostEqual(modes[0].peak_bands[0], m.peak_bands[0], delta=0.02)
